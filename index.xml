@@ -6,14 +6,7 @@
     <description>Recent content on My Hugo Site</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Fri, 22 Mar 2024 14:25:14 +0800</lastBuildDate>
+    <lastBuildDate></lastBuildDate>
     <atom:link href="https://z-bajer.gitee.io/blog/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>My First Post</title>
-      <link>https://z-bajer.gitee.io/blog/posts/my-first-post/</link>
-      <pubDate>Fri, 22 Mar 2024 14:25:14 +0800</pubDate>
-      <guid>https://z-bajer.gitee.io/blog/posts/my-first-post/</guid>
-      <description>Introduction This is bold text.</description>
-    </item>
   </channel>
 </rss>
