@@ -1,8 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: 如何统计cpu在某个状态驻留的时间
-
-:PROPERTIES:
-:KEYWORD: PMU, idle, winkle, nap, cpuidle framework, PMC Pstate Management Control
-:END:
-KEYWORD: PMU, idle, winkle, nap, cpuidle framework, PMC Pstate Management Control

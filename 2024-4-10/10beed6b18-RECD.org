@@ -1,9 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: wsl未注册类                                    
-
-issue:
-https://github.com/microsoft/WSL/issues/11282
-
-下载2.2.1版本wsl解决即可
-https://github.com/microsoft/WSL/releases/tag/2.2.1

@@ -1,6 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: linux dts中断id irq:-6问题                   
-
-因为没找到parent，parent's phandle不对；
-更新了版本，phandle需要重新查看；

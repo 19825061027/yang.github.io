@@ -1,5 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: */*/event/和*/*/format/下文件内容与文件名之间的关系 
-
-perf各个框架组件的函数调用逻辑.excalidraw

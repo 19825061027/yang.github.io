@@ -1,4 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: CMN PMU driver probe跑通                 
-

@@ -1,5 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: -finstrument-functions
-
-这个不知道为啥，没法用；总是卡死；无论是fpga还是本地物理机；

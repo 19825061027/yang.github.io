@@ -1,4 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: PCB基础知识学习                           
-

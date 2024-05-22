@@ -1,6 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: wsl export and import issues                   
-
-https://superuser.com/questions/1566022/how-to-set-default-user-for-manually-installed-wsl-distro
-[[file:images/Day_Done/2024-04-18_00-45-56_screenshot.png]]

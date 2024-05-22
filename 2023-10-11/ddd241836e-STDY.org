@@ -1,5 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: 如何实现分时采样
-
-首先，我们知道，可以通过用户层设置采样频率，结果是文件 hrtimer_interval_ms

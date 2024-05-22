@@ -1,6 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: reset singal device tree bindings            
-
-Reference: https://zhuanlan.zhihu.com/p/606384519
-类似

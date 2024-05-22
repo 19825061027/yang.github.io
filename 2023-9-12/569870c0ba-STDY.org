@@ -1,4 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: 针对ddr中断问题，找钱晨和文明进行communication。 
-

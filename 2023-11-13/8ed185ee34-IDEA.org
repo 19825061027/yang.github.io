@@ -1,6 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: 写一个桌面软件用来展示此文档内容          
-
-显式采用
-采用hugo server是一个正确的解决办法

@@ -1,5 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: 三个domain，三个dtc，三个中断信号是怎样被处理的？ 
-
-三个中断信号，哪个CPU都可以处理，并且在硬件上，也是都连接到GIC上，每个domain里的CPU都可以访问到任意一个DTC的寄存器；

@@ -1,4 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: event list
-

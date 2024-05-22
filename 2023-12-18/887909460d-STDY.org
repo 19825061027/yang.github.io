@@ -1,4 +1,0 @@
-#+INCLUDE: "../../prefix.org"
-
-#+TITLE: 跑SMMU中断问题
-
