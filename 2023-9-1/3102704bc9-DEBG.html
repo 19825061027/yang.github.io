@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>PowerPC 架构学习以及处理器idle相关内容学习</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,19 +204,45 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
+<h1 class="title">PowerPC 架构学习以及处理器idle相关内容学习</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
+<li><a href="#orgec9dc14">1. Registers</a></li>
+<li><a href="#org0dd83f9">2. idle相关内容</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
+<ol class="org-ol">
+<li>console问题之前已解决；</li>
+<li>在rcS中写上mount -a 或 /bin/mount -a 就会卡死在rcS执行之后，打印Please press Enter to activate this console.之前；</li>
+</ol>
+
+<div id="outline-container-orgec9dc14" class="outline-2">
+<h2 id="orgec9dc14"><span class="section-number-2">1.</span> Registers</h2>
 <div class="outline-text-2" id="text-1">
+<ol class="org-ol">
+<li>PowerPC ISA publiced in 1993, is a 64-bit spec including 32-bit.</li>
+<li>寄存器：
+<ul class="org-ul">
+<li>GPR，32个通用寄存器</li>
+<li>PC，程序计数器，也称IAR/指令地址寄存器或者NIP/下一指令指针</li>
+<li>LR，链接寄存器</li>
+<li>FPSCR，浮点状态和控制寄存器</li>
+<li>CTR，计数寄存器</li>
+<li>FPR，浮点寄存器</li>
+<li>CR，条件寄存器</li>
+</ul></li>
+<li>两个运行级别：
+<ul class="org-ul">
+<li>用户模式：可访问GPR，FPR，CR，FPSCR，LR，CTR，XER以及TBL/TBU，DCR可以访问；</li>
+<li>特权模式</li>
+</ul></li>
+<li>指令中，i后缀代表立即数，s后缀表示左移16位，如addi, addis, ori, oris等；</li>
+<li><p>
+配置寄存器
+</p>
 <table>
 
 
@@ -232,58 +251,237 @@
 
 <col  class="org-left">
 </colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">配置寄存器</th>
+<th scope="col" class="org-left">作用</th>
+</tr>
+</thead>
 <tbody>
 <tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
+<td class="org-left">HID0-HID2</td>
+<td class="org-left">硬件实现寄存器</td>
+</tr>
+
+<tr>
+<td class="org-left">MSR</td>
+<td class="org-left">机械状态寄存器(用来配置微处理器的设定)</td>
+</tr>
+
+<tr>
+<td class="org-left">MBAR</td>
+<td class="org-left">存储器基址寄存器</td>
+</tr>
+
+<tr>
+<td class="org-left">SVR</td>
+<td class="org-left">系统处理器</td>
+</tr>
+
+<tr>
+<td class="org-left">PVR</td>
+<td class="org-left">版本寄存器</td>
 </tr>
 </tbody>
-</table>
+</table></li>
+<li><p>
+存储管理寄存器
+</p>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">存储管理寄存器</th>
+<th scope="col" class="org-left">作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">LBATOU/LBATOL/LBAT3U/LBAT3L</td>
+<td class="org-left">指令BAT寄存器</td>
+</tr>
+
+<tr>
+<td class="org-left">DBATOU/DBATOL/DBAT3U/DBAT3L</td>
+<td class="org-left">数据BAT寄存器</td>
+</tr>
+
+<tr>
+<td class="org-left">DMISS/DCMP/HASH1/HASH2/ICMP/RPA</td>
+<td class="org-left">软件表搜索寄存器</td>
+</tr>
+
+<tr>
+<td class="org-left">SDR1</td>
+<td class="org-left">SDR1</td>
+</tr>
+
+<tr>
+<td class="org-left">SR0-15</td>
+<td class="org-left">段寄存器</td>
+</tr>
+
+<tr>
+<td class="org-left">SPRG0-7</td>
+<td class="org-left">中断处理寄存器</td>
+</tr>
+
+<tr>
+<td class="org-left">DSISR</td>
+<td class="org-left">DSISR</td>
+</tr>
+
+<tr>
+<td class="org-left">SRP0 SRP1</td>
+<td class="org-left">保存恢复寄存器</td>
+</tr>
+
+<tr>
+<td class="org-left">DEC</td>
+<td class="org-left">多功能寄存器</td>
+</tr>
+
+<tr>
+<td class="org-left">CSRR0-1</td>
+<td class="org-left">紧急中断寄存器</td>
+</tr>
+
+<tr>
+<td class="org-left">DAR</td>
+<td class="org-left">数据地址寄存器</td>
+</tr>
+
+<tr>
+<td class="org-left">TBL-TBU</td>
+<td class="org-left">时基设施(writable)</td>
+</tr>
+
+<tr>
+<td class="org-left">IABR/IABR2/DABR/DABR2</td>
+<td class="org-left">指令/数据地址断点寄存器</td>
+</tr>
+
+<tr>
+<td class="org-left">IBCR/DBCR</td>
+<td class="org-left">指令/数据地址断点控制</td>
+</tr>
+</tbody>
+</table></li>
+<li><p>
+通用寄存器
+</p>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">通用寄存器</th>
+<th scope="col" class="org-left">作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">r0</td>
+<td class="org-left">在函数开始时使用</td>
+</tr>
+
+<tr>
+<td class="org-left">r1</td>
+<td class="org-left">堆栈指针，也就是esp</td>
+</tr>
+
+<tr>
+<td class="org-left">r2</td>
+<td class="org-left">内容表指针，idapro把这个寄存器反汇编标识为rtoc，系统调用时包含系统调用号</td>
+</tr>
+
+<tr>
+<td class="org-left">r3</td>
+<td class="org-left">作为第一个参数和返回值</td>
+</tr>
+
+<tr>
+<td class="org-left">r4-r10</td>
+<td class="org-left">函数或系统调用开始的参数</td>
+</tr>
+
+<tr>
+<td class="org-left">r11</td>
+<td class="org-left">用在指针的调用或当作一些语言的环境指针</td>
+</tr>
+
+<tr>
+<td class="org-left">r12</td>
+<td class="org-left">用在异常处理时(动态链接器代码)</td>
+</tr>
+
+<tr>
+<td class="org-left">r13</td>
+<td class="org-left">保留作为系统线程id</td>
+</tr>
+
+<tr>
+<td class="org-left">r14-r31</td>
+<td class="org-left">作为本地volatile变量存储</td>
+</tr>
+</tbody>
+</table></li>
+<li>寄存器r1，r14-r31在函数调用过程中保持不变；</li>
+<li>r0, r3-r12和特殊寄存器lr, ctr, xer, fpscr值在系统调用过程中会发生改变；</li>
+<li>r0, r2, r11, r13可能会被交叉模块调用改变，所以函数调用时不能采用他们的值；</li>
+</ol>
 </div>
 </div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
+
+<div id="outline-container-org0dd83f9" class="outline-2">
+<h2 id="org0dd83f9"><span class="section-number-2">2.</span> idle相关内容</h2>
 <div class="outline-text-2" id="text-2">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
+<p>
+Reference: P8_UM
+</p>
+<ol class="org-ol">
+<li>Architected idle states: nap, sleep, and winkle; each with increasing power saving capability(and latency).</li>
+<li>HV可以执行相关idle指令静默处理器pipeline，并区分了不同级别的idle状态，每一个都有更高的enter和exit延迟；</li>
+<li>支持通用四个模式中的三个，nap，sleep和winkle，不支持doze；</li>
+<li>支持睡眠指令(fast sleep: core power on; deep sleep: core power off);</li>
+<li>睡眠指令允许L3 cache让其他core使用；</li>
+<li>Power Management Idle Control Register(PMICR) SPR for idle-time Pstate control.
+<ul class="org-ul">
+<li>Nap Pstate</li>
+<li>Sleep Pstate</li>
+<li>Winkle Pstate</li>
+</ul></li>
+<li>单个线程nap/sleep/winkle
+<ul class="org-ul">
+<li>When a single thread enters nap, sleep, or winkle mode, thread state can be lost. 因为core可能会执行SMT线程切换，来让非idle状态的线程继续获得执行；</li>
+<li>当SMT线程切换使能时，napping thread的资源可以给其他threads来提升单个core的性能；</li>
+<li>下面寄存器内容由硬件保存并恢复：
+<ul class="org-ul">
+<li>SLB State</li>
+<li>All Hypervisor Special Registers(includes PURR, SPURR, AMOR, UAMOR, AMR)</li>
+<li>DEC</li>
+<li>SPRG0-3</li>
+<li>DAR</li>
+<li>DSISR</li>
+<li>DABR, DABRX</li>
+<li>DSCR</li>
+<li>All Performance Monitoring Special Registers(PMCs, SIAR, SDAR)</li>
+</ul></li>
+</ul></li>
+<li>从idle状态恢复执行，取决于中断条件一般都是从SRESET vector开始；</li>
+<li>Control Register[31]，此比特由OS用来指明当前是idle还是run；PM可以用此bit避免在idle期间计数；统称为Run Latch；</li>
+</ol>
 </div>
 </div>
 </div>

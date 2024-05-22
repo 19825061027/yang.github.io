@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>busybox/mdev学习</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,81 +204,62 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
-<div id="table-of-contents" role="doc-toc">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents" role="doc-toc">
-<ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
-</ul>
-</div>
-</div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
-<div class="outline-text-2" id="text-1">
-<table>
+<h1 class="title">busybox/mdev学习</h1>
+<p>
+两个用法：initial population and dynamic updates.
+</p>
+
+<p>
+都需要sysfs支持。动态更新需要内核使能热插拔。
+</p>
+
+<p>
+Here's a typical code snippet from the init script:
+[0] mount -t proc proc /proc
+[1] mount -t sysfs sysfs /sys
+[2] echo /sbin/mdev &gt; /proc/sys/kernel/hotplug
+[3] mdev -s
+</p>
+
+<p>
+Alternatively, without procfs the above becomes:
+[1] mount -t sysfs sysfs /sys
+[2] sysctl -w kernel.hotplug=/sbin/mdev
+[3] mdev -s
+</p>
 
 
-<colgroup>
-<col  class="org-left">
+<p>
+Of course, a more "full" setup would entail executing this before the previous
+code snippet:
+[4] mount -t tmpfs -o size=64k,mode=0755 tmpfs /dev
+[5] mkdir /dev/pts
+[6] mount -t devpts devpts /dev/pts
+</p>
 
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
-<div class="outline-text-2" id="text-2">
-<table>
+<p>
+The simple explanation here is that [1] you need to have /sys mounted before
+executing mdev.  Then you [2] instruct the kernel to execute /sbin/mdev whenever
+a device is added or removed so that the device node can be created or
+destroyed.  Then you [3] seed /dev with all the device nodes that were created
+while the system was booting.
+</p>
 
 
-<colgroup>
-<col  class="org-left">
+<p>
+当前通过uevent告知用户层工具设备变动情况，而用户层工具就是udev或者是简化版的busybox
+中带的mdev。
+要点：事件通知接口：netlink
+netlink - communication between kernel and user space (AF_NETLINK)
+</p>
 
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p>
+netlink_socket = socket(AF_NETLINK, socket_type, netlink_family);
+netlink由一个标准的基于socket的接口，提供给用户层进程使用。以及一套内部kernel API，
+提供给内核模块使用。此处只展示用户层API。
+socket_type有SOCK_RAW和SOCK_DGRAM两种有效形式，在此是SOCK_DGRAM形式。
+netlink_family形式较多，此处为NETLINK_KOBJECT_UEVENT，专门用于传递内核消息到用户层。
+</p>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>

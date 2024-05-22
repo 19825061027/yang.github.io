@@ -1,0 +1,28 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: ivy-read function                            
+
+(ivy-read PROMPT COLLECTION &key PREDICATE REQUIRE-MATCH INITIAL-INPUT
+HISTORY PRESELECT DEF KEYMAP UPDATE-FN SORT ACTION MULTI-ACTION UNWIND
+RE-BUILDER MATCHER DYNAMIC-COLLECTION EXTRA-PROPS CALLER)
+作用：从minibuffer中通过补全功能，读入一个字符串
+
+PROMPT: 提示字符串，通常以:结尾。补全的时候ivy-count-format会接到PROMPT前面：(1/0) Swiper:
+COLLECTION: 可以是字符串列表，函数，alist或hash表。给 minibuffer-completion-table 供应。
+PREDICATE: 用来立即过滤COLLECTION. 此参数是为了兼容 completing-read .
+REQUIRE-MATCH: 非空时，只有COLLECTION的成员可以被选中。
+INITIAL-INPUT: 非空时，作为初始内容输入.
+HISTORY: 放变量名，hold the completion session history.
+KEYMAP: 即 ivy-minibuffer-map。minibuffer专用keymap
+PRESELECT: 非空时，决定哪一个匹配INITIAL-INPUT的候选对象作为初始输入。可以是代表候选人位置的数字。
+DEF: 为了兼容 completing-read
+UPDATE-FN: 每次候选人列表更新时调用
+SORT: 非空时，ivy-sort-function-alist 决定在展示候选人之前如何分类候选人。
+ACTION: 选中一个候选人之后的回调函数。一个参数存放选中的候选人。如果COLLECTION是alist，则参数是一个cons cell，否则就是一个字符串。
+MULTI-ACTION: 非空并且有多个候选人时，会调用这个而非ACTION。
+UNWIND: 退出之前调用的无参函数。
+RE-BUILDER: 将输入文本转换成正则表达式的函数。
+MATCHER: 此决定，如何基于用户输入过滤候选人。
+DYNAMIC-COLLECTION: boolean，指明候选人列表是否在每次输入时更新。
+EXTRA-PROPS: plist，用来存放collection-specific session-specific数据。
+CALLER: 标识 ivy-read 调用者的唯一符号。和COLLECTION一起使用，决定那个定义应用到当前补全会话。

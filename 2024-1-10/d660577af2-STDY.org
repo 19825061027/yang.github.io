@@ -1,0 +1,203 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: devm_xxx设备资源管理
+
+http://www.wowotech.net/device_model/device_resource_management.html
+1. 在probe函数中，要顺序申请多种资源(IRQ, Clock, memory, regions, ioremap, dma, etc..),
+   只要任意一种资源申请失败，就要回滚释放之前申请的所有资源。于是函数最后，一定会出现
+   很多goto标签，并在申请资源出错时，小心翼翼的goto到正确的标签上，以便释放已申请资源。
+
+2. 因此，linux设备模型借助device resource management设备资源管理，帮我们解决了这个问题。
+   #+begin_src c
+     pcdev = devm_kzalloc(&pdev->dev, sizeof(*pcdev), GFP_KERNEL);
+     if(!pcdev) {
+	     dev_err(&pdev->dev, "Could not allocate pcdev\n");
+	     return -ENOMEM;
+     }
+   #+end_src
+
+3. 什么是设备资源？
+   一个设备能功能，需要依赖很多的外部条件，如供电，时钟等等，这些外部条件称作设备资源。
+   对于现在计算机的体系结构，可能的资源包括：
+   - power, 供电;
+   - clock, 时钟;
+   - memory, 内存，在kernel中一般使用kzalloc分配；
+   - GPIO，用户和CPU交换简单控制，状态等信息；
+   - IRQ，触发中断；
+   - DMA，无CPU参与情况下进行数据传输；
+   - 虚拟地址空间，一般使用ioremap，request_region等分配；
+   - 等等
+   - 在linux kernel眼中，“资源”的定义更为广义，比如PWM，RTC，Reset，都可以抽象为资源，供driver调用；
+   较早kernel中，系统不是特别复杂，各个framework还没有成型，因此，大多数资源都由driver
+   自行维护。随着系统复杂度增加，driver之间公用资源情况越来越多，电源管理需求迫切，于是
+   kernel基于device resource management框架，将资源由各个framework统一管理，分配和回收。
+
+4. device resource management的软件框架
+   *high level driver*
+      1         1
+      1   *frameworks(regulator,clock,interrupt,gpio...)*
+      1         1
+   *driver base(device resource management)*
+   device resource management位于"drivers/base/devres.c"中，实现简单。因为资源种类很多，
+   表现形式很多，不可能一一表达，也就不能进行具体的分配和回收，因此，devres所做的是：
+   - *提供一种机制，将系统中某个设备的所有资源，以链表的形式，组织起来，以便在driver detch*
+     *的时候，自动释放。*
+   - *资源和设备绑定，驱动detach时，释放设备绑定的资源。*
+   - 而更为具体的事情，如怎么抽象某一设备，则由上层framework负责，framework有：regulator
+     framework(管理power资源)，clock framework(管理clock资源)，interrupt framework(管理
+     中断资源)，gpio framework（管理gpio资源），pwm framework（管理PWM资源）等等
+   - 其他driver，位于这些framework之上，使用他们提供的机制和接口。
+
+* 代码分析
+1. device resource management实现(drivers/base/devres.c)
+#+begin_src c
+  struct device {
+	  ...;
+	  spinlock_t       devres_lock;
+	  struct list_head devres_head; // 保存该设备资源申请的所有资源
+	  ...;
+  };
+
+  // 资源的数据结构
+  struct devres {
+	  struct devres_node       node;
+	  unsigned long long       data[]; // 零长数组，类型保证ULL对齐
+  };
+
+  // devres_node::entry配合device::devres_head，组织资源
+  struct devres_node {
+	  struct list_head       entry;
+	  dr_release_t           release; // 资源存在形式不知，由framework提供release
+	  const char             *name;
+	  size_t                 size;
+  };
+
+  // devres_alloc/devres_free & devres_add/devres_remove
+  // 只是单纯的分配一个struct devres
+  void * devres_alloc(dr_release_t release, size_t size, gfp_t gfp)
+  {
+	  struct devres *dr;
+	  dr = alloc_dr(release, size); //size是data的大小；分配一个dr，初始化dr->node.entry
+	  return dr->data;
+  }
+  自己使用的话还需要使用devres_add将devres和device绑定
+  void devres_add(struct device *dev, void *res)
+  {
+	  struct devres *dr = container_of(res, (struct devres), data);
+
+	  list_add_tail(&dr->node.entry, &dev->revres_head);
+  }
+
+  // 想必，上层framework也只是将申请了绑定操作放到了一起，并且将资源信息放到data域中，主要是
+  // 通过dr_release_t来实现资源的释放。data也只是辅助；
+#+end_src
+
+1. IRQ framework
+   #+begin_src c
+     static inline int __must_check
+     devm_request_irq(struct device *dev, unsigned int irq, irq_handler_t handler,
+		      unsigned long irqflags, const char *devname, void *dev_id)
+     {
+	     return devm_request_threaded_irq(dev, irq, handler, NULL, irqflags,
+					      devname, dev_id);
+     }
+
+     int devm_request_threaded_irq(struct device *dev, unsigned int irq,
+				   irq_handler_t handler, irq_handler_t thread_fn,
+				   unsigned long irqflags, const char *devname,
+				   void *dev_id)
+     {
+	     struct irq_devres *dr;
+	     int rc;
+
+	     dr = devres_alloc(devm_irq_release, sizeof(struct irq_devres),
+			       GFP_KERNEL);
+	     if (!dr)
+		     return -ENOMEM;
+
+	     if (!devname)
+		     devname = dev_name(dev);
+
+	     rc = request_threaded_irq(irq, handler, thread_fn, irqflags, devname,
+				       dev_id);
+	     if (rc) {
+		     devres_free(dr);
+		     return rc;
+	     }
+
+	     dr->irq = irq;
+	     dr->dev_id = dev_id;
+	     devres_add(dev, dr);
+
+	     return 0;
+     }
+   #+end_src
+   
+2. *devres_release_all* 释放资源
+   #+begin_src c
+     // drivers/base/devres.c
+     /**
+      ,* devres_release_all - Release all managed resources
+      ,* @dev: Device to release resources for
+      ,*
+      ,* Release all resources associated with @dev.  This function is
+      ,* called on driver detach.
+      ,*/
+     int devres_release_all(struct device *dev)
+     {
+	     unsigned long flags;
+	     LIST_HEAD(todo);
+	     int cnt;
+
+	     /* Looks like an uninitialized device structure */
+	     if (WARN_ON(dev->devres_head.next == NULL))
+		     return -ENODEV;
+
+	     /* Nothing to release if list is empty */
+	     if (list_empty(&dev->devres_head))
+		     return 0;
+
+	     spin_lock_irqsave(&dev->devres_lock, flags);
+	     cnt = remove_nodes(dev, dev->devres_head.next, &dev->devres_head, &todo);
+	     spin_unlock_irqrestore(&dev->devres_lock, flags);
+
+	     release_nodes(dev, &todo);
+	     return cnt;
+     }
+
+     // drivers/base/core.c
+     static void device_release(struct kobject *kobj)
+     {
+	     struct device *dev = kobj_to_dev(kobj);
+	     struct device_private *p = dev->p;
+
+	     /*
+	      ,* Some platform devices are driven without driver attached
+	      ,* and managed resources may have been acquired.  Make sure
+	      ,* all resources are released. 设备可以在没有驱动的情况下运行
+	      ,*
+	      ,* Drivers still can add resources into device after device
+	      ,* is deleted but alive, so release devres here to avoid
+	      ,* possible memory leak.
+	      ,*/
+	     devres_release_all(dev);
+
+	     kfree(dev->dma_range_map);
+
+	     if (dev->release)
+		     dev->release(dev);
+	     else if (dev->type && dev->type->release)
+		     dev->type->release(dev);
+	     else if (dev->class && dev->class->dev_release)
+		     dev->class->dev_release(dev);
+	     else
+		     WARN(1, KERN_ERR "Device '%s' does not have a release() function, it is broken and must be fixed. See Documentation/core-api/kobject.rst.\n",
+			  dev_name(dev));
+	     kfree(p);
+     }
+   #+end_src
+   - 设备注册分两步，初始化device_initialize(dev)和设备添加device_add(dev);
+   - 设备注销分两步：
+     - 将设备从所有子系统中删除device_del(dev)，和device_add(dev)相对，后者添加了什么，前者就删除什么，然后从sysfs系统中移除。
+     - 引用计数-1，当引用计数为0时，通过device_release清除资源。
+   

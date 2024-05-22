@@ -1,0 +1,150 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: PPC和非PPC(arm,x86,etc.)中OF创建platform_device之间的不同 
+
+非PPC方案中，在driver/of/platform.c文件中，有如下开始创建platform_device的入口：
+#+begin_src c
+  static int __init of_platform_default_populate_init(void)
+  {
+	  struct device_node *node;
+
+	  device_links_supplier_sync_state_pause();
+
+	  if (!of_have_populated_dt())
+		  return -ENODEV;
+
+	  /*
+	   ,* Handle certain compatibles explicitly, since we don't want to create
+	   ,* platform_devices for every node in /reserved-memory with a
+	   ,* "compatible",
+	   ,*/
+	  for_each_matching_node(node, reserved_mem_matches)
+		  of_platform_device_create(node, NULL, NULL);
+
+	  node = of_find_node_by_path("/firmware");
+	  if (node) {
+		  of_platform_populate(node, NULL, NULL, NULL);
+		  of_node_put(node);
+	  }
+
+	  /* Populate everything else. */
+	  fw_devlink_pause();
+	  of_platform_default_populate(NULL, NULL, NULL); // 弹出所有内容，挨个创建platform_device，放到/sys/bus/platform/devices/目录下
+	  fw_devlink_resume();
+
+	  return 0;
+  }
+  arch_initcall_sync(of_platform_default_populate_init); // level: 3
+
+#+end_src
+
+PPC方案中，入口点在/arch/powerpc/platforms/powernv/opal.c文件中：
+#+begin_src c
+  static int __init opal_init(void)
+{
+	struct device_node *np, *consoles, *leds;
+	int rc;
+
+	opal_node = of_find_node_by_path("/ibm,opal");
+	if (!opal_node) {
+		pr_warn("Device node not found\n");
+		return -ENODEV;
+	}
+
+	/* Register OPAL consoles if any ports */
+	consoles = of_find_node_by_path("/ibm,opal/consoles");
+	if (consoles) {
+		for_each_child_of_node(consoles, np) {
+			if (!of_node_name_eq(np, "serial"))
+				continue;
+			of_platform_device_create(np, NULL, NULL);
+		}
+		of_node_put(consoles);
+	}
+
+	/* Initialise OPAL messaging system */
+	opal_message_init(opal_node);
+
+	/* Initialise OPAL asynchronous completion interface */
+	opal_async_comp_init();
+
+	/* Initialise OPAL sensor interface */
+	opal_sensor_init();
+
+	/* Initialise OPAL hypervisor maintainence interrupt handling */
+	opal_hmi_handler_init();
+
+	/* Create i2c platform devices */
+	opal_pdev_init("ibm,opal-i2c");
+
+	/* Handle non-volatile memory devices */
+	opal_pdev_init("pmem-region");
+
+	/* Setup a heatbeat thread if requested by OPAL */
+	opal_init_heartbeat();
+
+	/* Detect In-Memory Collection counters and create devices*/
+	opal_imc_init_dev();
+
+	/* Create leds platform devices */
+	leds = of_find_node_by_path("/ibm,opal/leds");
+	if (leds) {
+		of_platform_device_create(leds, "opal_leds", NULL);
+		of_node_put(leds);
+	}
+
+	#ifndef CONFIG_NO_OPAL_TEST
+	/* Initialise OPAL message log interface */
+	opal_msglog_init();
+	#endif
+
+	/* Create "opal" kobject under /sys/firmware */
+	rc = opal_sysfs_init();
+	if (rc == 0) {
+		/* Setup dump region interface */
+		opal_dump_region_init();
+		/* Setup error log interface */
+		rc = opal_elog_init();
+		/* Setup code update interface */
+		opal_flash_update_init();
+		/* Setup platform dump extract interface */
+		opal_platform_dump_init();
+		/* Setup system parameters interface */
+		opal_sys_param_init();
+		/* Setup message log sysfs interface. */
+		opal_msglog_sysfs_init();
+		/* Add all export properties*/
+		opal_export_attrs();
+	}
+
+	/* Initialize platform devices: IPMI backend, PRD & flash interface */
+	opal_pdev_init("ibm,opal-ipmi");
+	opal_pdev_init("ibm,opal-flash");
+	opal_pdev_init("ibm,opal-prd");
+
+	/* Initialise platform device: oppanel interface */
+	opal_pdev_init("ibm,opal-oppanel");
+
+	/* Initialise OPAL kmsg dumper for flushing console on panic */
+	opal_kmsg_init();
+
+	/* Initialise OPAL powercap interface */
+	opal_powercap_init();
+
+	/* Initialise OPAL Power-Shifting-Ratio interface */
+	opal_psr_init();
+
+	/* Initialise OPAL sensor groups */
+	opal_sensor_groups_init();
+
+	/* Initialise OPAL Power control interface */
+	opal_power_control_init();
+
+	/* Initialize OPAL secure variables */
+	opal_pdev_init("ibm,secvar-backend");
+
+	return 0;
+}
+machine_subsys_initcall(powernv, opal_init); // level: 4
+
+#+end_src

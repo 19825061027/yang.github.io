@@ -1,0 +1,10 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: linux中pr_err打印出现的怪圈               
+
+pr_err("config: %d  pid: %d  cpu: %d", attr.config, pid, cpu);
+因为config是u64类型，因此，这种打印出来，config一直是0，而正确的
+config值放到了pid那个位置。
+改成：
+pr_err("config: %lld  pid: %d  cpu: %d", attr.config, pid, cpu);
+就好了

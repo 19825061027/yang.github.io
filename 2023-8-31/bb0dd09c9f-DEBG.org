@@ -1,0 +1,13 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: 解决启动问题 can't access tty job control turned off
+
+* detail
+1. 从已知知识，可以了解，根文件系统的启动，大概分为两种，一种是通过embedded kernel，一种是qemu使用-initrd选项指定；
+2. 无论哪种，kernel都是需要有个嵌入的根文件系统由于初期的某些必要因素，现在还不太清楚，可能是console early init需要；
+3. 总之，一定会有一个根文件系统，且必须有/dev/console，如果采用external方式，则kernel会创建/dev目录及console，之后再挂载上-initrd指定的，也不会被覆盖，神奇；所以external方式可以不创建/dev/及console；
+4. 而internal方式，kernel不再默认创建/dev/console，因此，这两个必需品就需要user创建；sudo mknod dev/console c 5 1
+5. ttyS0问题，还不太清楚为什么是ttyS0，而不使用console，总之，在本地qemu上，这两个都是可以使用的，并且在优先级上，是inittab大于cmdline；
+   - 采用console默认，没有/dev/ttyS0，有/dev/console，inittab 采用默认，即 ::askfirst:-/bin/sh ，cmdline指定console=ttyS0与采用默认都是可以启动；
+   - 采用console默认，没有/dev/ttyS0，有/dev/console，inittab 采用ttyS0，即 ttyS0::askfirst:-/bin/sh ，cmdline两种都尝试，报错can't open /dev/ttyS0: No such file or directory；
+6. 似乎，cmdline在internal模式下，没有效果；反正console是没有太大的效果；

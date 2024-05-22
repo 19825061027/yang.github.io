@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-05-22 Wed 16:46 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>python 学习</title>
+<meta name="author" content="Yang" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../css/readtheorg.css"/>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
+<script type="text/javascript" src="../js/readtheorg.js"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">python 学习</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgedd1241">1. 列表推导和生成器表达式</a></li>
+<li><a href="#org59d559a">2. 元组不仅仅是不可变的列表</a></li>
+<li><a href="#orgcbb3573">3. 强大的切片以及其高级用法</a></li>
+<li><a href="#org6446fab">4. 对序列使用 + 和 *</a></li>
+<li><a href="#org70f73c5">5. 序列增量赋值 += 和 *=</a></li>
+</ul>
+</div>
+</div>
+<p>
+容器序列：list, tuple, collections.deque可以存放不同类型的数据(因为存放的都是对象引用)
+扁平序列：str, bytes, bytearray, memoryview, array.array, 只能容纳一种类型(存放值，更紧凑，但只能存放字符、字节和数值这种基础类型)
+</p>
+
+<p>
+可变序列：list, bytearray, array.array, collections.deque, memoryview
+不可变序：tuple, str, bytes
+</p>
+
+<div id="outline-container-orgedd1241" class="outline-2">
+<h2 id="orgedd1241"><span class="section-number-2">1.</span> 列表推导和生成器表达式</h2>
+<div class="outline-text-2" id="text-1">
+<ol class="org-ol">
+<li>列表推导的作用只有一个，生成列表。</li>
+<li>如果想生成其他类型的序列，生成器表达式最适用。</li>
+<li>生成器表达式背后遵守迭代器协议，可以逐个产出元素，而不是先建立一个完整的列表，然后再把
+这个列表传递给某个构造函数里。相当于list(list())</li>
+</ol>
+<div class="org-src-container">
+<pre class="src src-python">  <span style="font-weight: bold; font-style: italic;">colors</span> = [<span style="font-style: italic;">'black'</span>, <span style="font-style: italic;">'white'</span>]
+  <span style="font-weight: bold; font-style: italic;">sizes</span> = [<span style="font-style: italic;">'S'</span>, <span style="font-style: italic;">'M'</span>, <span style="font-style: italic;">'L'</span>]
+  <span style="font-weight: bold;">for</span> tshirt <span style="font-weight: bold;">in</span> (<span style="font-style: italic;">'%s%s'</span>%(c, s) <span style="font-weight: bold;">for</span> c <span style="font-weight: bold;">in</span> colors <span style="font-weight: bold;">for</span> s <span style="font-weight: bold;">in</span> sizes):
+      <span style="font-weight: bold;">print</span>(tshirt)
+
+  <span style="font-weight: bold;">print</span>(<span style="font-style: italic;">'%s%s'</span>%(c, s) <span style="font-weight: bold;">for</span> c <span style="font-weight: bold;">in</span> colors <span style="font-weight: bold;">for</span> s <span style="font-weight: bold;">in</span> sizes) <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">&#29983;&#25104;&#22120;&#34920;&#36798;&#24335;</span>
+  <span style="font-weight: bold;">print</span>([<span style="font-style: italic;">'%s%s'</span>%(c, s) <span style="font-weight: bold;">for</span> c <span style="font-weight: bold;">in</span> colors <span style="font-weight: bold;">for</span> s <span style="font-weight: bold;">in</span> sizes]) <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">&#21015;&#34920;&#25512;&#23548;</span>
+</pre>
+</div>
+
+<ol class="org-ol">
+<li>也就是说，只要不是列表list，都应该适用生成器表达式</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org59d559a" class="outline-2">
+<h2 id="org59d559a"><span class="section-number-2">2.</span> 元组不仅仅是不可变的列表</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+元组除了可以用作不可变的列表，还可以用于没有字段名的记录。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">  <span style="font-weight: bold; font-style: italic;">lax_coordinates</span> = (33.9425, -118.408)
+  <span style="font-weight: bold; font-style: italic;">city</span>, <span style="font-weight: bold; font-style: italic;">year</span>, <span style="font-weight: bold; font-style: italic;">pop</span>, <span style="font-weight: bold; font-style: italic;">chg</span>, <span style="font-weight: bold; font-style: italic;">area</span> = (<span style="font-style: italic;">'Tokyo'</span>, 2003, 32450, 0.66, 8014)
+  <span style="font-weight: bold; font-style: italic;">traveler_ids</span> = [(<span style="font-style: italic;">'USA'</span>, <span style="font-style: italic;">'31195855'</span>), (<span style="font-style: italic;">'BRA'</span>, <span style="font-style: italic;">'CE342567'</span>), (<span style="font-style: italic;">'ESP'</span>, <span style="font-style: italic;">'XDA205856'</span>)]
+
+  <span style="font-weight: bold;">for</span> passport <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">sorted</span>(traveler_ids):
+      <span style="font-weight: bold;">print</span>(<span style="font-style: italic;">'%s/%s'</span>%passport)
+
+  <span style="font-weight: bold;">for</span> country, _ <span style="font-weight: bold;">in</span> traveler_ids:
+      <span style="font-weight: bold;">print</span>(country)
+</pre>
+</div>
+
+<p>
+元组拆包：
+拆包方式1：
+city, year, pop, chg, area = ('Tokyo', 2003, 32450, 0.66, 8014)
+</p>
+
+<p>
+拆包方式2：
+for country, _ in traveler_ids:
+</p>
+
+<ol class="org-ol">
+<li>唯一拆包硬性要求，被可迭代对象中的元素数量必须要跟接收这些元素的元组的空档数一致。</li>
+<li>除非用*来忽略多余元素。</li>
+<li><p>
+最好辨认元组拆包的形式：平行赋值：
+</p>
+<div class="org-src-container">
+<pre class="src src-python">     <span style="font-weight: bold; font-style: italic;">lax_coordinates</span> = (33.9425, -118.408)
+     <span style="font-weight: bold; font-style: italic;">latitude</span>, <span style="font-weight: bold; font-style: italic;">longitude</span> = lax_coordinates <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">&#20803;&#32452;&#25286;&#21253;</span>
+     <span style="font-weight: bold;">print</span>(latitude)
+</pre>
+</div></li>
+<li>不使用中间变量来交换也是用元组方式实现：
+a, b = b, a</li>
+<li><p>
+还可以用*运算符把一个可迭代对象拆开：
+</p>
+<div class="org-src-container">
+<pre class="src src-python">     <span style="font-weight: bold;">print</span>(<span style="font-weight: bold;">divmod</span>(20, 8))
+     <span style="font-weight: bold; font-style: italic;">t</span> = (20, 8)
+     <span style="font-weight: bold;">print</span>(<span style="font-weight: bold;">divmod</span>(*t))
+     <span style="font-weight: bold; font-style: italic;">quotient</span>, <span style="font-weight: bold; font-style: italic;">remainder</span> = <span style="font-weight: bold;">divmod</span>(*t)
+     <span style="font-weight: bold;">print</span>((quotient, remainder))
+</pre>
+</div></li>
+<li><p>
+元组拆包实现函数多个返回值：
+</p>
+<div class="org-src-container">
+<pre class="src src-python">     <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">os.path.split = split(p)</span>
+     <span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">Split a pathname.  Returns tuple "(head, tail)" where "tail" is</span>
+     <span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">everything after the final slash.  Either part may be empty.</span>
+     <span style="font-weight: bold;">import</span> os
+     <span style="font-weight: bold; font-style: italic;">_</span>, <span style="font-weight: bold; font-style: italic;">filename</span> = os.path.split(<span style="font-style: italic;">'/home/yjl00405/.ssh/idrsa.pub'</span>)
+     <span style="font-weight: bold;">print</span>(filename)
+     <span style="font-weight: bold;">print</span>(_)
+</pre>
+</div></li>
+<li>如果是国际化软件，_可能不是一个理想占位符，因为他是gettext.gettext函数的别名。
+其他情况仍是一个好的占位符。</li>
+<li><p>
+用 * 来处理：
+</p>
+<div class="org-src-container">
+<pre class="src src-python">     <span style="font-weight: bold; font-style: italic;">a</span>, <span style="font-weight: bold; font-style: italic;">b</span>, *<span style="font-weight: bold; font-style: italic;">reset</span> = <span style="font-weight: bold;">range</span>(5)
+     <span style="font-weight: bold;">print</span>((a, b, reset))
+     <span style="font-weight: bold; font-style: italic;">a</span>, *<span style="font-weight: bold; font-style: italic;">reset</span>, <span style="font-weight: bold; font-style: italic;">b</span> = <span style="font-weight: bold;">range</span>(5)
+     <span style="font-weight: bold;">print</span>((a, b, reset))
+     *<span style="font-weight: bold; font-style: italic;">reset</span>, <span style="font-weight: bold; font-style: italic;">a</span>, <span style="font-weight: bold; font-style: italic;">b</span> = <span style="font-weight: bold;">range</span>(5)
+     <span style="font-weight: bold;">print</span>((a, b, reset))
+     <span style="font-weight: bold; font-style: italic;">a</span>, <span style="font-weight: bold; font-style: italic;">b</span>, *<span style="font-weight: bold; font-style: italic;">reset</span> = <span style="font-weight: bold;">range</span>(3)
+     <span style="font-weight: bold;">print</span>((a, b, reset))
+     <span style="font-weight: bold; font-style: italic;">a</span>, <span style="font-weight: bold; font-style: italic;">b</span>, *<span style="font-weight: bold; font-style: italic;">reset</span> = <span style="font-weight: bold;">range</span>(2)
+     <span style="font-weight: bold;">print</span>((a, b, reset))
+</pre>
+</div></li>
+<li><p>
+嵌套元组拆包
+</p>
+<div class="org-src-container">
+<pre class="src src-python">     <span style="font-weight: bold; font-style: italic;">metro_areas</span> = [
+         (<span style="font-style: italic;">'Tokyo'</span>, <span style="font-style: italic;">'JP'</span>, 36.234, (35.345, 123.345)),
+         (<span style="font-style: italic;">'Tokyo2'</span>, <span style="font-style: italic;">'JP2'</span>, 3.234, (3.345, 12.345)),
+     ]
+
+     <span style="font-weight: bold; font-style: italic;">fmt</span> = <span style="font-style: italic;">'{:15} | {:9.4f} | {:9.4f}'</span>
+     <span style="font-weight: bold;">for</span> name, cc, pop, (latitude, longitude) <span style="font-weight: bold;">in</span> metro_areas:
+         <span style="font-weight: bold;">print</span>(fmt.<span style="font-weight: bold;">format</span>(name, latitude, longitude))
+</pre>
+</div></li>
+<li><p>
+元组缺少一个给记录中字段命名的功能，namedtuple函数的出现可以帮我们解决这个问题：
+collections.namedtuple是一个工厂函数，它可以用来构建一个带字段名的元组和一个有名字的类，
+这个带名字的类对调试程序有很大的帮助。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">      <span style="font-weight: bold;">from</span> collections <span style="font-weight: bold;">import</span> namedtuple
+      <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">&#31867;&#21517;&#65292; &#31867;&#20013;&#21508;&#23383;&#27573;&#21517;</span>
+      <span style="font-weight: bold; font-style: italic;">City</span> = namedtuple(<span style="font-style: italic;">'City'</span>, <span style="font-style: italic;">'name country population coordinates'</span>)
+      <span style="font-weight: bold; font-style: italic;">tokyo</span> = City(<span style="font-style: italic;">'Tokyo'</span>, <span style="font-style: italic;">'JP'</span>, 36.345, (35.456, 123,345))
+      <span style="font-weight: bold;">print</span>(tokyo)
+      <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">City(name='Tokyo', country='JP', population=36.345, coordinates=(35.456, 123, 345))</span>
+
+      <span style="font-weight: bold;">print</span>(tokyo.population)
+      <span style="font-weight: bold;">print</span>(tokyo[0])
+
+      <span style="font-weight: bold;">print</span>(City._fields)
+
+      <span style="font-weight: bold; font-style: italic;">LatLong</span> = namedtuple(<span style="font-style: italic;">'LatLong'</span>, <span style="font-style: italic;">'lat long'</span>)
+      <span style="font-weight: bold; font-style: italic;">delhi_data</span> = (<span style="font-style: italic;">'Delhi NCR'</span>, <span style="font-style: italic;">'IN'</span>, 21.934, LatLong(28.34523, 77.20234))
+      <span style="font-weight: bold; font-style: italic;">delhi</span> = City._make(delhi_data)
+      <span style="font-weight: bold;">print</span>(delhi._asdict())
+      <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">{'name': 'Delhi NCR', 'country': 'IN', 'population': 21.934, 'coordinates': LatLong(lat=28.34523, long=77.20234)}</span>
+      
+      <span style="font-weight: bold;">print</span>(delhi._asdict().items())
+      <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">dict_items([('name', 'Delhi NCR'), ('country', 'IN'), ('population', 21.934), ('coordinates', LatLong(lat=28.34523, long=77.20234))])</span>
+
+      <span style="font-weight: bold;">for</span> key, value <span style="font-weight: bold;">in</span> delhi._asdict().items():
+          <span style="font-weight: bold;">print</span>(key+<span style="font-style: italic;">':'</span>, value)
+</pre>
+</div></li>
+<li>_fields属性是一个包含这个类所有字段名的元组</li>
+<li>_make()通过接收一个可迭代对象来生成这个类的一个实例，作用和City(*delhi_data)一样</li>
+<li>_asdict()把具名元组以collections.OrderedDict的形式返回，我们可以利用它来把元组里的
+信息友好呈现出来。</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgcbb3573" class="outline-2">
+<h2 id="orgcbb3573"><span class="section-number-2">3.</span> 强大的切片以及其高级用法</h2>
+<div class="outline-text-2" id="text-3">
+<ol class="org-ol">
+<li>list, str, tuple, bytes, bytearray等序列类型都支持切片操作。</li>
+<li><p>
+切片和区间会忽略最后一个元素，符合Python，C和其他语言以0作为起始下标的传统。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">     <span style="font-weight: bold; font-style: italic;">s</span> = <span style="font-style: italic;">'bicycle'</span>
+     <span style="font-weight: bold;">print</span>(s[::3])
+     <span style="font-weight: bold;">print</span>(s[::1])
+     <span style="font-weight: bold;">print</span>(s[::-1]) <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">&#30456;&#24403;&#20110;reverse&#25805;&#20316;</span>
+</pre>
+</div></li>
+<li>a:b:c这种用法只能作为索引或者下标用在[]中来返回一个切片对象：slice(a, b, c)</li>
+<li>对seq[start:stop:step]进行求值时，Python会调用seq.__getitem__(slice(start, stop, step))。</li>
+<li><p>
+切片应用：
+</p>
+<div class="org-src-container">
+<pre class="src src-python">     <span style="font-weight: bold; font-style: italic;">invoice</span> = <span style="font-style: italic;">"""</span>
+<span style="font-style: italic;">     0.....6.................................40...........52...55.........</span>
+<span style="font-style: italic;">     1909  Pimoroni PiBrella                 $17.50       3    $52.50</span>
+<span style="font-style: italic;">     1489  6mm Tactile Switch x20            $4.95        2    $9.90</span>
+<span style="font-style: italic;">     1510  Panavise Jr.-PV-201               $28.00       1    $28.00 """</span>
+     <span style="font-weight: bold; font-style: italic;">SKU</span> = <span style="font-weight: bold;">slice</span>(0, 6)
+     <span style="font-weight: bold; font-style: italic;">DESCRIPTION</span> = <span style="font-weight: bold;">slice</span>(6, 40)
+     <span style="font-weight: bold; font-style: italic;">UNIT_PRICE</span> = <span style="font-weight: bold;">slice</span>(40, 52)
+     <span style="font-weight: bold; font-style: italic;">QUANTIY</span> = <span style="font-weight: bold;">slice</span>(52, 55)
+     <span style="font-weight: bold; font-style: italic;">ITEM_TOTAL</span> = <span style="font-weight: bold;">slice</span>(55, <span style="font-weight: bold; text-decoration: underline;">None</span>)
+     <span style="font-weight: bold; font-style: italic;">line_items</span> = invoice.split(<span style="font-style: italic;">'</span><span style="font-weight: bold; text-decoration: underline;">\n</span><span style="font-style: italic;">'</span>)[2:]
+
+     <span style="font-weight: bold;">for</span> item <span style="font-weight: bold;">in</span> line_items:
+         <span style="font-weight: bold;">print</span>(item[UNIT_PRICE], item[DESCRIPTION])
+</pre>
+</div></li>
+</ol>
+
+<p>
+给切片赋值：
+</p>
+<div class="org-src-container">
+<pre class="src src-python">  <span style="font-weight: bold;">print</span>(<span style="font-weight: bold;">range</span>(10))
+  <span style="font-weight: bold;">print</span>(<span style="font-weight: bold;">list</span>(<span style="font-weight: bold;">range</span>(10)))
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]</span>
+
+  <span style="font-weight: bold; font-style: italic;">l</span> = <span style="font-weight: bold;">list</span>(<span style="font-weight: bold;">range</span>(10))
+  <span style="font-weight: bold; font-style: italic;">l</span>[2:5] = [20, 30]
+  <span style="font-weight: bold;">print</span>(l)
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[0, 1, 20, 30, 5, 6, 7, 8, 9]</span>
+
+  <span style="font-weight: bold;">del</span> l[5:7]
+  <span style="font-weight: bold;">print</span>(l)
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[0, 1, 20, 30, 5, 8, 9]</span>
+
+  <span style="font-weight: bold; font-style: italic;">l</span>[3::2] = [11, 22]
+  <span style="font-weight: bold;">print</span>(l)
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[0, 1, 20, 11, 5, 22, 9]</span>
+
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">l[2:5] = 100</span>
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Traceback (most recent call last):</span>
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">File "&lt;stdin&gt;", line 18, in &lt;module&gt;</span>
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">TypeError: can only assign an iterable</span>
+
+  <span style="font-weight: bold; font-style: italic;">l</span>[2:5] = [100]
+  <span style="font-weight: bold;">print</span>(l)
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[0, 1, 100, 22, 9]</span>
+</pre>
+</div>
+<p>
+如果赋值对象，也就是左值是一个切片，那么赋值语句右边必须是个可迭代对象，
+即便只有一个值，也要转换成可迭代对象。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6446fab" class="outline-2">
+<h2 id="org6446fab"><span class="section-number-2">4.</span> 对序列使用 + 和 *</h2>
+<div class="outline-text-2" id="text-4">
+<div class="org-src-container">
+<pre class="src src-python">  <span style="font-weight: bold; font-style: italic;">l</span> = <span style="font-weight: bold;">list</span>(<span style="font-weight: bold;">range</span>(3))
+  <span style="font-weight: bold;">print</span>(l)
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[0, 1, 2]</span>
+
+  <span style="font-weight: bold;">print</span>(l * 3)
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[0, 1, 2, 0, 1, 2, 0, 1, 2]</span>
+
+  <span style="font-weight: bold;">print</span>(5 * <span style="font-style: italic;">'abcde'</span>)
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">abcdeabcdeabcdeabcdeabcde</span>
+</pre>
+</div>
+<ol class="org-ol">
+<li>注意容器序列中的引用</li>
+</ol>
+<div class="org-src-container">
+<pre class="src src-python">  <span style="font-weight: bold; font-style: italic;">board</span> = [[<span style="font-style: italic;">'_'</span>] * 3 <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(3)]
+  <span style="font-weight: bold;">print</span>(board)
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[['_', '_', '_'], ['_', '_', '_'], ['_', '_', '_']]</span>
+
+  board[1][2] = <span style="font-style: italic;">'X'</span>
+  <span style="font-weight: bold;">print</span>(board)
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[['_', '_', '_'], ['_', '_', 'X'], ['_', '_', '_']]</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python">  <span style="font-weight: bold; font-style: italic;">weird_board</span> = [[<span style="font-style: italic;">'_'</span>] * 3] * 3
+  <span style="font-weight: bold;">print</span>(weird_board)
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[['_', '_', '_'], ['_', '_', '_'], ['_', '_', '_']]</span>
+
+  weird_board[1][2] = <span style="font-style: italic;">'O'</span>
+  <span style="font-weight: bold;">print</span>(weird_board)
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">[['_', '_', 'O'], ['_', '_', 'O'], ['_', '_', 'O']]</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python">  <span style="font-weight: bold;">print</span>(<span style="font-weight: bold;">type</span>(<span style="font-style: italic;">'_'</span>))
+  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">&lt;class 'str'&gt;</span>
+
+  <span style="font-weight: bold; font-style: italic;">board</span> = [<span style="font-style: italic;">'_'</span>]
+  <span style="font-weight: bold;">print</span>(<span style="font-weight: bold;">id</span>(board[0]))
+  <span style="font-weight: bold;">print</span>([board * 3])
+  <span style="font-weight: bold;">print</span>([<span style="font-weight: bold;">id</span>(idx) <span style="font-weight: bold;">for</span> idx <span style="font-weight: bold;">in</span> board * 3])
+  <span style="font-weight: bold; font-style: italic;">tmp</span> = board * 3
+  <span style="font-weight: bold;">print</span>(tmp)
+  <span style="font-weight: bold;">print</span>([<span style="font-weight: bold;">id</span>(idx) <span style="font-weight: bold;">for</span> idx <span style="font-weight: bold;">in</span> tmp])
+  <span style="font-weight: bold; font-style: italic;">tmp</span>[0] = <span style="font-style: italic;">'Q'</span>
+  <span style="font-weight: bold;">print</span>(tmp)
+  <span style="font-weight: bold;">print</span>([<span style="font-weight: bold;">id</span>(idx) <span style="font-weight: bold;">for</span> idx <span style="font-weight: bold;">in</span> tmp])
+
+  <span style="font-weight: bold; font-style: italic;">board1</span> = [[<span style="font-style: italic;">'_'</span>] * 3] * 3
+  <span style="font-weight: bold; font-style: italic;">board2</span> = [[<span style="font-style: italic;">'_'</span>] * 3 <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(3)]
+  <span style="font-weight: bold;">print</span>(board1)
+  <span style="font-weight: bold;">print</span>([<span style="font-weight: bold;">id</span>(idx) <span style="font-weight: bold;">for</span> idx <span style="font-weight: bold;">in</span> board1])
+  <span style="font-weight: bold;">print</span>(board2)
+  <span style="font-weight: bold;">print</span>([<span style="font-weight: bold;">id</span>(idx) <span style="font-weight: bold;">for</span> idx <span style="font-weight: bold;">in</span> board2])
+
+  <span style="font-weight: bold; font-style: italic;">row</span> = [<span style="font-style: italic;">'_'</span>] * 3
+  <span style="font-weight: bold; font-style: italic;">board3</span> = []
+  <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(3):
+      board3.append(row)
+  <span style="font-weight: bold;">print</span>(board3)
+  <span style="font-weight: bold;">print</span>([<span style="font-weight: bold;">id</span>(idx) <span style="font-weight: bold;">for</span> idx <span style="font-weight: bold;">in</span> board3])
+
+  <span style="font-weight: bold; font-style: italic;">board4</span> = []
+  <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(3):
+      <span style="font-weight: bold; font-style: italic;">row</span> = [<span style="font-style: italic;">'_'</span>] * 3
+      board4.append(row)
+  <span style="font-weight: bold;">print</span>(board4)
+  <span style="font-weight: bold;">print</span>([<span style="font-weight: bold;">id</span>(idx) <span style="font-weight: bold;">for</span> idx <span style="font-weight: bold;">in</span> board4])
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org70f73c5" class="outline-2">
+<h2 id="org70f73c5"><span class="section-number-2">5.</span> 序列增量赋值 += 和 *=</h2>
+<div class="outline-text-2" id="text-5">
+<ol class="org-ol">
+<li>增量赋值运算符+= 和 *=取决于他们的第一个操作对象。</li>
+<li>+= 背后的特殊方法是__iadd__，用于‘就地加法’，如果没有实现，就会调用__add__。</li>
+<li>对可变序列来说，a += b中a会就地改变，和调用a.extend(b)一样。</li>
+<li>如果a没有实现__iadd__，那么a+=b == a=a+b，也就是会生成新的对象给a。</li>
+<li>变量名会不会关联到新的对象，完全取决于这个类型有没有实现__iadd__这个方法。</li>
+<li>可变序列一半都实现了__iadd__方法。不可变序列根本不支持此类操作。</li>
+<li>*= 对应的是 __imul__。</li>
+</ol>
+<div class="org-src-container">
+<pre class="src src-python">  <span style="font-weight: bold; font-style: italic;">l</span> = <span style="font-weight: bold;">list</span>(<span style="font-weight: bold;">range</span>(3))
+  <span style="font-weight: bold;">print</span>(<span style="font-weight: bold;">id</span>(l))
+  <span style="font-weight: bold; font-style: italic;">l</span> *= 2
+  <span style="font-weight: bold;">print</span>(<span style="font-weight: bold;">id</span>(l))
+
+  <span style="font-weight: bold; font-style: italic;">t</span> = <span style="font-weight: bold;">tuple</span>(<span style="font-weight: bold;">range</span>(3))
+  <span style="font-weight: bold;">print</span>(<span style="font-weight: bold;">id</span>(t))
+  <span style="font-weight: bold; font-style: italic;">t</span> *= 2
+  <span style="font-weight: bold;">print</span>(<span style="font-weight: bold;">id</span>(t))
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yang</p>
+<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

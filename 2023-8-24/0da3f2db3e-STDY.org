@@ -1,0 +1,45 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: 帮赵坤debug事件r44708e                        
+
+* 帮助赵坤debug事件r44708e
+1. 现象：此事件显示:
+   #+begin_example
+   ~/linux/tools/perf $ ./perf stat -e r44708e echo
+   
+
+   Performance counter stats for 'echo':
+
+   <not supported>      r44708e:u                                                   
+
+       0.001532151 seconds time elapsed
+
+       0.001666000 seconds user
+       0.000000000 seconds sys
+
+
+   syscall_counts: 5
+
+   #+end_example
+2. 原因，bit[20:23]代表了cache selector
+#+begin_src c
+  int isa207_get_constraint(u64 event, unsigned long *maskp, unsigned long *valp, u64 event_config1)
+  {
+	...;
+	if (cache & 0x7) {
+	      /*
+	       ,* L2/L3 events contain a cache selector field, which is
+	       ,* supposed to be programmed into MMCRC. However MMCRC is only
+	       ,* HV writable, and there is no API for guest kernels to modify
+	       ,* it. The solution is for the hypervisor to initialise the
+	       ,* field to zeroes, and for us to only ever allow events that
+	       ,* have a cache selector of zero. The bank selector (bit 3) is
+	       ,* irrelevant, as long as the rest of the value is 0.
+	       ,*/
+	      return -1;
+	}
+	...;
+  }
+#+end_src
+3. MMCRC是hypervisor mode下才可访问，也就是说此事件，只可在hypervisor mode下测试；
+   

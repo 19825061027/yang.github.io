@@ -1,0 +1,9 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: gcc编译选项mcmodel=medium
+
+问题出现在powerpc平台，initramfs需要的空间为2.7G，当KEEP()指令将initramfs放在一个位置
+之后，致使某些符号相对于被用到的位置，超过了4G，而链接之前，编译时，假设了相对寻址是
+4GB之内，所以选择的指令是4GB之内的寻址指令，留下的相对地址也是只满足4GB以内的。导致链接
+时发现相对位置超过4GB，就出现这个错误了。
+https://bbs.huaweicloud.com/blogs/detail/272527

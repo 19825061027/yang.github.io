@@ -1,0 +1,43 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: busybox/mdev学习
+
+两个用法：initial population and dynamic updates.
+
+都需要sysfs支持。动态更新需要内核使能热插拔。
+
+Here's a typical code snippet from the init script:
+[0] mount -t proc proc /proc
+[1] mount -t sysfs sysfs /sys
+[2] echo /sbin/mdev > /proc/sys/kernel/hotplug
+[3] mdev -s
+
+Alternatively, without procfs the above becomes:
+[1] mount -t sysfs sysfs /sys
+[2] sysctl -w kernel.hotplug=/sbin/mdev
+[3] mdev -s
+
+
+Of course, a more "full" setup would entail executing this before the previous
+code snippet:
+[4] mount -t tmpfs -o size=64k,mode=0755 tmpfs /dev
+[5] mkdir /dev/pts
+[6] mount -t devpts devpts /dev/pts
+
+The simple explanation here is that [1] you need to have /sys mounted before
+executing mdev.  Then you [2] instruct the kernel to execute /sbin/mdev whenever
+a device is added or removed so that the device node can be created or
+destroyed.  Then you [3] seed /dev with all the device nodes that were created
+while the system was booting.
+
+
+当前通过uevent告知用户层工具设备变动情况，而用户层工具就是udev或者是简化版的busybox
+中带的mdev。
+要点：事件通知接口：netlink
+netlink - communication between kernel and user space (AF_NETLINK)
+
+netlink_socket = socket(AF_NETLINK, socket_type, netlink_family);
+netlink由一个标准的基于socket的接口，提供给用户层进程使用。以及一套内部kernel API，
+提供给内核模块使用。此处只展示用户层API。
+socket_type有SOCK_RAW和SOCK_DGRAM两种有效形式，在此是SOCK_DGRAM形式。
+netlink_family形式较多，此处为NETLINK_KOBJECT_UEVENT，专门用于传递内核消息到用户层。

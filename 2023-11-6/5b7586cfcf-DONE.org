@@ -1,0 +1,5 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: 寻找适合的仓库管理软件 buildroot/repo/yocto... 
+
+Reference:https://zhuanlan.zhihu.com/p/435977116

@@ -1,0 +1,35 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: 驱动MMIO操作细节
+
+一种方式，但不推介，有特殊对齐需求才会用到
+#+begin_src c
+  /* Align virtual address with 0x2000. */
+  /* 1. Get phys of ni. */
+  res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+  if(!res)
+	  return -EINVAL;
+
+  start = res.start;
+  ph_size = resource_size(res);
+
+  /* 2. Request phys in iomem_resource. */
+  ret = devm_request_resource(&pdev->dev, &iomem_resource, res);
+  if(ret) {
+	  pr_err("Wrong in requesting iomem_resource.");
+	  return ret;
+   }
+
+  /* 3. Get vm. */
+  vm_size = _ALIGN(ph_size, 0x2000);
+  struct vm_struct *area = get_vm_area(vm_size, VM_IOREMAP);
+  if(!area)
+	  return -ENOMEM;
+
+  /* 4. Map v to p. */
+  if(ioremap_page_range()) {
+	  free_vm_area(area);
+	  return NULL;
+   }
+
+#+end_src

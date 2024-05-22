@@ -1,0 +1,26 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: interrupt-cells & interrupts = <1 9 0>    
+
+* Detail
+interrupt-cells看Documentation/*/arm,gic-v3.yaml文档;赋值4时，第一个表示中断类型，第二个是中断号，第三个是中断触发方式等设置，第四个是ppi类型事件cpu亲密度设置；
+一般看需求再设置3还是4；
+interrupts = <1 9 0>; 是gic-v2才需要的，gic400之前的；
+解释的话是gic400_r0p1文档：
+- Virtual CPU interfaces
+The virtual CPU interface registers are similar to the CPU interface registers. However, the 
+virtual CPU interfaces receive information from the virtual interface control registers, which are 
+managed by the hypervisor, rather than from the Distributor.
+After receiving a physical interrupt or otherwise, if the hypervisor needs to signal a virtual 
+interrupt to the current virtual machine, it typically updates the virtual interface control 
+registers. These registers, specifically the List registers, GICH_LRn, hold a list of the virtual 
+interrupts destined for the current virtual machine. The signaling, acknowledgement and EOI 
+steps of the virtual interrupt processing can usually be handled in hardware by the virtual CPU 
+interface. Certain cases might require hypervisor intervention, for example if there are more 
+virtual interrupts than can be stored in the List registers. The virtual interface control registers 
+control when an internal PPI, known as the virtual maintenance interrupt, is generated. This 
+virtual maintenance interrupt, ==PPI ID 25==, is designed to notify the hypervisor of events that it 
+must handle.
+The address translation tables for the processor are normally configured so that accesses to the 
+CPU interface by a virtual machine are directed to the virtual CPU interface. This ensures that 
+the virtualization of the CPU interface is transparent to the virtual machine

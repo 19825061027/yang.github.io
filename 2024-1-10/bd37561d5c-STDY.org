@@ -1,0 +1,28 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: struct device::driver_data域和dev_set_drvdata/dev_get_drvdata 
+
+* PMU对应设备的driver_data域
+由OF生成的platform_device用来和driver进行probe，而注册PMU的时候，并没有附带上这个
+&pdev->dev，而是struct pmu:dev=NULL，在perf_register_pmu --> pmu_dev_alloc中再次
+创建一个dev；
+由OF生成的platform_device会出现在/sys/bus/platform/devices/下
+而由pmu_dev_alloc创建的struct device会出现在/sys/bus/event_sources/devices/下
+两者绑定的总线不一样，前者是platform_bus_type:
+#+begin_src c
+  struct bus_type platform_bus_type = {
+	  .name		= "platform",
+	  .dev_groups	= platform_dev_groups,
+	  .match		= platform_match,
+	  .uevent		= platform_uevent,
+	  .dma_configure	= platform_dma_configure,
+	  .pm		= &platform_dev_pm_ops,
+  };
+#+end_src
+后者是pmu_bus:
+#+begin_src c
+  static struct bus_type pmu_bus = {
+	  .name		= "event_source",
+	  .dev_groups	= pmu_dev_groups,
+  };
+#+end_src

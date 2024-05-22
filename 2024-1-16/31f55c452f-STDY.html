@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>C语言别名 &amp; 数组指针降级 &amp; 宏#和##</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,79 +204,80 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
+<h1 class="title">C语言别名 &amp; 数组指针降级 &amp; 宏#和##</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
+<li><a href="#org61b2107">1. 数组指针降级</a></li>
+<li><a href="#org4e362de">2. C语言别名</a></li>
+<li><a href="#org191841f">3. 宏#和##</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
+
+<div id="outline-container-org61b2107" class="outline-2">
+<h2 id="org61b2107"><span class="section-number-2">1.</span> 数组指针降级</h2>
 <div class="outline-text-2" id="text-1">
-<table>
+<p>
+int qwe[] = {
+1,2,3,4
+};
+</p>
 
+<p>
+ARRAY_SIZE(qwe) == 4;
+</p>
 
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
+<p>
+当qwe作为函数参数传递时，qwe将会变成普通指针，也就是无法再通过ARRAY_SIZE求解。
+因为当qwe变为普通指针时，sizeof(qwe_arg) 只是指针大小，而非数组大小.
+</p>
 </div>
 </div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
+
+<div id="outline-container-org4e362de" class="outline-2">
+<h2 id="org4e362de"><span class="section-number-2">2.</span> C语言别名</h2>
 <div class="outline-text-2" id="text-2">
-<table>
+<p>
+int qwe[] = {
+1,2,3,4
+};
+</p>
 
+<p>
+extern int qwe_alias[] __attribute__((__alias__("qwe")));
+但别名之后，数组指针也会降级！！！！！
+</p>
+</div>
+</div>
 
-<colgroup>
-<col  class="org-left">
+<div id="outline-container-org191841f" class="outline-2">
+<h2 id="org191841f"><span class="section-number-2">3.</span> 宏#和##</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+一个#代表字符串
+两个##代表C变量名或函数名拼接
+</p>
 
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
+<p>
+将宏作为参数传递时，只会展开宏函数，不会展开宏参数
+#define ONE 1
+#define TEST_MACRO(num) int name_##num
+</p>
 
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
+<p>
+TEST_MACRO(ONE);
+==
+int name_ONE;
+</p>
 
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
+<p>
+想要等到name_1:
+#define _TEST_MACRO(num) int name_##num
+#define TEST_MACRO(num) _TEST_MACRO(num)
+需要中转一下，做一步宏展开
+</p>
 </div>
 </div>
 </div>

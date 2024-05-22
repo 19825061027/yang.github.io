@@ -1,0 +1,144 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: clock子系统                                  
+
+Reference: https://zhuanlan.zhihu.com/p/605593587
+驱动调用通用API操作时钟。
+
+基本概念：
+晶振：晶源振荡器，提供时钟。
+PLL：Phase lock loop，锁相环。用于提升频率。
+OSC: oscillator的简写，振荡器。
+
+Clock子系统：
+由CCF(common clock framework)框架管理，向上给用户提供通用的时钟接口，向下给驱动
+开发者提供硬件操作接口。
+Consumer: struct clk
+CCF: struct clk_core, 每个注册设备都对应一个clk_core
+Provider: struct clk_hw, struct clk_init_data, struct clk_ops
+
+Consumer：
+时钟使用者，clock子系统向consumer提供通用时钟API接口，使其可以屏蔽顶层硬件差异：
+struct clk *clk_get(struct device *dev, const char *id);
+struct clk *devm_clk_get(struct device *dev, const char *id);
+int clk_enable(struct clk *clk);   // enable clock, no sleep
+void clk_disable(struct clk *clk); // disabl clock, no sleep
+unsigned long clk_get_rate(struct clk *clk);
+void clk_put(struct clk *clk);
+long clk_round_rate(struct clk *clk, unsigned long rate);
+int clk_set_rate(struct clk *clk, unsigned long rate);
+int clk_set_parent(struct clk *clk, struct clk *parent);
+struct clk *clk_get_parent(struct clk *clk);
+int clk_prepare(struct clk *clk);
+void clk_unprepare(struct clk *clk);
+int clk_prepare_enable(struct clk *clk);    // enable clock, maybe sleep
+void clk_disable_unprepare(struct clk *clk);// disabl clock, maybe sleep
+
+Provider:
+struct clk_hw: 表示一个具体的硬件时钟。
+struct clk_init_data: struct clk_hw结构体成员，用于表示该时钟下的初始化数据，如
+时钟名字name，操作函数ops等。
+#+begin_src c
+  struct clk_hw {
+	  struct clk_core *core;
+	  struct clk *clk;
+	  const struct clk_init_data *init;
+  };
+
+  struct clk_init_data {
+	  const char *name; // 时钟名
+	  const struct clk_ops *ops; // 时钟硬件操作函数集合
+	  const char *const *parent_names; // 父时钟名字
+	  const struct clk_parent_data *parent_data;
+	  const struct clk_hw **parent_hws;
+	  u8 num_parents;
+	  unsigned long flags;
+  };
+#+end_src
+
+clk_ops在consumer调用相关api时，ccf框架负责调用此ops。
+常用函数：
+recalc_rate: 通过查询硬件，重新计算此时钟速率。可选。如果函数为空，则时钟初始化频率为0
+round_rate: 给定目标速率作为输入，返回实际支持的最接近速率
+set_rate: 更改此时钟的速率。请求的速率由第二个参数指定。
+enable/disable: 使能/失能
+
+一般consumer驱动开发：
+#+begin_src dts
+  mmc0: mmc0@0x12340000 {
+  ......
+  clocks = <&peri PERI_MCI0>; // 指定mmc0的时钟来自PERI_MCI0，PERI_MCI0的父时钟是peri
+  clocks-names = "mmc0";      // 时钟名，调用devm_clk_get获取时钟时，可以传入改名字
+};
+#+end_src
+
+#+begin_src c
+  /* 1. 获取时钟 */
+  host->clk = devm_clk_get(&pdev->dev, NULL); // or devm_clk_get(&pdev->dev, "mmc0")
+  /* 2. 使能时钟 */
+  clk_prepare_enable(host->clk);
+#+end_src
+
+像i2c, mmc等这些外设驱动，通常只需要使能门控即可，因为这些外设并不是时钟源。如果直接调用
+clk_set_rate函数设置频率，clk_set_rate会向上传递，即设置他的父时钟频率。如此例中，直接
+调用clk_set_rate，最终设置peri的频率。
+
+clock驱动实例(provider)：
+clock驱动在linux刚启动时就要完成，比initcall早。因此，clock驱动是内核中进行实现driver/clk。
+#+begin_src python
+                            ______ ENC: 225M Hz
+                            |_____ DDR: 445M Hz
+                            |
+         PLL1: 900M Hz______|           _____ ISP: 333M Hz
+             |                          |____ PERI: 500M Hz
+         PLL0: 1G Hz____________________|____ DSP: 200M Hz
+     ________|
+     |
+24M OSC
+#+end_src
+时钟树的根节点一般是晶振时钟，上图根节点为24M晶振时钟。根节点下面是PLL，PLL用于提升频率。
+PLL0下又分为PERI，DSP和ISP。PLL1分频给DDR和ENC。
+对于PLL来说，PLL频率可以通过寄存器设置，但通常是固定的，所以PLL属于固定时钟。
+对PERI，DSP模块来说，他们的频率来自PLL的分配，因此这些模块的时钟属于分频时钟。
+
+#+begin_src dts
+  clocks{
+  osc24m: osc24m{
+  compatible = "fixed-clock";     // match driver
+  #clock-cells = <0>;             // 提供输出时钟的路数，0代表输出1路，1代表2路
+  clock-output-name = "osc24m";   // 输出时钟的名字
+  clock-frequency = <24000000>;   // 输出时钟的频率
+};
+};
+#+end_src
+驱动实现：
+1. 实现 clk_ops 相关成员函数
+2. 定义分配clk_onecell_data结构体，初始化相关数据
+3. 定义分配clk_init_data结构体，初始化相关数据
+4. 调用clk_register将时钟注册进框架
+5. 调用clk_register_clkdev注册时钟设备
+6. 调用of_clk_add_provider，将clk provider存放到of_clk_provider链表中管理
+7. 调用CLK_OF_DECLARE声明驱动
+
+fixed_clk固定时钟实现
+fixed_clk针对像PLL这种具有固定频率的时钟，对于PLL我们只需要实现.recalc_rate函数。
+#+begin_src dts
+  #define PLL0_CLK 0
+
+  clocks{
+  osc24M:osc24M{
+  compatible = "fixed-clock";
+  #clock-cells = <0>;
+  clock-output-names = "osc24M";
+  clock-frequency = <24000000>;
+ };
+ pll0:pll0{
+  compatible = "xx, choogle-fixed-clk";
+  #clock-cells = <0>;
+  clock-id = <PLL0_CLK>;
+  clock-frequency = <1000000000>;
+  clock-output-names = "pll0";
+  clocks = <&osc24M>;
+ };
+};
+#+end_src

@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>perf-record学习</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,81 +204,30 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
-<div id="table-of-contents" role="doc-toc">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents" role="doc-toc">
-<ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
-</ul>
-</div>
-</div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
-<div class="outline-text-2" id="text-1">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
-<div class="outline-text-2" id="text-2">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<h1 class="title">perf-record学习</h1>
+<p>
+perf record运行一个命令，并从中收集性能计数器分析数据，将数据导进perf.data。
+perf record [-e &lt;EVENT&gt; | --event=EVENT] [-a] &lt;command&gt; [&lt;options&gt;]
+支持的事件(-e)
+</p>
+<ol class="org-ol">
+<li>perf list展示的事件</li>
+<li>通过rNNN表示的raw PMU event</li>
+<li>上述事件后跟事件修饰符，如cpu-cycles:p</li>
+<li>pmu/param1=0x3,param2/</li>
+<li>pmu/config=M,config1=N,config3=K/,除了config之外，还有其他默认定义的参数：
+<ul class="org-ul">
+<li>period: 设置采样周期</li>
+<li>freq: 设置采样频率</li>
+<li>time：禁止/使能时间戳</li>
+<li>call-graph: 禁止/使能callgraph，接受"fp"设置为FP模式，"dwarf"设置为DWARF模式，"lbr"设置为LBR模式，"no"禁止</li>
+<li>stack-size: dwarf模式下的用户栈大小</li>
+<li>name: 相当于事件起自定义名称(perf stat -e cpu/cpu-cycles,name=goodday/ echo)</li>
+</ul></li>
+<li>内存访问</li>
+<li>BPF程序</li>
+<li>事件组</li>
+</ol>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>

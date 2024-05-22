@@ -1,0 +1,11 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: 帮助PERV查看打印颠倒问题                      
+
+表现1，malloc无法分配，函数调用不返回，死在了_sbrk中；表现2，打印输出颠倒；
+追踪：
+1. debug和release模式下_sbrk返回的堆初始化地址大小端不一样，数据有颠倒30004200变成00420030；
+2. .data段从flash搬到SRAM出现大小端错误，但debug没有出现；
+3. 进而发现，底层负责此COPY的函数arch_exception_reset --> start -->software_init_hook --> memcpy函数在debug和release是不同的库函数实现，
+   debug模式下是字搬运，release模式下是字节搬运；
+4. 以字节拷贝，且是从flash-->SRAM才会出现搬运错误；flash配置错误；

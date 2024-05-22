@@ -1,0 +1,21 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: perf-record学习                         
+
+perf record运行一个命令，并从中收集性能计数器分析数据，将数据导进perf.data。
+perf record [-e <EVENT> | --event=EVENT] [-a] <command> [<options>]
+支持的事件(-e)
+   1. perf list展示的事件
+   2. 通过rNNN表示的raw PMU event
+   3. 上述事件后跟事件修饰符，如cpu-cycles:p
+   4. pmu/param1=0x3,param2/
+   5. pmu/config=M,config1=N,config3=K/,除了config之外，还有其他默认定义的参数：
+      - period: 设置采样周期
+      - freq: 设置采样频率
+      - time：禁止/使能时间戳
+      - call-graph: 禁止/使能callgraph，接受"fp"设置为FP模式，"dwarf"设置为DWARF模式，"lbr"设置为LBR模式，"no"禁止
+      - stack-size: dwarf模式下的用户栈大小
+      - name: 相当于事件起自定义名称(perf stat -e cpu/cpu-cycles,name=goodday/ echo)
+   6. 内存访问
+   7. BPF程序
+   8. 事件组

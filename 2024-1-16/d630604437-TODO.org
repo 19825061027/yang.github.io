@@ -1,0 +1,6 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: linux抢占                                    
+
+https://blog.csdn.net/Rong_Toa/article/details/114496009
+1. linux user线程抢占

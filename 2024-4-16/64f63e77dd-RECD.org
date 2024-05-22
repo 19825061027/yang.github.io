@@ -1,0 +1,9 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: shared with windows clipboard and screenshot   
+
+[[file:images/Day_Done/2024-05-21_11-29-20_20170701031430776.jpg]]
+
+[[file:images/Day_Done/2024-05-21_11-29-20_20170701031430776.jpg]]
+[[https://tse3-mm.cn.bing.net/th/id/OIP-C.8ia9ZF4LzM2aOHkRBm8tYgHaHa?rs=1&pid=ImgDetMain][picture]]
+https://tse3-mm.cn.bing.net/th/id/OIP-C.8ia9ZF4LzM2aOHkRBm8tYgHaHa?rs=1&pid=ImgDetMain

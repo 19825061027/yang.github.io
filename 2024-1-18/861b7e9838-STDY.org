@@ -1,0 +1,17 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: 自定义设备树节点属性                         
+
+#+begin_src dts
+  ni700@efff0000 {
+  pccs-id = <1>;
+};
+
+  of_property_read_u8();
+  of_property_read_u16();
+  of_property_read_u32();
+
+  of_property_read_u8_array();
+  of_property_read_u16_array();
+  of_property_read_u32_array();
+#+end_src

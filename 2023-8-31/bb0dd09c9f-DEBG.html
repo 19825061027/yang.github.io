@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>解决启动问题 can't access tty job control turned off</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,79 +204,31 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
+<h1 class="title">解决启动问题 can't access tty job control turned off</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
+<li><a href="#orga84e2ba">1. detail</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
+
+<div id="outline-container-orga84e2ba" class="outline-2">
+<h2 id="orga84e2ba"><span class="section-number-2">1.</span> detail</h2>
 <div class="outline-text-2" id="text-1">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
-<div class="outline-text-2" id="text-2">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
+<ol class="org-ol">
+<li>从已知知识，可以了解，根文件系统的启动，大概分为两种，一种是通过embedded kernel，一种是qemu使用-initrd选项指定；</li>
+<li>无论哪种，kernel都是需要有个嵌入的根文件系统由于初期的某些必要因素，现在还不太清楚，可能是console early init需要；</li>
+<li>总之，一定会有一个根文件系统，且必须有/dev/console，如果采用external方式，则kernel会创建/dev目录及console，之后再挂载上-initrd指定的，也不会被覆盖，神奇；所以external方式可以不创建/dev/及console；</li>
+<li>而internal方式，kernel不再默认创建/dev/console，因此，这两个必需品就需要user创建；sudo mknod dev/console c 5 1</li>
+<li>ttyS0问题，还不太清楚为什么是ttyS0，而不使用console，总之，在本地qemu上，这两个都是可以使用的，并且在优先级上，是inittab大于cmdline；
+<ul class="org-ul">
+<li>采用console默认，没有/dev/ttyS0，有/dev/console，inittab 采用默认，即 ::askfirst:-/bin/sh ，cmdline指定console=ttyS0与采用默认都是可以启动；</li>
+<li>采用console默认，没有/dev/ttyS0，有/dev/console，inittab 采用ttyS0，即 ttyS0::askfirst:-/bin/sh ，cmdline两种都尝试，报错can't open /dev/ttyS0: No such file or directory；</li>
+</ul></li>
+<li>似乎，cmdline在internal模式下，没有效果；反正console是没有太大的效果；</li>
+</ol>
 </div>
 </div>
 </div>

@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>struct device::driver_data域和dev_set_drvdata/dev_get_drvdata</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,79 +204,48 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
+<h1 class="title">struct device::driver_data域和dev_set_drvdata/dev_get_drvdata</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
+<li><a href="#orgd240bde">1. PMU对应设备的driver_data域</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
+
+<div id="outline-container-orgd240bde" class="outline-2">
+<h2 id="orgd240bde"><span class="section-number-2">1.</span> PMU对应设备的driver_data域</h2>
 <div class="outline-text-2" id="text-1">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
+<p>
+由OF生成的platform_device用来和driver进行probe，而注册PMU的时候，并没有附带上这个
+&amp;pdev-&gt;dev，而是struct pmu:dev=NULL，在perf_register_pmu --&gt; pmu_dev_alloc中再次
+创建一个dev；
+由OF生成的platform_device会出现在/sys/bus/platform/devices/下
+而由pmu_dev_alloc创建的struct device会出现在/sys/bus/event_sources/devices/下
+两者绑定的总线不一样，前者是platform_bus_type:
+</p>
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">bus_type</span> <span style="font-weight: bold; font-style: italic;">platform_bus_type</span> = {
+          .name         = <span style="font-style: italic;">"platform"</span>,
+          .dev_groups   = platform_dev_groups,
+          .match                = platform_match,
+          .uevent               = platform_uevent,
+          .dma_configure        = platform_dma_configure,
+          .pm           = &amp;platform_dev_pm_ops,
+  };
+</pre>
 </div>
+<p>
+后者是pmu_bus:
+</p>
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold;">static</span> <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">bus_type</span> <span style="font-weight: bold; font-style: italic;">pmu_bus</span> = {
+          .name         = <span style="font-style: italic;">"event_source"</span>,
+          .dev_groups   = pmu_dev_groups,
+  };
+</pre>
 </div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
-<div class="outline-text-2" id="text-2">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 </div>

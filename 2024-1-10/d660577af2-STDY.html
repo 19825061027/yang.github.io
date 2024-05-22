@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-05-22 Wed 16:46 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>devm_xxx设备资源管理</title>
+<meta name="author" content="Yang" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../css/readtheorg.css"/>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
+<script type="text/javascript" src="../js/readtheorg.js"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">devm_xxx设备资源管理</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgbc1efde">1. 代码分析</a></li>
+</ul>
+</div>
+</div>
+<p>
+<a href="http://www.wowotech.net/device_model/device_resource_management.html">http://www.wowotech.net/device_model/device_resource_management.html</a>
+</p>
+<ol class="org-ol">
+<li>在probe函数中，要顺序申请多种资源(IRQ, Clock, memory, regions, ioremap, dma, etc..),
+只要任意一种资源申请失败，就要回滚释放之前申请的所有资源。于是函数最后，一定会出现
+很多goto标签，并在申请资源出错时，小心翼翼的goto到正确的标签上，以便释放已申请资源。</li>
+
+<li><p>
+因此，linux设备模型借助device resource management设备资源管理，帮我们解决了这个问题。
+</p>
+<div class="org-src-container">
+<pre class="src src-c">     pcdev = devm_kzalloc(&amp;pdev-&gt;dev, <span style="font-weight: bold;">sizeof</span>(*pcdev), GFP_KERNEL);
+     <span style="font-weight: bold;">if</span>(!pcdev) {
+             dev_err(&amp;pdev-&gt;dev, <span style="font-style: italic;">"Could not allocate pcdev\n"</span>);
+             <span style="font-weight: bold;">return</span> -ENOMEM;
+     }
+</pre>
+</div></li>
+
+<li><p>
+什么是设备资源？
+一个设备能功能，需要依赖很多的外部条件，如供电，时钟等等，这些外部条件称作设备资源。
+对于现在计算机的体系结构，可能的资源包括：
+</p>
+<ul class="org-ul">
+<li>power, 供电;</li>
+<li>clock, 时钟;</li>
+<li>memory, 内存，在kernel中一般使用kzalloc分配；</li>
+<li>GPIO，用户和CPU交换简单控制，状态等信息；</li>
+<li>IRQ，触发中断；</li>
+<li>DMA，无CPU参与情况下进行数据传输；</li>
+<li>虚拟地址空间，一般使用ioremap，request_region等分配；</li>
+<li>等等</li>
+<li>在linux kernel眼中，“资源”的定义更为广义，比如PWM，RTC，Reset，都可以抽象为资源，供driver调用；</li>
+</ul>
+<p>
+较早kernel中，系统不是特别复杂，各个framework还没有成型，因此，大多数资源都由driver
+自行维护。随着系统复杂度增加，driver之间公用资源情况越来越多，电源管理需求迫切，于是
+kernel基于device resource management框架，将资源由各个framework统一管理，分配和回收。
+</p></li>
+
+<li>device resource management的软件框架
+<b>high level driver</b>
+   1         1
+   1   <b>frameworks(regulator,clock,interrupt,gpio...)</b>
+   1         1
+<b>driver base(device resource management)</b>
+device resource management位于"drivers/base/devres.c"中，实现简单。因为资源种类很多，
+表现形式很多，不可能一一表达，也就不能进行具体的分配和回收，因此，devres所做的是：
+<ul class="org-ul">
+<li><b>提供一种机制，将系统中某个设备的所有资源，以链表的形式，组织起来，以便在driver detch</b>
+<b>的时候，自动释放。</b></li>
+<li><b>资源和设备绑定，驱动detach时，释放设备绑定的资源。</b></li>
+<li>而更为具体的事情，如怎么抽象某一设备，则由上层framework负责，framework有：regulator
+framework(管理power资源)，clock framework(管理clock资源)，interrupt framework(管理
+中断资源)，gpio framework（管理gpio资源），pwm framework（管理PWM资源）等等</li>
+<li>其他driver，位于这些framework之上，使用他们提供的机制和接口。</li>
+</ul></li>
+</ol>
+
+<div id="outline-container-orgbc1efde" class="outline-2">
+<h2 id="orgbc1efde"><span class="section-number-2">1.</span> 代码分析</h2>
+<div class="outline-text-2" id="text-1">
+<ol class="org-ol">
+<li>device resource management实现(drivers/base/devres.c)</li>
+</ol>
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> {
+          ...;
+          <span style="font-weight: bold; text-decoration: underline;">spinlock_t</span>       <span style="font-weight: bold; font-style: italic;">devres_lock</span>;
+          <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">list_head</span> <span style="font-weight: bold; font-style: italic;">devres_head</span>; <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#20445;&#23384;&#35813;&#35774;&#22791;&#36164;&#28304;&#30003;&#35831;&#30340;&#25152;&#26377;&#36164;&#28304;</span>
+          ...;
+  };
+
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#36164;&#28304;&#30340;&#25968;&#25454;&#32467;&#26500;</span>
+  <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">devres</span> {
+          <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">devres_node</span>       <span style="font-weight: bold; font-style: italic;">node</span>;
+          <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; text-decoration: underline;">long</span>       <span style="font-weight: bold; font-style: italic;">data</span>[]; <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#38646;&#38271;&#25968;&#32452;&#65292;&#31867;&#22411;&#20445;&#35777;ULL&#23545;&#40784;</span>
+  };
+
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">devres_node::entry&#37197;&#21512;device::devres_head&#65292;&#32452;&#32455;&#36164;&#28304;</span>
+  <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">devres_node</span> {
+          <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">list_head</span>       <span style="font-weight: bold; font-style: italic;">entry</span>;
+          <span style="font-weight: bold; text-decoration: underline;">dr_release_t</span>           <span style="font-weight: bold; font-style: italic;">release</span>; <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#36164;&#28304;&#23384;&#22312;&#24418;&#24335;&#19981;&#30693;&#65292;&#30001;framework&#25552;&#20379;release</span>
+          <span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">char</span>             *<span style="font-weight: bold; font-style: italic;">name</span>;
+          <span style="font-weight: bold; text-decoration: underline;">size_t</span>                 <span style="font-weight: bold; font-style: italic;">size</span>;
+  };
+
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">devres_alloc/devres_free &amp; devres_add/devres_remove</span>
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#21482;&#26159;&#21333;&#32431;&#30340;&#20998;&#37197;&#19968;&#20010;struct devres</span>
+  <span style="font-weight: bold; text-decoration: underline;">void</span> * <span style="font-weight: bold;">devres_alloc</span>(<span style="font-weight: bold; text-decoration: underline;">dr_release_t</span> <span style="font-weight: bold; font-style: italic;">release</span>, <span style="font-weight: bold; text-decoration: underline;">size_t</span> <span style="font-weight: bold; font-style: italic;">size</span>, <span style="font-weight: bold; text-decoration: underline;">gfp_t</span> <span style="font-weight: bold; font-style: italic;">gfp</span>)
+  {
+          <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">devres</span> *<span style="font-weight: bold; font-style: italic;">dr</span>;
+          dr = alloc_dr(release, size); <span style="font-weight: bold; font-style: italic;">//</span><span style="font-weight: bold; font-style: italic;">size&#26159;data&#30340;&#22823;&#23567;&#65307;&#20998;&#37197;&#19968;&#20010;dr&#65292;&#21021;&#22987;&#21270;dr-&gt;node.entry</span>
+          <span style="font-weight: bold;">return</span> dr-&gt;data;
+  }
+  &#33258;&#24049;&#20351;&#29992;&#30340;&#35805;&#36824;&#38656;&#35201;&#20351;&#29992;devres_add&#23558;devres&#21644;device&#32465;&#23450;
+  <span style="font-weight: bold; text-decoration: underline;">void</span> <span style="font-weight: bold;">devres_add</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>, <span style="font-weight: bold; text-decoration: underline;">void</span> *<span style="font-weight: bold; font-style: italic;">res</span>)
+  {
+          <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">devres</span> *<span style="font-weight: bold; font-style: italic;">dr</span> = container_of(res, (<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">devres</span>), data);
+
+          list_add_tail(&amp;dr-&gt;node.entry, &amp;dev-&gt;revres_head);
+  }
+
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#24819;&#24517;&#65292;&#19978;&#23618;framework&#20063;&#21482;&#26159;&#23558;&#30003;&#35831;&#20102;&#32465;&#23450;&#25805;&#20316;&#25918;&#21040;&#20102;&#19968;&#36215;&#65292;&#24182;&#19988;&#23558;&#36164;&#28304;&#20449;&#24687;&#25918;&#21040;data&#22495;&#20013;&#65292;&#20027;&#35201;&#26159;</span>
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#36890;&#36807;dr_release_t&#26469;&#23454;&#29616;&#36164;&#28304;&#30340;&#37322;&#25918;&#12290;data&#20063;&#21482;&#26159;&#36741;&#21161;&#65307;</span>
+</pre>
+</div>
+
+<ol class="org-ol">
+<li><p>
+IRQ framework
+</p>
+<div class="org-src-container">
+<pre class="src src-c">     <span style="font-weight: bold;">static</span> <span style="font-weight: bold;">inline</span> <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">__must_check</span>
+     devm_request_irq(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>, <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">irq</span>, <span style="font-weight: bold; text-decoration: underline;">irq_handler_t</span> <span style="font-weight: bold; font-style: italic;">handler</span>,
+                      <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">irqflags</span>, <span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">char</span> *<span style="font-weight: bold; font-style: italic;">devname</span>, <span style="font-weight: bold; text-decoration: underline;">void</span> *<span style="font-weight: bold; font-style: italic;">dev_id</span>)
+     {
+             <span style="font-weight: bold;">return</span> devm_request_threaded_irq(dev, irq, handler, <span style="font-weight: bold; text-decoration: underline;">NULL</span>, irqflags,
+                                              devname, dev_id);
+     }
+
+     <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">devm_request_threaded_irq</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>, <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">irq</span>,
+                                   <span style="font-weight: bold; text-decoration: underline;">irq_handler_t</span> <span style="font-weight: bold; font-style: italic;">handler</span>, <span style="font-weight: bold; text-decoration: underline;">irq_handler_t</span> <span style="font-weight: bold; font-style: italic;">thread_fn</span>,
+                                   <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">irqflags</span>, <span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">char</span> *<span style="font-weight: bold; font-style: italic;">devname</span>,
+                                   <span style="font-weight: bold; text-decoration: underline;">void</span> *<span style="font-weight: bold; font-style: italic;">dev_id</span>)
+     {
+             <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">irq_devres</span> *<span style="font-weight: bold; font-style: italic;">dr</span>;
+             <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">rc</span>;
+
+             dr = devres_alloc(devm_irq_release, <span style="font-weight: bold;">sizeof</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">irq_devres</span>),
+                               GFP_KERNEL);
+             <span style="font-weight: bold;">if</span> (!dr)
+                     <span style="font-weight: bold;">return</span> -ENOMEM;
+
+             <span style="font-weight: bold;">if</span> (!devname)
+                     devname = dev_name(dev);
+
+             rc = request_threaded_irq(irq, handler, thread_fn, irqflags, devname,
+                                       dev_id);
+             <span style="font-weight: bold;">if</span> (rc) {
+                     devres_free(dr);
+                     <span style="font-weight: bold;">return</span> rc;
+             }
+
+             dr-&gt;irq = irq;
+             dr-&gt;dev_id = dev_id;
+             devres_add(dev, dr);
+
+             <span style="font-weight: bold;">return</span> 0;
+     }
+</pre>
+</div></li>
+
+<li><p>
+<b>devres_release_all</b> 释放资源
+</p>
+<div class="org-src-container">
+<pre class="src src-c">     <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">drivers/base/devres.c</span>
+     <span style="font-style: italic;">/**</span>
+<span style="font-style: italic;">      * devres_release_all - Release all managed resources</span>
+<span style="font-style: italic;">      * </span><span style="font-weight: bold; font-style: italic; text-decoration: underline;">@dev</span><span style="font-style: italic;">: Device to release resources for</span>
+<span style="font-style: italic;">      *</span>
+<span style="font-style: italic;">      * Release all resources associated with </span><span style="font-weight: bold; font-style: italic; text-decoration: underline;">@dev</span><span style="font-style: italic;">.  This function is</span>
+<span style="font-style: italic;">      * called on driver detach.</span>
+<span style="font-style: italic;">      */</span>
+     <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">devres_release_all</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>)
+     {
+             <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">flags</span>;
+             LIST_HEAD(todo);
+             <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">cnt</span>;
+
+             <span style="font-weight: bold; font-style: italic;">/* </span><span style="font-weight: bold; font-style: italic;">Looks like an uninitialized device structure</span><span style="font-weight: bold; font-style: italic;"> */</span>
+             <span style="font-weight: bold;">if</span> (WARN_ON(dev-&gt;devres_head.next == <span style="font-weight: bold; text-decoration: underline;">NULL</span>))
+                     <span style="font-weight: bold;">return</span> -ENODEV;
+
+             <span style="font-weight: bold; font-style: italic;">/* </span><span style="font-weight: bold; font-style: italic;">Nothing to release if list is empty</span><span style="font-weight: bold; font-style: italic;"> */</span>
+             <span style="font-weight: bold;">if</span> (list_empty(&amp;dev-&gt;devres_head))
+                     <span style="font-weight: bold;">return</span> 0;
+
+             spin_lock_irqsave(&amp;dev-&gt;devres_lock, flags);
+             cnt = remove_nodes(dev, dev-&gt;devres_head.next, &amp;dev-&gt;devres_head, &amp;todo);
+             spin_unlock_irqrestore(&amp;dev-&gt;devres_lock, flags);
+
+             release_nodes(dev, &amp;todo);
+             <span style="font-weight: bold;">return</span> cnt;
+     }
+
+     <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">drivers/base/core.c</span>
+     <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">void</span> <span style="font-weight: bold;">device_release</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">kobject</span> *<span style="font-weight: bold; font-style: italic;">kobj</span>)
+     {
+             <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span> = kobj_to_dev(kobj);
+             <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device_private</span> *<span style="font-weight: bold; font-style: italic;">p</span> = dev-&gt;p;
+
+             <span style="font-weight: bold; font-style: italic;">/*</span>
+<span style="font-weight: bold; font-style: italic;">              * Some platform devices are driven without driver attached</span>
+<span style="font-weight: bold; font-style: italic;">              * and managed resources may have been acquired.  Make sure</span>
+<span style="font-weight: bold; font-style: italic;">              * all resources are released. &#35774;&#22791;&#21487;&#20197;&#22312;&#27809;&#26377;&#39537;&#21160;&#30340;&#24773;&#20917;&#19979;&#36816;&#34892;</span>
+<span style="font-weight: bold; font-style: italic;">              *</span>
+<span style="font-weight: bold; font-style: italic;">              * Drivers still can add resources into device after device</span>
+<span style="font-weight: bold; font-style: italic;">              * is deleted but alive, so release devres here to avoid</span>
+<span style="font-weight: bold; font-style: italic;">              * possible memory leak.</span>
+<span style="font-weight: bold; font-style: italic;">              */</span>
+             devres_release_all(dev);
+
+             kfree(dev-&gt;dma_range_map);
+
+             <span style="font-weight: bold;">if</span> (dev-&gt;release)
+                     dev-&gt;release(dev);
+             <span style="font-weight: bold;">else</span> <span style="font-weight: bold;">if</span> (dev-&gt;type &amp;&amp; dev-&gt;type-&gt;release)
+                     dev-&gt;type-&gt;release(dev);
+             <span style="font-weight: bold;">else</span> <span style="font-weight: bold;">if</span> (dev-&gt;class &amp;&amp; dev-&gt;class-&gt;dev_release)
+                     dev-&gt;class-&gt;dev_release(dev);
+             <span style="font-weight: bold;">else</span>
+                     WARN(1, KERN_ERR <span style="font-style: italic;">"Device '%s' does not have a release() function, it is broken and must be fixed. See Documentation/core-api/kobject.rst.\n"</span>,
+                          dev_name(dev));
+             kfree(p);
+     }
+</pre>
+</div>
+<ul class="org-ul">
+<li>设备注册分两步，初始化device_initialize(dev)和设备添加device_add(dev);</li>
+<li>设备注销分两步：
+<ul class="org-ul">
+<li>将设备从所有子系统中删除device_del(dev)，和device_add(dev)相对，后者添加了什么，前者就删除什么，然后从sysfs系统中移除。</li>
+<li>引用计数-1，当引用计数为0时，通过device_release清除资源。</li>
+</ul></li>
+</ul></li>
+</ol>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yang</p>
+<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

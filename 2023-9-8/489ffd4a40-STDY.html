@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-05-22 Wed 16:46 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>学习cpu_hotplug</title>
+<meta name="author" content="Yang" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../css/readtheorg.css"/>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
+<script type="text/javascript" src="../js/readtheorg.js"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">学习cpu_hotplug</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org4dd2af9">1. cpu_hotplug</a>
+<ul>
+<li><a href="#org75ddf69">1.1. CPU 热插拔协调(The CPU hotplug coordination)</a></li>
+<li><a href="#org30e52d5">1.2. CPU热插拔API(THe CPU hotplug API)</a></li>
+<li><a href="#org9c02bc3">1.3. Architecture's requirements</a></li>
+<li><a href="#orgc373e8c">1.4. User Space Notification</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org4dd2af9" class="outline-2">
+<h2 id="org4dd2af9"><span class="section-number-2">1.</span> cpu_hotplug</h2>
+<div class="outline-text-2" id="text-1">
+<ol class="org-ol">
+<li>一个更加新颖的CPU-hotplug支持使用是在suspend resume support for SMP.</li>
+
+<li>命令行开关：
+<ul class="org-ul">
+<li><code>="maxcpus=n"=</code> 限制启动时cpus数量到n；假如有四个CPUs，使用maxcpus=2,启动时则只会启动两个cpu，启动后可再选择启动其他cpu；</li>
+<li><code>="nr_cpus=n"=</code> 限制kernel支持的CPUs数量；被舍弃的cpu在启动之后也不可再使用；</li>
+<li><code>="additional_cpus=n"=</code> 限制可热插拔的cpus数量："cpu_possible_mask = cpu_present_mask + additional_cpus"</li>
+<li><code>="possible_cpus=n"=</code> 此选项设置"cpu_possible_mask"中的"possible_cpus"比特位；</li>
+<li><code>="cpu0_hotplug"=</code> 允许关闭CPU0；</li>
+</ul></li>
+
+<li>CPU maps：
+<ul class="org-ul">
+<li><code>="cpu_possbile_mask"=</code> 系统中可以使用的CPUs的位图；用来在启动时为CPU分配每cpu变量空间，这些变量不受CPUs的卸载与安装而收缩或生长；</li>
+<li><code>="cpu_online_mask"=</code> 当前在线的CPUs位图；在"__cpu_up()"中设置，如果一个cpu可以被kernel进行调度并准备接收设备中断；"__cpu_disable()"可以将CPU在kernel视角进行下线，但要保证所有OS服务和中断迁移到其他CPU；</li>
+<li><code>="cpu_present_mask"=</code> 当前系统中存在的CPU位图；他们中并非全部在线；当相关子系统进行物理热插拔时，通过事件hot-add/hot-remove处理此bitmap；比bitmap当前还没有固定规则，目前典型的时候是在boot阶段，当禁用热插拔时初始化topology;</li>
+<li>这三个位图不需要直接操作，大部分使用都是只需要读取就可以了；当设置每cpu资源时，总是使用 "cpu_possible_mask" 或 "for_each_possbile_cpu()" 来迭代；对于宏 "for_each_cpu()" 可以用来迭代一个自定义的CPU mask；代表CPUs位图时要使用 "cpumask_t" 而不是其他；</li>
+</ul></li>
+
+<li>使用CPU热插拔：
+<ul class="org-ul">
+<li><p>
+<code>=CONFIG_HOTPLUG_CPU=</code> 使能此内核选项；
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">       ls -lh /sys/devices/system/cpu
+</pre>
+</div>
+<ol class="org-ol">
+<li>文件 offline/online/possible/present 代表CPU mask；</li>
+<li>每一个cpu文件夹包含一个online文件用来控制CPU的逻辑开关 (0/1)</li>
+</ol>
+<div class="org-src-container">
+<pre class="src src-sh">       <span style="font-weight: bold;">echo</span> 0 &gt; /sys/devices/system/cpu/cpu4/online
+       smpboot: CPU 4 is now offline
+</pre>
+</div>
+<ol class="org-ol">
+<li>CPU关机之后，就会从/proc/interrupts和/proc/cpuinfo中移除；</li>
+<li>CPU0总是特殊的，并且一般不支持热插拔；</li>
+</ol></li>
+</ul></li>
+</ol>
+</div>
+
+<div id="outline-container-org75ddf69" class="outline-3">
+<h3 id="org75ddf69"><span class="section-number-3">1.1.</span> CPU 热插拔协调(The CPU hotplug coordination)</h3>
+<div class="outline-text-3" id="text-1-1">
+<ol class="org-ol">
+<li>卸载case：
+<ul class="org-ul">
+<li>一旦CPU进行逻辑上的关机，就会调用注册进来的，在状态转换时进行调用的回调函数: CPUHP_ONLINE --&gt; CPUHP_OFFLINE
+<ol class="org-ol">
+<li>如果由于一个suspend操作导致任务冻结，则 "cpuhp_tasks_frozen" 设置为 true；</li>
+<li>所有进行从当前处理器迁移到其他处理器；新处理器从进程的cpuset，也就是进程想要在哪些处理器上运行，上进行选择；</li>
+<li>当前处理器上的所有中断迁移到新处理器上；</li>
+<li>迁移定时器事件；</li>
+<li>所有服务迁移完成后，kernel调用一个架构指定的routine "__cpu_disable()" 来执行架构清理工作；</li>
+</ol></li>
+</ul></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org30e52d5" class="outline-3">
+<h3 id="org30e52d5"><span class="section-number-3">1.2.</span> CPU热插拔API(THe CPU hotplug API)</h3>
+<div class="outline-text-3" id="text-1-2">
+</div>
+<ol class="org-ol">
+<li><a id="orgf5f0921"></a>CPU hotplug state machine<br>
+<div class="outline-text-4" id="text-1-2-1">
+<ol class="org-ol">
+<li>CPU从CPUHP_OFFLINE到CPUHP_ONLINE，每个状态都有一个startup/teardown回调函数；</li>
+<li>当CPU上线时，各个状态的startup回调函数顺序调用，直到CPUHP_ONLINE；They can also be invoked when the callbacks of a state are set up or an instance is added to a multi-instance state. CPU下线也同理；</li>
+<li>If a usage site requires only a callback in one direction of the hotplug operations (CPU online or CPU offline) then the other not-required callback can be set to NULL when the state is set up.</li>
+
+<li>有一个词状态空间state space，尝试理解它，它分为三个部分：
+<ol class="org-ol">
+<li>The PREPARE section
+<ul class="org-ul">
+<li>占据状态空间中：CPUHP_OFFLINE --&gt; CPUHP_BRINGUP_CPU</li>
+<li>这个部分下的startup回调函数在CPU online操作之后，真正online之前；</li>
+<li>这个部分下的teardow回调函数在CPU offline操作之后，真正失效之前；</li>
+<li>这个部分下，这些回调函数都由一个控制CPU调用，因为目标CPU还没起来或已经下线；</li>
+<li>startup回调允许失败，如果失败，则online终止；CPU会变成之前的状态，通常是CPUHP_OFFLINE.</li>
+<li>teardown回调不允许失败；</li>
+</ul></li>
+<li>The STARTING section
+<ul class="org-ul">
+<li>CPUHP_BRINGUP_CPU + 1 --&gt; CPUHP_AP_ONLINE</li>
+<li>startup/teardown回调函数在目标CPU上运行，目标CPU中断禁止；回调函数不允许失败；</li>
+<li>回调函数用来为核心子系统做低级硬件初始化或关机；</li>
+</ul></li>
+<li>The ONLINE section
+<ul class="org-ul">
+<li>CPUHP_AP_ONLINE + 1 --&gt; CPUHP_ONLINE</li>
+<li>startup/teardown在目标CPU上调用运行；</li>
+<li>回调函数在per CPU hotplug thread上下文调用，这个thread是固定于每个可插拔CPU的；当前中断和抢占都在使能；</li>
+<li>回调允许失败，失败后操作终止，回归到原来状态；</li>
+</ul></li>
+</ol></li>
+</ol>
+</div>
+</li>
+<li><a id="org45fc887"></a>CPU online/offline operations<br>
+<div class="outline-text-4" id="text-1-2-2">
+<p>
+一个成功的online操作如下：
+</p>
+<div class="org-src-container">
+<pre class="src src-rst">  [CPUHP_OFFLINE]
+  [CPUHP_OFFLINE + 1]-&gt;startup()       -&gt; success
+  [CPUHP_OFFLINE + 2]-&gt;startup()       -&gt; success
+  [CPUHP_OFFLINE + 3]                  -&gt; skipped because startup == NULL
+  ...
+  [CPUHP_BRINGUP_CPU]-&gt;startup()       -&gt; success
+  === End of PREPARE section
+  [CPUHP_BRINGUP_CPU + 1]-&gt;startup()   -&gt; success
+  ...
+  [CPUHP_AP_ONLINE]-&gt;startup()         -&gt; success
+  === End of STARTUP section
+  [CPUHP_AP_ONLINE + 1]-&gt;startup()     -&gt; success
+  ...
+  [CPUHP_ONLINE - 1]-&gt;startup()        -&gt; success
+  [CPUHP_ONLINE]
+</pre>
+</div>
+
+<p>
+一个成功的offline操作如下：
+</p>
+<div class="org-src-container">
+<pre class="src src-rst">  [CPUHP_ONLINE]
+  [CPUHP_ONLINE - 1]-&gt;teardown()       -&gt; success
+  ...
+  [CPUHP_AP_ONLINE + 1]-&gt;teardown()    -&gt; success
+  === Start of STARTUP section
+  [CPUHP_AP_ONLINE]-&gt;teardown()        -&gt; success
+  ...
+  [CPUHP_BRINGUP_ONLINE - 1]-&gt;teardown()
+  ...
+  === Start of PREPARE section
+  [CPUHP_BRINGUP_CPU]-&gt;teardown()
+  [CPUHP_OFFLINE + 3]-&gt;teardown()
+  [CPUHP_OFFLINE + 2]                  -&gt; skipped because teardown == NULL
+  [CPUHP_OFFLINE + 1]-&gt;teardown()
+  [CPUHP_OFFLINE]
+</pre>
+</div>
+
+<p>
+一个失败的online操作：
+</p>
+<div class="org-src-container">
+<pre class="src src-rst">  [CPUHP_OFFLINE]
+  [CPUHP_OFFLINE + 1]-&gt;startup()       -&gt; success
+  [CPUHP_OFFLINE + 2]-&gt;startup()       -&gt; success
+  [CPUHP_OFFLINE + 3]                  -&gt; skipped because startup == NULL
+  ...
+  [CPUHP_BRINGUP_CPU]-&gt;startup()       -&gt; success
+  === End of PREPARE section
+  [CPUHP_BRINGUP_CPU + 1]-&gt;startup()   -&gt; success
+  ...
+  [CPUHP_AP_ONLINE]-&gt;startup()         -&gt; success
+  === End of STARTUP section
+  [CPUHP_AP_ONLINE + 1]-&gt;startup()     -&gt; success
+  ---
+  [CPUHP_AP_ONLINE + N]-&gt;startup()     -&gt; fail
+  [CPUHP_AP_ONLINE + (N - 1)]-&gt;teardown()
+  ...
+  [CPUHP_AP_ONLINE + 1]-&gt;teardown()
+  === Start of STARTUP section
+  [CPUHP_AP_ONLINE]-&gt;teardown()
+  ...
+  [CPUHP_BRINGUP_ONLINE - 1]-&gt;teardown()
+  ...
+  === Start of PREPARE section
+  [CPUHP_BRINGUP_CPU]-&gt;teardown()
+  [CPUHP_OFFLINE + 3]-&gt;teardown()
+  [CPUHP_OFFLINE + 2]                  -&gt; skipped because teardown == NULL
+  [CPUHP_OFFLINE + 1]-&gt;teardown()
+  [CPUHP_OFFLINE]
+</pre>
+</div>
+
+<p>
+一个失败的offline操作：
+</p>
+<div class="org-src-container">
+<pre class="src src-rst">  [CPUHP_ONLINE]
+  [CPUHP_ONLINE - 1]-&gt;teardown()       -&gt; success
+  ...
+  [CPUHP_ONLINE - N]-&gt;teardown()       -&gt; fail
+  [CPUHP_ONLINE - (N - 1)]-&gt;startup()
+  ...
+  [CPUHP_ONLINE - 1]-&gt;startup()
+  [CPUHP_ONLINE]
+</pre>
+</div>
+
+<p>
+重复失败的话，会停在最后失败的地方；
+online过程失败 --&gt; 尝试offline --&gt; offline失败 --&gt; 再次online --&gt; 还是失败 --&gt; endless loop
+</p>
+</div>
+</li>
+<li><a id="orgf869b0e"></a>Allocating a state<br>
+<div class="outline-text-4" id="text-1-2-3">
+<p>
+两种方法：
+静态分配
+</p>
+<ul class="org-ul">
+<li>perf core(kernel core)的startup callback需要在perf driver(device driver)的startup callback之前调用；</li>
+<li>During a CPU offline operation the driver teardown callbacks have to be invoked before the core teardown callback.</li>
+<li>静态分配在 "cpuhp_state" enum中的常量进行描述，可以在 include/linux/cpuhotplug.h中找到；</li>
+</ul>
+<p>
+动态分配
+</p>
+<ul class="org-ul">
+<li>只有PREPARE &amp; ONLINE sections提供有动态分配的范围；</li>
+</ul>
+</div>
+</li>
+<li><a id="org903ed32"></a>Setup of a CPU hotplug state<br>
+<div class="outline-text-4" id="text-1-2-4">
+<p>
+热插拔核心提供以下接口：
+</p>
+<ul class="org-ul">
+<li>cpuhp_setup_state(state, name, startup, teardown)</li>
+<li>cpuhp_setup_state_nocalls(state, name, startup, teardown)</li>
+<li>cpuhp_setup_state_cpuslocked(state, name, startup, teardown)</li>
+<li>cpuhp_setup_state_nocalls_cpuslocked(state, name, startup, teardown)</li>
+</ul>
+<p>
+有多个实例instances的驱动或子系统，每个实例都需要在CPU热插拔时进行调用，CPU 热插拔核心提供了多实例支持；与驱动程序特定的实力列表相比，其优势在于，与实例相关的函数完全针对CPU hotplug操作进行序列化，并在添加和删除时提供状态回调的自动调用；
+</p>
+<ul class="org-ul">
+<li>cpuhp_setup_state_multi(state, name, startup, teardown)</li>
+</ul>
+<p>
+@state 参数可以时静态分配的状态，也可以是需要进行动态分配的标识CPUHP_PREPARE_DYN/CPUHP_ONLINE_DYN;
+@name  用来给sysfs进行输出；明明约定："sybsys:mode", or "subsys/driver:mode"; 如 "perf:mode" or "perf/x86:mode"； 常见的mode有如下几个：
+<code>=======</code> <code>=============================================================================</code>
+prepare   For states in the PREPARE section. 如果state是prepare section中的，则这样设置；
+dead      For states in the PREPARE section which do not provide a startup callback;
+starting  For states in the STARTING section;
+dying     For states in the STARTING section which do not provide a startup callback;
+online    For states in the ONLINE section;
+offline   For states in the ONLINE section which do not provide a startup callback;
+<code>=======</code> <code>=============================================================================</code>
+因为@name只用来给sysfs做说明，因此，如果有更合适的@name，也可以用来替换上面这些；
+@name例子："perf/online", "perf/x86:prepare", "RCU/tree:dying", "sched/waitempty" 
+@startup指向一个CPU online操作时，@state状态下的回调函数；必须要则置NULL；
+@teardown同理；
+</p>
+
+<p>
+这些函数在处理注册回调的方式有所不同：
+</p>
+<ul class="org-ul">
+<li>cpuhp_setup_state_nocalls(), cpuhp_setup_state_nocalls_cpuslocked() and cpuhp_setup_state_multi()只安装回调函数；</li>
+<li>cpuhp_setup_state() and cuphp_setup_state_cpuslocked() 安装并在所有在线且状态大于当前注册的@state的CPU上调用@startup；取决于state section，callback在PREPARE section时，在当前CPU上调用，ONLINE时，在每个online CPU上都调用(in the context of the CPU's hotplug thread)；</li>
+</ul>
+<p>
+If a callback fails for CPU N then the teardown callback for CPU 0..N-1 is invoked to rollback the operation. The state setup fails, the callbacks for the state are not installed and in case of dynamic allocation the allocated state is freed.
+</p>
+
+<p>
+The state setup and the callback invocations are serialized against CPU hotplug operations. If the setup function has to be called from a CPU hotplug read locked region, then the _cpuslocked() variants have to be used. These functions cannot be used from within CPU hotplug callbacks.
+</p>
+
+<p>
+函数返回值：
+<code>===</code> <code>==========================================================================</code>
+0     静态分配的状态设置成功
+&gt;0    动态分配的状态设置成功
+      返回值就是分配的状态号；如果状态回调之后不得不需要移除，则需要保存此状态号；
+&lt;0    操作失败
+<code>===</code> <code>==========================================================================</code>
+</p>
+</div>
+</li>
+<li><a id="org7046722"></a>Removal of a CPU hotplug state<br>
+<div class="outline-text-4" id="text-1-2-5">
+<ul class="org-ul">
+<li>cpuhp_remove_state(state)</li>
+<li>cpuhp_remove_state_nocalls(state)</li>
+<li>cpuhp_remove_state_nocalls_cpuslocked(state)</li>
+<li>cpuhp_remove_multi_state(state)</li>
+</ul>
+
+<p>
+cpuhp_remove_state(state) 移除回调函数并在CPU状态大于此状态号的在线上CPUs调用teardown；
+</p>
+
+<p>
+为了完成移除，teardown不能失败；
+</p>
+</div>
+</li>
+<li><a id="orgcd9b64f"></a>Multi-Instance state instance management<br>
+<div class="outline-text-4" id="text-1-2-6">
+<p>
+Once the multi-instance state is set up, instances can be added to the state:
+</p>
+<ul class="org-ul">
+<li>cpuhp_state_add_instance(state, node)</li>
+<li>cpuhp_state_add_instance_nocalls(state, node)</li>
+</ul>
+
+<p>
+@state 可以是静态分配的状态号，也可以是cpuhp_setup_state_multi()动态分配的；
+@node  一个指向hlist_node的指针，hlist_node是嵌在实例数据结构中的一个成员；
+       这个指针通过node传递给multi-instance状态回调函数，可以通过它及container_of获取到具体实例的数据结构；
+</p>
+
+<p>
+两个函数的不同：
+cpuhp_state_add_instance_nocalls()只添加实例到multi-instance state's node list;
+cpuhp_state_add_instance()不但只添加实例，也调用startup回调函数；再描述一遍，只有CPUs当前的状态比@state大，才会在CPUs上执行；并且，取决于状态所处的section，如果是PREPARE section,则只在当前CPU上调用，如果是ONLINE section，则在每个online CPU的热插拔线程上下文调用；
+</p>
+
+<p>
+从状态的节点列表上移除实例：
+</p>
+<ul class="org-ul">
+<li>cpuhp_setup_remove_instance(state, node)</li>
+<li>cpuhp_setup_remove_instance_nocalls(state, node)</li>
+</ul>
+<p>
+其他同理，不再描述；  
+</p>
+</div>
+</li>
+
+<li><a id="org649f883"></a>Examples<br>
+<div class="outline-text-4" id="text-1-2-7">
+<p>
+在STARTING section静态分配并设置startup/teardown函数，以便在online/offline操作时得到通知:
+</p>
+<div class="org-src-container">
+<pre class="src src-c">  ret = cpuhp_setup_state(CPUHP_SUBSYS_STARTING, <span style="font-style: italic;">"subsys:starting"</span>, subsys_cpu_starting, subsys_cpu_dying);
+  <span style="font-weight: bold;">if</span>(ret &lt; 0)
+        <span style="font-weight: bold;">return</span> ret;
+  ...;
+  <span style="font-weight: bold;">cpuhp_remove_state</span>(CPUHP_SUBSYS_STARTING);
+</pre>
+</div>
+
+<p>
+动态分配并只在offline操作时调用：
+</p>
+<div class="org-src-container">
+<pre class="src src-c">  state = cpuhp_setup_state(CPUHP_ONLINE_DYN, <span style="font-style: italic;">"subsys:offline"</span>, <span style="font-weight: bold; text-decoration: underline;">NULL</span>, subsys_cpu_offline);
+  <span style="font-weight: bold;">if</span>(state &lt; 0)
+        <span style="font-weight: bold;">return</span> state;
+  ...;
+  <span style="font-weight: bold;">cpuhp_remove_state</span>(state);
+</pre>
+</div>
+
+<p>
+ONLINE section + callback on online operations + without invoking:
+</p>
+<div class="org-src-container">
+<pre class="src src-c">  state = cpuhp_setup_state_nocalls(CPUHP_ONLINE_DYN, <span style="font-style: italic;">"subsys:online"</span>, subsys_cpu_online, <span style="font-weight: bold; text-decoration: underline;">NULL</span>);
+  <span style="font-weight: bold;">if</span>(state &lt; 0)
+        <span style="font-weight: bold;">return</span> state;
+  ...;
+  <span style="font-weight: bold;">cpuhp_remove_state_nocalls</span>(state);
+</pre>
+</div>
+
+<p>
+ONLINE section + callback on online/offline operations + multi-instances:
+</p>
+<div class="org-src-container">
+<pre class="src src-c">  state = cpuhp_setup_state_multi(CPUHP_ONLINE_DYN, <span style="font-style: italic;">"subsys:online"</span>, subsys_cpu_online, subsys_cpu_offline); <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">no callbacks</span>
+  <span style="font-weight: bold;">if</span>(state &lt; 0)
+        <span style="font-weight: bold;">return</span> state;
+  ...;
+  ret = cpuhp_setup_add_instance(state, &amp;inst1-&gt;node); <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">callback</span>
+  <span style="font-weight: bold;">if</span>(ret)
+        <span style="font-weight: bold;">return</span> ret;
+  ...;
+  ret = cpuhp_setup_add_instance(state, &amp;inst2-&gt;node); <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">callback</span>
+  <span style="font-weight: bold;">if</span>(ret)
+        <span style="font-weight: bold;">return</span> ret;
+  ...;
+  <span style="font-weight: bold;">cpuhp_remove_instance</span>(state, &amp;inst1-&gt;node); <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">callback</span>
+  ...;
+  <span style="font-weight: bold;">cpuhp_remove_instance</span>(state, &amp;inst2-&gt;node); <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">callback</span>
+  ...;
+  <span style="font-weight: bold;">cpuhp_remove_multi_state</span>(state);
+</pre>
+</div>
+</div>
+</li>
+<li><a id="org4c9bbc8"></a>Testing of hotplug states<br>
+<div class="outline-text-4" id="text-1-2-8">
+<p>
+验证一个自定义状态是否工作的一个方法是关闭一个核并重新打开，或者将核置到某个状态，如CPUHP_AP_ONLINE，然后返回到CPUHP_ONLINE; 后者可以模拟CPUHP_AP_ONLINE之后状态上回调函数的出错返回前一个状态的行为；
+</p>
+
+<p>
+所有注册状态列举在 "/sys/devices/system/cpu/hotplug/states" 中;
+ $ tail /sys/devices/system/cpu/hotplug/states
+ 138: mm/vmscan:online
+ 139: mm/vmstat:online
+ 140: lib/percpu_cnt:online
+ 141: acpi/cpu-drv:online
+ 142: base/cacheinfo:online
+ 143: virtio/net:online
+ 144: x86/mce:online
+ 145: printk:online
+ 168: sched:active
+ 169: online
+</p>
+
+<p>
+将CPU4回滚到 140 lib/percpu_cnt:online然后返回online：
+  $ cat /sys/devices/system/cpu/cpu4/hotplug/state
+  169
+  $ echo 140 &gt; /sys/devices/system/cpu/cpu4/hotplug/target
+  $ cat /sys/devices/system/cpu/cpu4/hotplug/state
+  140
+此时，140状态的teardown也调用了；然后，返回：
+  $ echo 169 &gt; /sys/devices/system/cpu/cpu4/hotplug/target
+  $ cat /sys/devices/system/cpu/cpu4/hotplug/state
+  169
+</p>
+
+<p>
+当使能跟踪事件时，可看到单个步骤：
+</p>
+<pre class="example" id="org3b2c36e">
+  #  TASK-PID   CPU#    TIMESTAMP  FUNCTION
+  #     | |       |        |         |
+      bash-394  [001]  22.976: cpuhp_enter: cpu: 0004 target: 140 step: 169 (cpuhp_kick_ap_work)
+   cpuhp/4-31   [004]  22.977: cpuhp_enter: cpu: 0004 target: 140 step: 168 (sched_cpu_deactivate)
+   cpuhp/4-31   [004]  22.990: cpuhp_exit:  cpu: 0004  state: 168 step: 168 ret: 0
+   cpuhp/4-31   [004]  22.991: cpuhp_enter: cpu: 0004 target: 140 step: 144 (mce_cpu_pre_down)
+   cpuhp/4-31   [004]  22.992: cpuhp_exit:  cpu: 0004  state: 144 step: 144 ret: 0
+   cpuhp/4-31   [004]  22.993: cpuhp_multi_enter: cpu: 0004 target: 140 step: 143 (virtnet_cpu_down_prep)
+   cpuhp/4-31   [004]  22.994: cpuhp_exit:  cpu: 0004  state: 143 step: 143 ret: 0
+   cpuhp/4-31   [004]  22.995: cpuhp_enter: cpu: 0004 target: 140 step: 142 (cacheinfo_cpu_pre_down)
+   cpuhp/4-31   [004]  22.996: cpuhp_exit:  cpu: 0004  state: 142 step: 142 ret: 0
+      bash-394  [001]  22.997: cpuhp_exit:  cpu: 0004  state: 140 step: 169 ret: 0
+      bash-394  [005]  95.540: cpuhp_enter: cpu: 0004 target: 169 step: 140 (cpuhp_kick_ap_work)
+   cpuhp/4-31   [004]  95.541: cpuhp_enter: cpu: 0004 target: 169 step: 141 (acpi_soft_cpu_online)
+   cpuhp/4-31   [004]  95.542: cpuhp_exit:  cpu: 0004  state: 141 step: 141 ret: 0
+   cpuhp/4-31   [004]  95.543: cpuhp_enter: cpu: 0004 target: 169 step: 142 (cacheinfo_cpu_online)
+   cpuhp/4-31   [004]  95.544: cpuhp_exit:  cpu: 0004  state: 142 step: 142 ret: 0
+   cpuhp/4-31   [004]  95.545: cpuhp_multi_enter: cpu: 0004 target: 169 step: 143 (virtnet_cpu_online)
+   cpuhp/4-31   [004]  95.546: cpuhp_exit:  cpu: 0004  state: 143 step: 143 ret: 0
+   cpuhp/4-31   [004]  95.547: cpuhp_enter: cpu: 0004 target: 169 step: 144 (mce_cpu_online)
+   cpuhp/4-31   [004]  95.548: cpuhp_exit:  cpu: 0004  state: 144 step: 144 ret: 0
+   cpuhp/4-31   [004]  95.549: cpuhp_enter: cpu: 0004 target: 169 step: 145 (console_cpu_notify)
+   cpuhp/4-31   [004]  95.550: cpuhp_exit:  cpu: 0004  state: 145 step: 145 ret: 0
+   cpuhp/4-31   [004]  95.551: cpuhp_enter: cpu: 0004 target: 169 step: 168 (sched_cpu_activate)
+   cpuhp/4-31   [004]  95.552: cpuhp_exit:  cpu: 0004  state: 168 step: 168 ret: 0
+      bash-394  [005]  95.553: cpuhp_exit:  cpu: 0004  state: 169 step: 140 ret: 0
+
+</pre>
+<p>
+As it be seen, CPU4 went down until timestamp 22.996 and then back up until 95.552. All invoked callbacks including their return codes are visible in the trace.
+</p>
+</div>
+</li>
+</ol>
+</div>
+<div id="outline-container-org9c02bc3" class="outline-3">
+<h3 id="org9c02bc3"><span class="section-number-3">1.3.</span> Architecture's requirements</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+Following functions and configurations are required:
+</p>
+<ul class="org-ul">
+<li><code>=CONFIG_HOTPLUG_CPU=</code> This entry needs to be enabled in Kconfig</li>
+<li><code>=__cpu_up()=</code> Arch interface to bring up a CPU</li>
+<li><code>=__cpu_disable()=</code> Arch interface to shutdown a CPU, no more interrupts can be handled by the kernel after the routine returns. This includes the shutdown of the timer.</li>
+<li><code>=__cpu_die()=</code> This actually supposed to ensure death of the CPU. Actually look at some example code in other arch that implement CPU hotplug. The processor is taken down from the "idle()" loop for that specific architecure. "__cpu_die()" typically waits for some per_cpu state to be set, to ensure the processor dead rontine is called to be sure positively.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgc373e8c" class="outline-3">
+<h3 id="orgc373e8c"><span class="section-number-3">1.4.</span> User Space Notification</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+CPU成功online/offline后，udev事件发送(样例)：
+SUBSYSTEM=="cpu", DRIVERS=="processor", DEVPATH=="/devices/system/cpu/*", RUN+="the_hotplug_receiver.sh"
+将会收到所有事件，一个脚本可以进一步处理：
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">  <span style="font-weight: bold; font-style: italic;">#</span><span style="font-weight: bold; font-style: italic;">!/bin/sh</span>
+
+  <span style="font-weight: bold;">if</span> [ <span style="font-style: italic;">"${ACTION}"</span> = <span style="font-style: italic;">"offline"</span> ]
+  <span style="font-weight: bold;">then</span>
+      <span style="font-weight: bold;">echo</span> <span style="font-style: italic;">"CPU ${DEVPATH##*/} offline"</span>
+
+  <span style="font-weight: bold;">elif</span> [ <span style="font-style: italic;">"${ACTION}"</span> = <span style="font-style: italic;">"online"</span> ]
+  <span style="font-weight: bold;">then</span>
+      <span style="font-weight: bold;">echo</span> <span style="font-style: italic;">"CPU ${DEVPATH##*/} online"</span>
+
+  <span style="font-weight: bold;">fi</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yang</p>
+<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

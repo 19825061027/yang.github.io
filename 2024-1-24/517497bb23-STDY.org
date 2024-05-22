@@ -1,0 +1,53 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: ffs & fls & __ffs & __fls                    
+
+u64 k = 0x00000101;
+unsigned long lo = ffs(k);
+unsigned long hi = fls(k);
+pr_err("kkkkkkkkkkk%lu  %lu", lo, hi);
+myperftest:mytest_pmu_init: kkkkkkkkkkk1  9
+
+k = 0x00000000;
+lo = ffs(k);
+hi = fls(k);
+pr_err("kkkkkkkkkkk%lu  %lu", lo, hi);
+myperftest:mytest_pmu_init: kkkkkkkkkkk0  0
+
+k = 0x00000101;
+lo = __ffs(k);
+hi = __fls(k);
+pr_err("kkkkkkkkkkk%lu  %lu", lo, hi);
+myperftest:mytest_pmu_init: kkkkkkkkkkk0  8
+
+k = 0x00000000;
+lo = __ffs(k);
+hi = __fls(k);
+pr_err("kkkkkkkkkkk%lu  %lu", lo, hi);
+myperftest:mytest_pmu_init: kkkkkkkkkkk32  4294967295	
+在32位系统上，会自动将u64给截断成long类型，也就是32位。
+可以使用64位的
+u64 k = 0x100000000101;
+unsigned long lo = __ffs64(k);
+unsigned long hi = fls64(k);
+pr_err("kkkkkkkkkkk%lu  %lu", lo, hi);
+
+k = 0x00000000;
+lo = __ffs64(k);
+hi = fls64(k);
+pr_err("kkkkkkkkkkk%lu  %lu", lo, hi);
+
+k = 0x1000000000101;
+lo = __ffs64(k);
+hi = fls64(k);
+pr_err("kkkkkkkkkkk%lu  %lu", lo, hi);
+
+k = 0x00000000;
+lo = __ffs64(k);
+hi = fls64(k);
+pr_err("kkkkkkkkkkk%lu  %lu", lo, hi);
+	
+myperftest:mytest_pmu_init: kkkkkkkkkkk0  45
+myperftest:mytest_pmu_init: kkkkkkkkkkk64  0
+myperftest:mytest_pmu_init: kkkkkkkkkkk0  49
+myperftest:mytest_pmu_init: kkkkkkkkkkk64  0

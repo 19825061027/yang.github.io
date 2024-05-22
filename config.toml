@@ -1,4 +1,0 @@
-baseURL = 'https://z-bajer.gitee.io/blog'
-languageCode = 'zh-cn'
-title = 'My Hugo Site'
-theme = 'black-and-light'

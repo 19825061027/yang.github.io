@@ -1,0 +1,107 @@
+#+INCLUDE: "../prefix.org"
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
+#+HTML_HEAD: <script src="./js/jquery.min.js"></script>
+#+HTML_HEAD: <script src="./js/bootstrap.min.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="./js/readtheorg.js"></script>
+#+TITLE: 欢迎来到我的博客
+* busybox
+|[[./2024-4-11/4607f8e230-RECD.html][busybox /bin/sh: can't access tty; job control turned off                       ]]|2024年04月11日|
+* cc
+|[[./2024-4-29/e1e3cddb89-RECD.html][文件同时可被bash和C使用                                                                  ]]|2024年04月29日|
+|[[./2024-1-18/6d537c26fc-RECD.html][宏里面无法直接使用sizeof                                                                 ]]|2024年01月18日|
+|[[./2024-1-16/31f55c452f-STDY.html][C语言别名 & 数组指针降级 & 宏#和##                                                          ]]|2024年01月16日|
+* elisp
+|[[./2024-4-24/fe01846929-RECD.html][auto-fill-mode可以设置每行字长                                                          ]]|2024年04月24日|
+|[[./2024-1-20/5e84f53a0e-DONE.html][ivy-read function                                                               ]]|2024年01月20日|
+|[[./2024-1-17/f769507c1e-DONE.html][做一个专注点，C-x w标记当前位置为专注点, C-x C-w返回专注点                                            ]]|2024年01月17日|
+* git
+|[[./2024-3-7/08c9bf980b-STDY.html][git format-patch部分选项功能说明                                                        ]]|2024年03月07日|
+* libc
+|[[./2024-3-22/7a734fd719-STDY.html][glibc库探究                                                                        ]]|2024年03月22日|
+* linux
+|[[./2024-3-25/7781575475-STDY.html][perf-record学习                                                                   ]]|2024年03月25日|
+|[[./2024-3-14/11a943c043-STDY.html][进程间通信---信号                                                                      ]]|2024年03月14日|
+|[[./2024-3-8/0977a0092b-STDY.html][workqueue学习                                                                     ]]|2024年03月08日|
+|[[./2024-2-19/e5abbef496-DONE.html][clock子系统                                                                        ]]|2024年02月19日|
+|[[./2024-2-2/5b5416a50a-TODO.html][reset singal device tree bindings                                               ]]|2024年02月02日|
+|[[./2024-1-24/517497bb23-STDY.html][ffs & fls & __ffs & __fls                                                       ]]|2024年01月24日|
+|[[./2024-1-22/bb5256ac83-RECD.html][驱动BUG总结                                                                         ]]|2024年01月22日|
+|[[./2024-1-20/d7ad64af74-TODO.html][IRQ总结                                                                           ]]|2024年01月20日|
+|[[./2024-1-19/d9669e4397-RECD.html][64bit系统中32位寄存器映射                                                                ]]|2024年01月19日|
+|[[./2024-1-18/861b7e9838-STDY.html][自定义设备树节点属性                                                                      ]]|2024年01月18日|
+|[[./2024-1-18/2259f59c19-RECD.html][pdev->id                                                                        ]]|2024年01月18日|
+|[[./2024-1-16/d630604437-TODO.html][linux抢占                                                                         ]]|2024年01月16日|
+|[[./2024-1-16/d58a67a237-STDY.html][spin_lock & spin_lock_irq & spin_lock_irqsave区别                                 ]]|2024年01月16日|
+* mail
+|[[./2024-3-7/08c9bf980b-STDY.html][git format-patch部分选项功能说明                                                        ]]|2024年03月07日|
+* micropython
+|[[./2024-5-21/93579856c8-TODO.html][python async def                                                                ]]|2024年05月21日|
+* perf
+|[[./2024-3-25/7781575475-STDY.html][perf-record学习                                                                   ]]|2024年03月25日|
+* python
+|[[./2024-4-29/e1e3cddb89-RECD.html][文件同时可被bash和C使用                                                                  ]]|2024年04月29日|
+|[[./2024-3-29/d67c092dd0-DONE.html][Call function directly in cmd line                                              ]]|2024年03月29日|
+|[[./2024-2-4/d42736ec4d-STDY.html][python 学习                                                                       ]]|2024年02月04日|
+* wsl
+|[[./2024-4-18/4c8fed2e7c-RECD.html][wsl export and import issues                                                    ]]|2024年04月18日|
+|[[./2024-4-16/64f63e77dd-RECD.html][shared with windows clipboard and screenshot                                    ]]|2024年04月16日|
+|[[./2024-4-10/10beed6b18-RECD.html][wsl未注册类                                                                         ]]|2024年04月10日|
+* others
+|[[./2024-5-22/7e74f59268-RECD.html][blog 方案                                                                         ]]|2024年05月22日|
+|[[./2024-4-10/2a6ca27ca3-RECD.html][terminal配置文件                                                                    ]]|2024年04月10日|
+|[[./2024-1-12/f01d530ba5-RECD.html][format/event/cpumask中struct attribute*数字以NULL结尾                                 ]]|2024年01月12日|
+|[[./2024-1-12/6884b2da75-RECD.html][驱动MMIO操作细节                                                                      ]]|2024年01月12日|
+|[[./2024-1-11/11cb435382-STDY.html][device IO mapping操作                                                             ]]|2024年01月11日|
+|[[./2024-1-10/d4d7be2464-STDY.html][位域操作                                                                            ]]|2024年01月10日|
+|[[./2024-1-10/51286c3ee0-STDY.html][void*指针+1                                                                       ]]|2024年01月10日|
+|[[./2024-1-10/c0e6b03a7a-DONE.html][pr_err和dev_err的区别                                                               ]]|2024年01月10日|
+|[[./2024-1-10/d660577af2-STDY.html][devm_xxx设备资源管理                                                                  ]]|2024年01月10日|
+|[[./2024-1-8/1112901c4d-TODO.html][global->gtags大量后台进程导致卡死                                                         ]]|2024年01月08日|
+|[[./2023-12-21/09b2e39c93-STDY.html][perf工具-a用法                                                                      ]]|2023年12月21日|
+|[[./2023-12-19/d656f61fce-STDY.html][workqueue工作队列                                                                   ]]|2023年12月19日|
+|[[./2023-12-18/a39e0a172b-STDY.html][busybox/mdev学习                                                                  ]]|2023年12月18日|
+|[[./2023-12-18/164db53ad1-STDY.html][linux insmod报错问题探究                                                              ]]|2023年12月18日|
+|[[./2023-12-18/887909460d-STDY.html][跑SMMU中断问题                                                                       ]]|2023年12月18日|
+|[[./2023-12-7/56198c45a5-STDY.html][mtdnand                                                                         ]]|2023年12月07日|
+|[[./2023-12-6/aa6631199a-STDY.html][gcc编译选项mcmodel=medium                                                           ]]|2023年12月06日|
+|[[./2023-12-5/cc7617c356-CANCELED.html][C-mode实现宏判断                                                                     ]]|2023年12月05日|
+|[[./2023-12-1/8ccc65a748-STDY.html][Cache翻译Documentation/admin-guide/device-mapper/cache.rst                        ]]|2023年12月01日|
+|[[./2023-11-22/810bac682c-STDY.html][IOMMU.txt翻译学习，设备树属性层面                                                           ]]|2023年11月22日|
+|[[./2023-11-20/58b9833a46-STDY.html][tty源码探究                                                                         ]]|2023年11月20日|
+|[[./2023-11-20/20d45a10e9-STDY.html][回车与换行的区别                                                                        ]]|2023年11月20日|
+|[[./2023-11-17/1d12211c12-STDY.html][TTY文档翻译                                                                         ]]|2023年11月17日|
+|[[./2023-11-6/706f2a7431-STDY.html][串口方式传送OS binary到DSRAM问题分析                                                       ]]|2023年11月06日|
+|[[./2023-11-3/e82f84e04f-STDY.html][u-boot::pinctrl                                                                 ]]|2023年11月03日|
+|[[./2023-11-1/dfb2e9f41b-STDY.html][u-boot学习                                                                        ]]|2023年11月01日|
+|[[./2023-10-27/517f849de0-STDY.html][提交补丁到社区的方法                                                                      ]]|2023年10月27日|
+|[[./2023-10-27/a3adc8f4b3-STDY.html][Kernel/Documentations/doc-guide/kernel-doc.rst翻译                                ]]|2023年10月27日|
+|[[./2023-10-25/3e37be6130-STDY.html][-finstrument-functions                                                          ]]|2023年10月25日|
+|[[./2023-10-24/18e21971ab-STDY.html][mmap系统调用回溯                                                                      ]]|2023年10月24日|
+|[[./2023-10-24/cddb39bd48-STDY.html][ringbuffer aux                                                                  ]]|2023年10月24日|
+|[[./2023-10-18/d45967f391-STDY.html][ringbuffer学习                                                                    ]]|2023年10月18日|
+|[[./2023-10-16/2d858f2f90-DONE.html][event list                                                                      ]]|2023年10月16日|
+|[[./2023-10-13/471d156f64-STDY.html][使用BHT进行分支预测 翻译                                                                  ]]|2023年10月13日|
+|[[./2023-10-11/93818c5d29-DONE.html][checklist                                                                       ]]|2023年10月11日|
+|[[./2023-10-11/ddd241836e-STDY.html][如何实现分时采样                                                                        ]]|2023年10月11日|
+|[[./2023-10-10/3d45f64c4b-STDY.html][Perf_event_exec(void)                                                           ]]|2023年10月10日|
+|[[./2023-10-10/660d5176e3-STDY.html][Power8 CACHE                                                                    ]]|2023年10月10日|
+|[[./2023-10-8/5dbc6c6838-STDY.html][Linux性能优化--Tuned特性原理及使用指南                                                       ]]|2023年10月08日|
+|[[./2023-10-8/9507716c42-STDY.html][高精度事件定时器                                                                        ]]|2023年10月08日|
+|[[./2023-9-27/2a09fa83bd-STDY.html][devicetree                                                                      ]]|2023年09月27日|
+|[[./2023-9-25/a09d109529-STDY.html][/sys/bus/event_source 目录下devices/有内容, drivers/没有驱动                              ]]|2023年09月25日|
+|[[./2023-9-22/2fd7c0c249-STDY.html][pmu->type                                                                       ]]|2023年09月22日|
+|[[./2023-9-22/2ec691b423-STDY.html][Overflow handling                                                               ]]|2023年09月22日|
+|[[./2023-9-21/cdcf1fd0a8-STDY.html][用户层对采集类型的处理,以及采集内容都可以是啥                                                         ]]|2023年09月21日|
+|[[./2023-9-19/ee98557e7d-STDY.html][理清bus/device_driver/device之间的关系                                                 ]]|2023年09月19日|
+|[[./2023-9-18/f9867fb17a-STDY.html][linux-6.5版本编译perf命令                                                             ]]|2023年09月18日|
+|[[./2023-9-15/cc96be43a4-STDY.html][如何统计cpu在某个状态驻留的时间                                                               ]]|2023年09月15日|
+|[[./2023-9-8/489ffd4a40-STDY.html][学习cpu_hotplug                                                                   ]]|2023年09月08日|
+|[[./2023-9-7/78fbb3d99c-STDY.html][学习kbuild                                                                        ]]|2023年09月07日|
+|[[./2023-9-5/f7c76da9cf-STDY.html][学习设备树格式及其生成使用原理                                                                 ]]|2023年09月05日|
+|[[./2023-9-1/3102704bc9-DEBG.html][PowerPC 架构学习以及处理器idle相关内容学习                                                     ]]|2023年09月01日|
+|[[./2023-8-31/bb0dd09c9f-DEBG.html][解决启动问题 can't access tty job control turned off                                  ]]|2023年08月31日|
+|[[./2023-8-30/57a7184543-STDY.html][epapr 的生成及其初始运行                                                                 ]]|2023年08月30日|
+|[[./2023-8-29/614a00c829-STDY.html][学习rootfs相关内容并理解多种方式加载的区别                                                        ]]|2023年08月29日|

@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>宏里面无法直接使用sizeof</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,81 +204,72 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
-<div id="table-of-contents" role="doc-toc">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents" role="doc-toc">
-<ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
-</ul>
+<h1 class="title">宏里面无法直接使用sizeof</h1>
+<p>
+<a href="https://www.coder.work/article/1558363">https://www.coder.work/article/1558363</a>
+不被允许的形式：
+</p>
+<div class="org-src-container">
+<pre class="src src-c"><span style="font-weight: bold;">  #if</span> <span style="font-weight: bold;">sizeof</span>(someThing) != PAGE_SIZE
+<span style="font-weight: bold;">  #error</span> <span style="font-style: italic;">Data structure doesn</span><span style="font-weight: bold;">'</span><span style="font-style: italic;">t match page size</span>
+<span style="font-weight: bold;">  #endif</span>
+</pre>
 </div>
+
+<p>
+linux kernel提供有如下方法：
+用在全局的：static_assert();
+</p>
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold;">static_assert</span>(NSIGSYS == 2);
+  static_assert(<span style="font-weight: bold;">sizeof</span>(siginfo_t) == 128);
+  <span style="font-weight: bold;">static_assert</span>(<span style="font-weight: bold; text-decoration: underline;">__alignof__</span>(<span style="font-weight: bold; font-style: italic;">siginfo_t</span>) == 4);
+  <span style="font-weight: bold;">static_assert</span>(offsetof(<span style="font-weight: bold; text-decoration: underline;">siginfo_t</span>, si_signo)   == 0x00);
+</pre>
 </div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
-<div class="outline-text-2" id="text-1">
-<table>
+<p>
+用在函数内：BUILD_BUG_ON();
+</p>
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold; text-decoration: underline;">void</span> <span style="font-weight: bold; font-style: italic;">__init</span> mem_init(<span style="font-weight: bold; text-decoration: underline;">void</span>)
+  {
+          memblock_free_all();
+          highmem_init();
 
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
+          BUILD_BUG_ON((PTRS_PER_PGD * <span style="font-weight: bold;">sizeof</span>(pgd_t)) &gt; PAGE_SIZE);
+          BUILD_BUG_ON((PTRS_PER_PUD * <span style="font-weight: bold;">sizeof</span>(pud_t)) &gt; PAGE_SIZE);
+          BUILD_BUG_ON((PTRS_PER_PMD * <span style="font-weight: bold;">sizeof</span>(pmd_t)) &gt; PAGE_SIZE);
+          BUILD_BUG_ON((PTRS_PER_PTE * <span style="font-weight: bold;">sizeof</span>(pte_t)) &gt; PAGE_SIZE);
+  }
+</pre>
 </div>
+<p>
+以及函数内：compiletime_assert():
+</p>
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">ec_input_read</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">ariel_pwrbutton</span> *<span style="font-weight: bold; font-style: italic;">priv</span>,
+                           <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">ec_input_response</span> *<span style="font-weight: bold; font-style: italic;">response</span>)
+  {
+          <span style="font-weight: bold; text-decoration: underline;">u8</span> <span style="font-weight: bold; font-style: italic;">read_request</span>[] = { 0x00, 0x5a, 0xa5, 0x00, 0x00 };
+          <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">spi_device</span> *<span style="font-weight: bold; font-style: italic;">spi</span> = priv-&gt;client;
+          <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">spi_transfer</span> <span style="font-weight: bold; font-style: italic;">t</span> = {
+                  .tx_buf = read_request,
+                  .rx_buf = response,
+                  .len = <span style="font-weight: bold;">sizeof</span>(read_request),
+          };
+
+          compiletime_assert(<span style="font-weight: bold;">sizeof</span>(read_request) == <span style="font-weight: bold;">sizeof</span>(*response),
+                             <span style="font-style: italic;">"SPI xfer request/response size mismatch"</span>);
+
+          <span style="font-weight: bold;">return</span> spi_sync_transfer(spi, &amp;t, 1);
+  }
+</pre>
 </div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
-<div class="outline-text-2" id="text-2">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p>
+另外BUILD_BUG_ON()的一种实现是：
+#define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
+当condition为true时，会求一个sizeof(char[-1])的大小，会报错
+condition为false时，不会。</p>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>

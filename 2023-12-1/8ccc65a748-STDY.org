@@ -1,0 +1,30 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: Cache翻译Documentation/admin-guide/device-mapper/cache.rst
+
+介绍：
+dm-cache(device mapper cache), is a device mapper.
+通过将块设备部分数据迁移到一个更快更小的设备，如SSD，来提升块设备的性能。
+
+设计：
+===
+子设备
+------
+通过缓存方式加快数据访问的目标由三个设备构成：
+1. 数据源设备(origin) - 大，慢
+2. 缓存设备(cache)   - 小，块
+3. 小的元数据设备(metadata) - 记录哪个块在缓存设备中，哪个是脏块，以及其他标志信息。
+   这些信息可以放在缓存设备中或单独的一个地方，各有各的优缺。
+
+固定块大小
+------
+origin分为固定大小的块。块大小在第一次创建缓存时指定。典型值256KB - 1024KB。
+固定块可以简化设备，但也会带来问题，例如，一个块的一小部分频繁被访问到，但需要将
+整个块都放到缓存里面，这是缓存块大带来的问题。而缓存块小会导致metadata过多。
+
+缓存操作模式
+------
+三种：writeback, writethrough, passthrough
+writeback: 默认，数据放到cache中，metadata标记为dirty。
+writethrough: 数据同时更新到cache & origin。过程更简单，更可靠。适用于没有频繁
+写入cache的情况。

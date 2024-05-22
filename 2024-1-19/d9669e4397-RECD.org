@@ -1,0 +1,31 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: 64bit系统中32位寄存器映射                    
+
+#+begin_src c
+  struct ni_node_reg_map {
+	  union {
+		  struct {
+			  u32 type:16;
+			  u32 id:16;
+		  };
+		  u32 node_type;
+	  };
+
+	  union {
+		  u32 child_num;
+		  u32 node_info;
+	  };
+
+	  union {
+		  struct {
+			  u32 secr_acc;
+			  u32 pmusela;
+			  u32 pmuselb;
+		  };
+		  // 寄存器实际是32位的，因此，这里有错误，会当成64bits寄存器访问
+		  void __iomem *child_offset[0];
+	  };
+  };
+
+#+end_src

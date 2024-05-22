@@ -1,0 +1,52 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: python async def                       
+
+[[file:extmod/asyncio/task.py]]
+#+begin_src python :indent 4
+# 通过pairing-heap算法，作为一个容器，存放同一类Task
+class TaskQueue
+
+# 任务的对应实例。async def修饰的类，在直接执行时，会自动创建此Task，
+# 并将对应任务放到Task::coro中。并放入默认event loop中，event loop是
+# 更底层实现。无论是asyncio.run还是其他任务运行方式，都会将协程创建成
+# Task，并由asyncio.core.run_until_complete(main_task)开始运行。
+class Task
+#+end_src
+[[file:extmod/asyncio/core.py]]
+#+begin_src python :indent 4
+# 进程，线程和协程：
+# 进程是资源分配的基本单位，线程是操作系统调度的基本单位
+# 协程是一种比线程更加轻量级的存在，正如一个进程可以拥有多个线程一样，
+# 一个线程也可以拥有多个协程。并且，协程不是由操作系统控制，而是由
+# 程序完全控制(也就是一直在用户态)。
+# 协程实现：
+# yield关键字，暂停，等到主线程调用send方法发送和数据，协程才会接到
+# 数据继续执行。协程也有自己的环境，也就是上下文。协程的调度完全由
+# 用户控制，协程拥有自己的寄存器和栈。协程调度时，将寄存器上下文和
+# 栈保存到其他地方。
+
+# 在mp协程中作为yield。位于和协程不同的是，不用user负责send启动继续
+# 而是框架会send。只取其让出线程功能，并由睡眠功能模拟。
+# 典型用法：await asyncio.sleep_ms()
+def sleep_ms
+
+# 简单的将coro包装进Task，并放进默认event loop中。
+def create_task(coro):
+    # 协程必有此send方法，用来唤醒此协程继续运行
+    if not hasattr(coro, "send"):
+        raise TypeError("coroutine expected")
+    t = Task(coro, globals()) # wrapper
+    _task_queue.push(t) # push into default event loop. 
+    return t
+
+# Create a new task from a coroutine and run it until it finishes
+def run(coro):
+    return run_until_complete(create_task(coro))
+
+''' 主要逻辑:
+1. main_task如果结束，则停止剩余协程。而Loop.run_forever不过是采用了
+一个不会
+'''
+def run_until_complete(main_task=None)
+#+end_src

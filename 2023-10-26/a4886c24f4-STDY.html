@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-05-22 Wed 16:46 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DTB格式</title>
+<meta name="author" content="Yang" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../css/readtheorg.css"/>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
+<script type="text/javascript" src="../js/readtheorg.js"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">DTB格式</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgc013af7">1. Header</a></li>
+<li><a href="#org6f70cd0">2. Memory Reservation Block</a></li>
+<li><a href="#org9906e9f">3. Structure Block</a></li>
+<li><a href="#org0dcb51f">4. Strings Block</a></li>
+</ul>
+</div>
+</div>
+<p>
+IEEE1275 Open Firmware没有定义DTB格式；在大多数符合OpenFirmware的平台，设备树通过调用固件方法，遍历树结构提取；
+DTB格式使用一个单一，线性，无指针的数据格式编码设备树；
+由一个小头+三个可变大小的sections组成：
+</p>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">struct fdt_header</td>
+</tr>
+
+<tr>
+<td class="org-left">(free space)</td>
+</tr>
+
+<tr>
+<td class="org-left">memory reservation block</td>
+</tr>
+
+<tr>
+<td class="org-left">(free space)</td>
+</tr>
+
+<tr>
+<td class="org-left">structure block</td>
+</tr>
+
+<tr>
+<td class="org-left">(free space)</td>
+</tr>
+
+<tr>
+<td class="org-left">strings block</td>
+</tr>
+
+<tr>
+<td class="org-left">(free space)</td>
+</tr>
+</tbody>
+</table>
+<p>
+free space可能存在，也可能不存在，存在的原因可以是对齐；
+</p>
+
+<p>
+Versioning
+header中的域会给出当前DTB的版本，此文档只描述V17版格式；
+</p>
+<div id="outline-container-orgc013af7" class="outline-2">
+<h2 id="orgc013af7"><span class="section-number-2">1.</span> Header</h2>
+<div class="outline-text-2" id="text-1">
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">fdt_header</span> {
+        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">0xd00dfeed(big-endian)</span>
+        <span style="font-weight: bold; text-decoration: underline;">uint32_t</span> <span style="font-weight: bold; font-style: italic;">magic</span>;
+        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">sizeof(header + memory reservation block + structure block + strings block + free space gaps)</span>
+        <span style="font-weight: bold; text-decoration: underline;">uint32_t</span> <span style="font-weight: bold; font-style: italic;">totalsize</span>;
+        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">offset in bytes of the structure block from the beginning of the header</span>
+        <span style="font-weight: bold; text-decoration: underline;">uint32_t</span> <span style="font-weight: bold; font-style: italic;">off_dt_struct</span>;
+        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">offset of the strings block</span>
+        <span style="font-weight: bold; text-decoration: underline;">uint32_t</span> <span style="font-weight: bold; font-style: italic;">off_dt_strings</span>;
+        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">offset of the memory resveration</span>
+        <span style="font-weight: bold; text-decoration: underline;">uint32_t</span> <span style="font-weight: bold; font-style: italic;">off_mem_rsvmap</span>;
+        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">Version of the dts. Current document is 17.</span>
+        <span style="font-weight: bold; text-decoration: underline;">uint32_t</span> <span style="font-weight: bold; font-style: italic;">version</span>;
+        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">Lowest version of the dts with which the version used is backwards compatible. This should be 16.</span>
+        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">17 is backwards compatible with 16, but not ealier version.</span>
+        <span style="font-weight: bold; text-decoration: underline;">uint32_t</span> <span style="font-weight: bold; font-style: italic;">last_comp_version</span>;
+        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">physical ID of the system's boot CPU.</span>
+        <span style="font-weight: bold; text-decoration: underline;">uint32_t</span> <span style="font-weight: bold; font-style: italic;">boot_cpuid_phys</span>;
+        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">length in bytes of the strings block section of the devicetree blob.</span>
+        <span style="font-weight: bold; text-decoration: underline;">uint32_t</span> <span style="font-weight: bold; font-style: italic;">size_dt_strings</span>;
+        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">length in bytes of the struture block section of the devicetree blob.</span>
+        <span style="font-weight: bold; text-decoration: underline;">uint32_t</span> <span style="font-weight: bold; font-style: italic;">size_dt_struct</span>;
+  };
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6f70cd0" class="outline-2">
+<h2 id="org6f70cd0"><span class="section-number-2">2.</span> Memory Reservation Block</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+目的：讲述了保留块是存放内存保留区列表的，以及内存保留区的一些实现和限制
+</p>
+
+<p>
+给client program(如OS)提供保留物理内存(不能拿来当作通用内存进行分配)的列表；可以用来保护重要数据，放置被client program重写；
+例子：有IOMMU的系统，由DTSpec启动程序初始化的TCE(translation control entry)表，需要使用这种方法保护；
+例子：启动程序为client program提供的运行时服务(代码和数据)，需要采用这种方式保护；（OpenFirmware平台的RTAS）；
+</p>
+
+<p>
+client program不应该访问保留区内的内存，除非启动程序显式指明可以访问；
+</p>
+
+<p>
+启动程序提供的保留区间可以，但也不需要，包含设备树本身；因为client program需要保证在使用设备树之前，不会重写设备树中的内容，
+无论设备树是否放到保留地址；
+</p>
+
+<p>
+Any accesses to reserved memory by or caused by the boot program must be done as not Caching Inhibited and Memory Coherence Required
+(i.e., WIMG=0bx01x). and addtionally for Book Ⅲ-S implementations as not Write Through Required(i.e., WIMG=0b001x). Further,
+if the VLE storage attribute is supported, all accesses to reserved memory must be done as VLE=0.
+</p>
+
+<p>
+This requirement is necessary because the client program is permitted to map memory with storage attributes specified as not Write
+Through Required, not Caching Inhibited, and Memory Coherence Required(i.e., WIMG=0b001x), and VLE=0 where supported.
+</p>
+
+<p>
+client program可能会使用包含保留内存的large virtual pages.然而，client program不会修改保留内存，因此，boot program对保留需区域的访问
+是Write Through Required的。
+</p>
+
+<p>
+格式：介绍了保留区的格式
+</p>
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">fdt_reserve_entry</span> {
+        <span style="font-weight: bold; text-decoration: underline;">uint64_t</span> <span style="font-weight: bold; font-style: italic;">address</span>;
+        <span style="font-weight: bold; text-decoration: underline;">uint64_t</span> <span style="font-weight: bold; font-style: italic;">size</span>;
+  }
+</pre>
+</div>
+
+<p>
+内存保护块和UEFI
+As with the /reserved-memory node, when booting via [UEFI] entries in the Memory Reservation Block must alos be listed in the system
+memory map obtained via the GetMemoryMap() to protect against allocations by UEFI applications. The memory reservation block entries
+should be listed with type EfiReservedMemoryType.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9906e9f" class="outline-2">
+<h2 id="org9906e9f"><span class="section-number-2">3.</span> Structure Block</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+描述了设备树本身的结构和内容；由一系列带有数据的tokens组成；
+structure block由一系列pieces组成，每一个由一个token开始，也就是一个大端的32-bit整数；
+一些token之后是额外的数据；
+五个token类型：
+</p>
+<ul class="org-ul">
+<li>FDT_BEGIN_NODE(0x00000001)
+标志一个node的开始；之后是额外数据，node的unitname；name字符串的存储是null-terminal类型，并且name应该包括单元地址；
+nodename之后是一些用来填充对齐的0x0；
+下一个token，需要是除FDT_END之外的任何的token；</li>
+<li>FDT_END_NODE(0x00000002)
+标志node的结束；后面不会跟随额外数据，因此，后面会立刻是下一个除了FDT_PROP之外的token；</li>
+<li><p>
+FDT_PROP(0x00000003)
+标志一个属性的开始；后跟随额外数据描述属性；额外数据首先由属性长，和属性名组成：
+</p>
+<div class="org-src-container">
+<pre class="src src-c">    <span style="font-weight: bold;">struct</span> {
+          <span style="font-weight: bold; text-decoration: underline;">uint32_t</span> <span style="font-weight: bold; font-style: italic;">len</span>;
+          <span style="font-weight: bold; text-decoration: underline;">uint32_t</span> <span style="font-weight: bold; font-style: italic;">nameoff</span>;
+    };
+</pre>
+</div>
+<p>
+len指示属性的值的大小，单位字节；可以是0，表明是空属性；
+nameoff指示的偏移量是相对于strings block，这里面存储了属性名，以null-terminal方式存储；
+这个结构之后，就是真正的属性值了，大小就是len；
+属性值后，是用来进行对齐的padding bytes；
+下一个token是除FDT_END之外的任何token；
+</p></li>
+<li>FDT_NOP(x000000004)
+此会被解析设备树的程序忽略；
+没有额外数据；
+树中的属性或节点定义可以使用FDT_NOP重写，来将其移出树；
+也就是说，想要覆盖一个属性，可以将其用多个FDT_NOP填充覆盖，知道下一个有效token；</li>
+<li>FDT_END(0x00000009)
+标志structure block的结束；
+只能有一个；且只能是最后一个；
+没有额外数据；
+此token之后，是下一个size_dt_struct域指明的structure block开始；</li>
+</ul>
+
+<p>
+Tree Structure
+设备树结构表现为一个线性树：每一个节点开始于FDT_BEGIN_NODE token，结束于FDT_END_NODE token；
+node的属性和子节点存在于FDT_END_NODE之前；
+子节点的FDT_BEGIN_NODE/FDT_END_NODE嵌于其中；
+structure block由根节点组成，之后是FDT_END标志其结束；
+</p>
+
+<p>
+每一个节点由以下组件构成：
+</p>
+<ul class="org-ul">
+<li>(optionally)any number of FDT_NOP tokens</li>
+<li>FDT_BEGIN_NODE token
+<ul class="org-ul">
+<li>The node's name as a null-terminal string</li>
+<li>[zeroed padding bytes to align to a 4-byte boundary]</li>
+</ul></li>
+<li>For each property of the node:
+<ul class="org-ul">
+<li>(optionally)any number of FDT_NOP tokens</li>
+<li>FDT_PROP token
+<ul class="org-ul">
+<li>property information</li>
+<li>[zeroed padding bytes to align to a 4-byte boundary]</li>
+</ul></li>
+</ul></li>
+<li>Representations of all child nodes in this format</li>
+<li>(optionally)any number of FDT_NOP tokens</li>
+<li>FDT_END_NODE token</li>
+</ul>
+<p>
+为了代码处理方便，一个节点的属性应该在子节点之前；当然，属性和节点交叉配置并无大碍，只是为了代码处理流程简单，推介在前；  
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0dcb51f" class="outline-2">
+<h2 id="org0dcb51f"><span class="section-number-2">4.</span> Strings Block</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+包含树种使用的所有属性名字符；
+以null结尾，简单拼接；
+没有对齐限制；</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yang</p>
+<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

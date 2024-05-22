@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>NI-700 PMU驱动方案设计</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,81 +204,86 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
-<div id="table-of-contents" role="doc-toc">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents" role="doc-toc">
-<ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
-</ul>
-</div>
-</div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
-<div class="outline-text-2" id="text-1">
-<table>
+<h1 class="title">NI-700 PMU驱动方案设计</h1>
+<p>
+对应一个ni-700下个多个node，如VD,CD,PD,PMU,ASNI,AMNI...
+struct ni_node {
+	void __iomem *base;
+	enum ni_node_type type;
+	u16 id;
+};
+对应一个ni-700，其中nodes存放此ni-700下所有节点
+struct ni_pmu {
+	void __iomem *base;
+	DECLARE_BITMAP(used_counters, NI_PMU_COUNTER_NUM);
+	struct perf_event *events[NI_PMU_COUNTER_NUM];
+	struct perf_event *cycle_event; <i>/ 特殊的那个cycle计数器
+	struct pmu pmu;
+	unsigned int irq;
+	unsigned int on_cpu;
+	struct device *dev;
+	struct ni_node *nodes[0];
+};
+标识一个组件模型的事件
+struct ni_event_desc {
+	u64 eventid;
+	const char *name;
+};
+唯一标识一个实例事件，ni_pmu区分了不同pccs域，node区分到了是那个node，ev_desc区分到了事件id
+事件名区分了node
+struct ni_event_attr {
+	struct device_attribute attr;
+	struct ni_event_desc *ev_desc; /</i> 如果这个不为空，则是事件类型1
+	struct ni_node *node;          // 如果ev_desc为空，这个不为空，则是事件类型2，否则3
+};
+</p>
 
 
-<colgroup>
-<col  class="org-left">
+<p>
+config:
+0-5  8-13 16-21 24-29 32-37 40-45 48-53 56-61 63
+e1   e2   e3    e4    e5    e6    e7    e8    cycles
+event
+以节点为单位，增加节点数量个特殊属性。其中内容为：
+e1=?,e2=?,e3=?,e4=?,e5=?,e6=?,e7=?,e8=?,nodeid=x
+</p>
 
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
-<div class="outline-text-2" id="text-2">
-<table>
+<p>
+增加特殊事件cycles，其中内容为：
+cycles=1
+</p>
+
+<p>
+config1
+0-15       16-31
+nodetype  nodeid
+</p>
+
+<p>
+因此，按上述划分，事件有三类
+</p>
+<ol class="org-ol">
+<li>通用事件，spec上有的</li>
+<li>节点汇合事件，说明节点可以有多个事件的</li>
+<li>cycles事件</li>
+</ol>
 
 
-<colgroup>
-<col  class="org-left">
+<p>
+Global --&gt; VD --&gt; PD --&gt; CD --&gt; nodes
+一个CD一个PMU
+一个PD一个IRQ
+</p>
 
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
+<p>
+上述内容已经基本更新迭代，具体内容看源码
+</p>
 
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p>
+<span class="timestamp-wrapper"><span class="timestamp">&lt;2024-01-25 Thu&gt;</span></span>：要测试的内容：
+中断溢出，
+热插拔
+</p>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>

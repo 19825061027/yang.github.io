@@ -1,0 +1,18 @@
+#+INCLUDE: "../prefix.org"
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
+#+HTML_HEAD: <script src="./js/jquery.min.js"></script>
+#+HTML_HEAD: <script src="./js/bootstrap.min.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="./js/readtheorg.js"></script>
+#+TITLE: 欢迎来到我的博客
+* python
+|[[./2024-3-29/d67c092dd0-DONE.html][Call function directly in cmd line                                              ]]|2024年03月29日|
+* others
+|[[./2024-5-22/7e74f59268-RECD.html][blog 方案                                                                         ]]|2024年05月22日|
+|[[./2024-4-10/2a6ca27ca3-RECD.html][terminal配置文件                                                                    ]]|2024年04月10日|
+|[[./2023-9-21/cdcf1fd0a8-STDY.html][用户层对采集类型的处理,以及采集内容都可以是啥                                                         ]]|2023年09月21日|
+|[[./2023-9-19/ee98557e7d-STDY.html][理清bus/device_driver/device之间的关系                                                 ]]|2023年09月19日|
+|[[./2023-8-30/57a7184543-STDY.html][epapr 的生成及其初始运行                                                                 ]]|2023年08月30日|
+|[[./2023-8-29/614a00c829-STDY.html][学习rootfs相关内容并理解多种方式加载的区别                                                        ]]|2023年08月29日|

@@ -1,0 +1,26 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: 文件同时可被bash和C使用                  
+
+* detail
+#+begin_src bash
+#if 0
+: << 'COMMENT'
+shell comments
+COMMENT
+# SHELLSHELLSHELLSHELLSHELLSHELL #
+
+
+# SHELLSHELLSHELLSHELLSHELLSHELL #
+:<< 'COMMENT'
+#else
+/* CCCCCCCCCCCCCCCCCCCCCCCCC */
+
+
+   
+/* CCCCCCCCCCCCCCCCCCCCCCCCC */   
+#endif
+#if 0
+COMMENT
+#endif
+#+end_src

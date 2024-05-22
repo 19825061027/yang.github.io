@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>linux physical_memory.rst</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,80 +204,54 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
-<div id="table-of-contents" role="doc-toc">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents" role="doc-toc">
-<ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
-</ul>
+<h1 class="title">linux physical_memory.rst</h1>
+<ol class="org-ol">
+<li>sizeof(struct page) = 64</li>
+<li>pnf_to_page and page_to_pnf采用vmemmap使用虚拟映射内存映射来优化</li>
+<li>vmemmap是struct page *类型，指向一个虚拟连续的struct page对象阵列。</li>
+<li>pfn是vmemmap数组索引，可以直接获得目标page</li>
+<li>vmemmap范围分配：</li>
+</ol>
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">sparse_init</span>():
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">sparse_init_nid</span>():
+        <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">__populate_section_memmap</span>():
+            <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">vmemmap_populate</span>():
+                <span style="font-weight: bold;">pass</span>
+</pre>
 </div>
-</div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
-<div class="outline-text-2" id="text-1">
-<table>
+<div class="org-src-container">
+<pre class="src src-c"><span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">void</span> <span style="font-weight: bold; font-style: italic;">__init</span> sparse_init_nid(<span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">nid</span>, <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">pnum_begin</span>,
+                                   <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">pnum_end</span>,
+                                   <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> map_count)
+{
+        <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">mem_section_usage</span> *<span style="font-weight: bold; font-style: italic;">usage</span>;
+        <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">pnum</span>;
+        <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">page</span> *<span style="font-weight: bold; font-style: italic;">map</span>;
 
+        usage = sparse_early_usemaps_alloc_pgdat_section(NODE_DATA(nid),
+                        mem_section_usage_size() * map_count);
 
-<colgroup>
-<col  class="org-left">
+        sparse_buffer_init(map_count * section_map_size(), nid);
+        <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#24320;&#22987;&#36941;&#21382;&#65292;&#27599;&#27425;2^17&#20010;page&#65292;&#36941;&#21382;8&#27425;: 8 * 2^17 * 4k = 2^32 = 4G</span>
+        for_each_present_section_nr(pnum_begin, pnum) {
+                <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">pfn</span> = section_nr_to_pfn(pnum);
 
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
-<div class="outline-text-2" id="text-2">
-<table>
+                <span style="font-weight: bold;">if</span> (pnum &gt;= pnum_end)
+                        <span style="font-weight: bold;">break</span>;
+                <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#33719;&#21462;&#20174;vmemmap&#24320;&#22987;&#30340;&#34394;&#25311;&#22320;&#22336;&#20197;&#21450;&#23545;&#24212;&#23384;&#25918;struct page&#30340;&#29289;&#29702;&#22320;&#22336;</span>
+                map = __populate_section_memmap(pfn, PAGES_PER_SECTION,
+                                nid, <span style="font-weight: bold; text-decoration: underline;">NULL</span>, <span style="font-weight: bold; text-decoration: underline;">NULL</span>);
 
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
+                check_usemap_section_nr(nid, usage);
+                sparse_init_one_section(__nr_to_section(pnum), pnum, map, usage,
+                                SECTION_IS_EARLY);
+                usage = (<span style="font-weight: bold; text-decoration: underline;">void</span> *) usage + mem_section_usage_size();
+        }
+        sparse_buffer_fini();
+        <span style="font-weight: bold;">return</span>;
+}
+</pre>
 </div>
 </div>
 <div id="postamble" class="status">

@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-05-22 Wed 16:46 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>学习设备树格式及其生成使用原理</title>
+<meta name="author" content="Yang" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../css/readtheorg.css"/>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
+<script type="text/javascript" src="../js/readtheorg.js"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">学习设备树格式及其生成使用原理</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgfa0d4f1">1. 2.2 Devicetree Structure and Conventions</a>
+<ul>
+<li><a href="#org8403c52">1.1. Generic Names Recommendation</a></li>
+<li><a href="#org4c5d955">1.2. Path Names</a></li>
+<li><a href="#org43295e5">1.3. Peoperty Values</a></li>
+</ul>
+</li>
+<li><a href="#org68c1f75">2. Standard Properties</a>
+<ul>
+<li><a href="#orgd13f848">2.1. compatible</a></li>
+<li><a href="#org2b05d61">2.2. model</a></li>
+<li><a href="#orgffb3387">2.3. phandle</a></li>
+<li><a href="#org1b88b74">2.4. status</a></li>
+<li><a href="#org7f7a754">2.5. #address-cells and #size-cells</a></li>
+<li><a href="#org6f3d4cc">2.6. reg</a></li>
+<li><a href="#org4ef65a3">2.7. ranges</a></li>
+</ul>
+</li>
+<li><a href="#org8fa4c05">3. Properties for interrupt generating devices</a></li>
+<li><a href="#orgc3e4010">4. Base Device Node Types</a>
+<ul>
+<li><a href="#org41f8ed5">4.1. /memory node</a></li>
+</ul>
+</li>
+<li><a href="#orgefbfe1e">5. Kernel设备树文档</a></li>
+<li><a href="#org61294f4">6. Device Population</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgfa0d4f1" class="outline-2">
+<h2 id="orgfa0d4f1"><span class="section-number-2">1.</span> 2.2 Devicetree Structure and Conventions</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+node-name@unit-address
+</p>
+<ol class="org-ol">
+<li>The node-name shall start with a lower or uppercase character and should describe the general class of device.</li>
+<li><p>
+The unit-address component of the name is specific to the bus type on which the node sits. It consists of one or more ASCLL characters from the set of characters in below table.
+</p>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Character</th>
+<th scope="col" class="org-left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">0-9</td>
+<td class="org-left">digit</td>
+</tr>
+
+<tr>
+<td class="org-left">a-z</td>
+<td class="org-left">lowercase letter</td>
+</tr>
+
+<tr>
+<td class="org-left">A-Z</td>
+<td class="org-left">uppercase letter</td>
+</tr>
+
+<tr>
+<td class="org-left">,</td>
+<td class="org-left">comma</td>
+</tr>
+
+<tr>
+<td class="org-left">.</td>
+<td class="org-left">period</td>
+</tr>
+
+<tr>
+<td class="org-left">-</td>
+<td class="org-left">underscore</td>
+</tr>
+
+<tr>
+<td class="org-left">+</td>
+<td class="org-left">plus sign</td>
+</tr>
+
+<tr>
+<td class="org-left">-</td>
+<td class="org-left">dash</td>
+</tr>
+</tbody>
+</table></li>
+<li>In the case of node-name without an @unit-address the node-name shall be unique from any property names at the same level in the tree.</li>
+<li>The root node does not have a node-name or unit-address. It is identified by a forward slash(/).
+<ul class="org-ul">
+<li>/
+<ul class="org-ul">
+<li>cpus
+<ul class="org-ul">
+<li>cpu@0</li>
+<li>cpu@1</li>
+</ul></li>
+<li>memory@0</li>
+<li>uart@fe0010000</li>
+<li>ethernet@fe002000</li>
+<li>ethernet@fe003000</li>
+</ul></li>
+</ul></li>
+<li>The nodes with the name cpu are distinguished by their unit-address values of 0 and 1.</li>
+<li>The nodes with the name ethernet are distinguished by their unit-address values of fe002000 and fe003000.</li>
+</ol>
+</div>
+
+<div id="outline-container-org8403c52" class="outline-3">
+<h3 id="org8403c52"><span class="section-number-3">1.1.</span> Generic Names Recommendation</h3>
+<div class="outline-text-3" id="text-1-1">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">adc</td>
+<td class="org-left">clock-controller</td>
+<td class="org-left">ethernet</td>
+<td class="org-left">accelerometer</td>
+<td class="org-left">co2-sensor</td>
+</tr>
+
+<tr>
+<td class="org-left">air-pollution-sensor</td>
+<td class="org-left">compact-flash</td>
+<td class="org-left">fdc</td>
+<td class="org-left">atm</td>
+<td class="org-left">cpu</td>
+</tr>
+
+<tr>
+<td class="org-left">flash</td>
+<td class="org-left">cpus</td>
+<td class="org-left">gpio</td>
+<td class="org-left">crypto</td>
+<td class="org-left">disk</td>
+</tr>
+
+<tr>
+<td class="org-left">gpu</td>
+<td class="org-left">bluetooth</td>
+<td class="org-left">display</td>
+<td class="org-left">bus</td>
+<td class="org-left">dma-controller</td>
+</tr>
+
+<tr>
+<td class="org-left">hdmi</td>
+<td class="org-left">cache-controller</td>
+<td class="org-left">dsi</td>
+<td class="org-left">hwlock</td>
+<td class="org-left">camera</td>
+</tr>
+
+<tr>
+<td class="org-left">dsp</td>
+<td class="org-left">i2c</td>
+<td class="org-left">can</td>
+<td class="org-left">eeprom</td>
+<td class="org-left">i2c-mux</td>
+</tr>
+
+<tr>
+<td class="org-left">charger</td>
+<td class="org-left">efuse</td>
+<td class="org-left">ide</td>
+<td class="org-left">clock</td>
+<td class="org-left">endpoint</td>
+</tr>
+
+<tr>
+<td class="org-left">interrupt-controller</td>
+<td class="org-left">iommu</td>
+<td class="org-left">nvram</td>
+<td class="org-left">serial</td>
+<td class="org-left">isa</td>
+</tr>
+
+<tr>
+<td class="org-left">sound</td>
+<td class="org-left">spi</td>
+<td class="org-left">keyboard</td>
+<td class="org-left">key</td>
+<td class="org-left">pci</td>
+</tr>
+
+<tr>
+<td class="org-left">sram-controller</td>
+<td class="org-left">pcie</td>
+<td class="org-left">led</td>
+<td class="org-left">leds</td>
+<td class="org-left">pmu</td>
+</tr>
+
+<tr>
+<td class="org-left">usb</td>
+<td class="org-left">scsi</td>
+<td class="org-left">memory</td>
+<td class="org-left">mmc</td>
+<td class="org-left">mailbox</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-org4c5d955" class="outline-3">
+<h3 id="org4c5d955"><span class="section-number-3">1.2.</span> Path Names</h3>
+<div class="outline-text-3" id="text-1-2">
+<ul class="org-ul">
+<li>A node in the devicetree can be uniquely identified by specifying the full path from the root node, through all descendant nodes, to the desired node.</li>
+<li>The convention for specifying a devicee path is:
+/node-name-1/node-name-2/node-name-N
+<ul class="org-ul">
+<li>For example, the device path to cpu#1 would be:
+/cpus/cpu@1</li>
+<li>The path to the root is /.</li>
+</ul></li>
+<li>Nonstandard property names should specify a unique string prefix, such as a stock ticker symbol, identifying the name of the company or organization that defined the property. Examples:
+fsl,channerl-fifo-len
+ibm,ppc-interrupt-server#s
+linux,network-index</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org43295e5" class="outline-3">
+<h3 id="org43295e5"><span class="section-number-3">1.3.</span> Peoperty Values</h3>
+<div class="outline-text-3" id="text-1-3">
+<ul class="org-ul">
+<li>A property value is an array of zero or more bytes that contain information associated with the property.</li>
+</ul>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Value</th>
+<th scope="col" class="org-left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">&lt;empty&gt;</td>
+<td class="org-left">Value is empty.</td>
+</tr>
+
+<tr>
+<td class="org-left">&lt;u32&gt;</td>
+<td class="org-left">A 32-bit integer in big-endian format.</td>
+</tr>
+
+<tr>
+<td class="org-left">&lt;u64&gt;</td>
+<td class="org-left">Represents a 64-bit integer in big-endian format.</td>
+</tr>
+
+<tr>
+<td class="org-left">&lt;string&gt;</td>
+<td class="org-left">Strings are printable and null-terminated.</td>
+</tr>
+
+<tr>
+<td class="org-left">&lt;prop-encoded-array&gt;</td>
+<td class="org-left">Format is specific to the property.</td>
+</tr>
+
+<tr>
+<td class="org-left">&lt;phandle&gt;</td>
+<td class="org-left">A &lt;u32&gt; value.</td>
+</tr>
+
+<tr>
+<td class="org-left">&lt;stringlist&gt;</td>
+<td class="org-left">A list of &lt;string&gt; values concatenated together.</td>
+</tr>
+</tbody>
+</table>
+
+<ul class="org-ul">
+<li><p>
+Example: the 32-bit value 0x11223344 would be represented in memory as:
+</p>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-right">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">address</td>
+<td class="org-right">11</td>
+</tr>
+
+<tr>
+<td class="org-left">address+1</td>
+<td class="org-right">22</td>
+</tr>
+
+<tr>
+<td class="org-left">address+2</td>
+<td class="org-right">33</td>
+</tr>
+
+<tr>
+<td class="org-left">address+3</td>
+<td class="org-right">44</td>
+</tr>
+</tbody>
+</table></li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org68c1f75" class="outline-2">
+<h2 id="org68c1f75"><span class="section-number-2">2.</span> Standard Properties</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-orgd13f848" class="outline-3">
+<h3 id="orgd13f848"><span class="section-number-3">2.1.</span> compatible</h3>
+<div class="outline-text-3" id="text-2-1">
+<ul class="org-ul">
+<li>Value type: &lt;stringlist&gt;</li>
+<li>Example: compatible = "fsl,mpc8641", "ns16550";</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org2b05d61" class="outline-3">
+<h3 id="org2b05d61"><span class="section-number-3">2.2.</span> model</h3>
+<div class="outline-text-3" id="text-2-2">
+<ul class="org-ul">
+<li>Value type: &lt;string&gt;</li>
+<li>Example: mode = "fsl,MPC8349EMITX";</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgffb3387" class="outline-3">
+<h3 id="orgffb3387"><span class="section-number-3">2.3.</span> phandle</h3>
+<div class="outline-text-3" id="text-2-3">
+<ul class="org-ul">
+<li>Value type: &lt;u32&gt;</li>
+<li>Description: The phandle property specifies a numerical identifier for a node that is unique within the devicetree. The phandle property value is used by other nodes that need to refer to the node associated with the property.</li>
+<li><p>
+Example:
+</p>
+<div class="org-src-container">
+<pre class="src src-json">      pic@<span style="font-weight: bold; text-decoration: underline;">10000000</span> {
+         phandle = &lt;<span style="font-weight: bold; text-decoration: underline;">1</span>&gt;;
+         interrupt-controller;
+          reg = &lt;<span style="font-weight: bold; text-decoration: underline;">0</span>x<span style="font-weight: bold; text-decoration: underline;">10000000</span> <span style="font-weight: bold; text-decoration: underline;">0</span>x<span style="font-weight: bold; text-decoration: underline;">100</span>&gt;;
+      };
+
+      another-device-node {
+          interrupt-parent = &lt;<span style="font-weight: bold; text-decoration: underline;">1</span>&gt;;
+      };
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org1b88b74" class="outline-3">
+<h3 id="org1b88b74"><span class="section-number-3">2.4.</span> status</h3>
+<div class="outline-text-3" id="text-2-4">
+<ul class="org-ul">
+<li>Value type: &lt;string&gt;</li>
+<li><p>
+The status property indicates the operaional status of a device. The lack of a status property should be treated as if the property existed with the value of "okay".
+</p>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Value</th>
+<th scope="col" class="org-left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">"okay"</td>
+<td class="org-left">Device is operational.</td>
+</tr>
+
+<tr>
+<td class="org-left">"disabled"</td>
+<td class="org-left">Isn't operational. But may becomre operational in the future.</td>
+</tr>
+
+<tr>
+<td class="org-left">"reserved"</td>
+<td class="org-left">"Device is operational, but should not be used."</td>
+</tr>
+
+<tr>
+<td class="org-left">"fail"</td>
+<td class="org-left">Device is not operational.</td>
+</tr>
+
+<tr>
+<td class="org-left">"fail-sss"</td>
+<td class="org-left">Device is not operational.</td>
+</tr>
+</tbody>
+</table></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org7f7a754" class="outline-3">
+<h3 id="org7f7a754"><span class="section-number-3">2.5.</span> #address-cells and #size-cells</h3>
+<div class="outline-text-3" id="text-2-5">
+<ul class="org-ul">
+<li>Propery name: #address-cells, #size-cells</li>
+<li>Value type: &lt;u32&gt;</li>
+<li>Description:
+The #address-cells and #size-cells properties may be used in any device node that has children in the devicetree hierarchy and describes how child device nodes should be addressed. The #address-cells property defines the number of &lt;u32&gt; cells used to encode the address field in a child node's reg property. The #size-cells property defines the number of &lt;u32&gt; cells used to encode the size field in a child node's reg property.
+The #address-cells and #size-cells properties are not inherited from ancestors in the devicetree. They shall be explicitly defined.
+A DTSpec-compliant boot program shall supply #address-cells and #size-cells on all nodes that have children. If missing, a client program should assume a default value of 2 for #address-cells, and a value of 1 for #size-cells.</li>
+<li><p>
+Example:
+</p>
+<div class="org-src-container">
+<pre class="src src-json">      soc {
+          #address-cells = &lt;<span style="font-weight: bold; text-decoration: underline;">1</span>&gt;;
+          #size-cells = &lt;<span style="font-weight: bold; text-decoration: underline;">1</span>&gt;;
+
+          serial@<span style="font-weight: bold; text-decoration: underline;">4600</span> {
+              compatible = <span style="font-style: italic;">"ns16550"</span>;
+              reg = &lt;<span style="font-weight: bold; text-decoration: underline;">0</span>x<span style="font-weight: bold; text-decoration: underline;">4600</span> <span style="font-weight: bold; text-decoration: underline;">0</span>x<span style="font-weight: bold; text-decoration: underline;">100</span>&gt;;
+              clock-frequency = &lt;<span style="font-weight: bold; text-decoration: underline;">0</span>&gt;;
+              interrupts = &lt;<span style="font-weight: bold; text-decoration: underline;">0</span>xA <span style="font-weight: bold; text-decoration: underline;">0</span>x<span style="font-weight: bold; text-decoration: underline;">8</span>&gt;;
+              interrupt-parent = &lt;&amp;ipic&gt;;
+          };
+      };
+</pre>
+</div></li>
+<li>In this example, the #address-cells and #size-cells properties of the soc node are both set to 1. This setting specifies that one cell is required to represent an address and one cell is required to represent the size of nodes that are children of this node.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org6f3d4cc" class="outline-3">
+<h3 id="org6f3d4cc"><span class="section-number-3">2.6.</span> reg</h3>
+<div class="outline-text-3" id="text-2-6">
+<ul class="org-ul">
+<li>Property name: reg</li>
+<li>Property value: &lt;prop-encoded-array&gt; encoded as an arbitrary number of (address, length) pairs.</li>
+<li>Description: The reg property describes the address of the device's resources within the address space defined by its parent bus. Most commonly this means the offsets and lengths of memory-mapped IO register blocks, but may have a diffirent meaning on some bus types. Addresses in the address space defined by the root node are CPU real addresses.
+The value is &lt;prop-encoded-array&gt;, composed of an arbitrary number of pairs of address and length, &lt;address length&gt;. The number of &lt;u32&gt; cells required to specify the address and length are bus-specific and are specified by the #size-cells, the filed in the value of reg shall be omitted.</li>
+<li>Example:
+reg = &lt;0x3000 0x20 0xFE00 0x100&gt;;</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org4ef65a3" class="outline-3">
+<h3 id="org4ef65a3"><span class="section-number-3">2.7.</span> ranges</h3>
+<div class="outline-text-3" id="text-2-7">
+<ul class="org-ul">
+<li>Value type: &lt;empty&gt; or &lt;prop-encoded-array&gt; encoded as an arbitrary number of(child-bus-address, parent-bus-address, length) triplet.</li>
+<li>Description: The ranges property provides a means of defining a mapping or translation between the address space of the bus(the child address space) and the address space of the bus node's parent(the parent address space).</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8fa4c05" class="outline-2">
+<h2 id="org8fa4c05"><span class="section-number-2">3.</span> Properties for interrupt generating devices</h2>
+<div class="outline-text-2" id="text-3">
+<div class="org-src-container">
+<pre class="src src-json">  interrupts = &lt;<span style="font-weight: bold; text-decoration: underline;">0</span>xA <span style="font-weight: bold; text-decoration: underline;">8</span>&gt;;
+</pre>
+</div>
+<p>
+an interrupt number: 0xA
+level/sense encoding: 8
+</p>
+
+<div class="org-src-container">
+<pre class="src src-json">  interrupts-extended = &lt;&amp;pic <span style="font-weight: bold; text-decoration: underline;">0</span>xA <span style="font-weight: bold; text-decoration: underline;">8</span>&gt;, &lt;&amp;gic <span style="font-weight: bold; text-decoration: underline;">0</span>xda&gt;;
+</pre>
+</div>
+<p>
+This example shows how a device with two interrupt outputs connected to two separate interrupt controllers would descibe the connection using an interrupts-extended property. pic is and interrupt controller with an #interrupt-cells specifier of 2, which gic is an interrupt controller with an #interrupts-cells specifier of 1.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc3e4010" class="outline-2">
+<h2 id="orgc3e4010"><span class="section-number-2">4.</span> Base Device Node Types</h2>
+<div class="outline-text-2" id="text-4">
+<ul class="org-ul">
+<li>All devicetrees shall have a root node and the following nodes shall be present at the root of all devicetrees:
+<ul class="org-ul">
+<li>One /cpus node</li>
+<li>At least one /memory node</li>
+</ul></li>
+</ul>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Property Name</th>
+<th scope="col" class="org-left">Usage</th>
+<th scope="col" class="org-left">Value Type</th>
+<th scope="col" class="org-left">Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">#address-cells</td>
+<td class="org-left">R</td>
+<td class="org-left">&lt;u32&gt;</td>
+<td class="org-left">指明root的子节点reg属性中地址的数量</td>
+</tr>
+
+<tr>
+<td class="org-left">#size-cells</td>
+<td class="org-left">R</td>
+<td class="org-left">&lt;u32&gt;</td>
+<td class="org-left">指明root的子节点reg属性中size的数量</td>
+</tr>
+
+<tr>
+<td class="org-left">model</td>
+<td class="org-left">R</td>
+<td class="org-left">&lt;string&gt;</td>
+<td class="org-left">具体板子:"manufacturer,model-number"</td>
+</tr>
+
+<tr>
+<td class="org-left">compatible</td>
+<td class="org-left">R</td>
+<td class="org-left">&lt;stringlist&gt;</td>
+<td class="org-left">指明兼容性:"manufacturer,model-number"</td>
+</tr>
+
+<tr>
+<td class="org-left">serial-number</td>
+<td class="org-left">O</td>
+<td class="org-left">&lt;string&gt;</td>
+<td class="org-left">设备的序列号</td>
+</tr>
+
+<tr>
+<td class="org-left">chassis-type</td>
+<td class="org-left">OR</td>
+<td class="org-left">&lt;string&gt;</td>
+<td class="org-left">系统类型：</td>
+</tr>
+</tbody>
+</table>
+<p>
+Usage legend: R=Required, O=Optional, OR=Optional but Recommended, SD=See Definition.
+系统类型：
+</p>
+<ul class="org-ul">
+<li>"desktop"</li>
+<li>"laptop"</li>
+<li>"convertible"</li>
+<li>"server"</li>
+<li>"tablet"</li>
+<li>"handset"</li>
+<li>"watch"</li>
+<li>"embedded"</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-json">  aliases {
+      serial<span style="font-weight: bold; text-decoration: underline;">0</span> = <span style="font-style: italic;">"/simple-bus@fe000000/serial@11c500"</span>;
+      ethernet<span style="font-weight: bold; text-decoration: underline;">0</span> = <span style="font-style: italic;">"/simple-bus@fe000000/ethernet@31c000"</span>;
+  };
+</pre>
+</div>
+</div>
+<div id="outline-container-org41f8ed5" class="outline-3">
+<h3 id="org41f8ed5"><span class="section-number-3">4.1.</span> /memory node</h3>
+<div class="outline-text-3" id="text-4-1">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Property Name</th>
+<th scope="col" class="org-left">Usage</th>
+<th scope="col" class="org-left">Value Type</th>
+<th scope="col" class="org-left">Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">device_type</td>
+<td class="org-left">R</td>
+<td class="org-left">&lt;string&gt;</td>
+<td class="org-left">需要填上"memory"</td>
+</tr>
+
+<tr>
+<td class="org-left">reg</td>
+<td class="org-left">R</td>
+<td class="org-left">&lt;prop-encoded-array&gt;</td>
+<td class="org-left">任意数量addr &amp; size组成</td>
+</tr>
+
+<tr>
+<td class="org-left">initial-mapped-area</td>
+<td class="org-left">O</td>
+<td class="org-left">&lt;prop-encoded-array&gt;</td>
+<td class="org-left">初始映射区域的addr &amp; size</td>
+</tr>
+
+<tr>
+<td class="org-left">hotplug</td>
+<td class="org-left">O</td>
+<td class="org-left">&lt;empty&gt;</td>
+<td class="org-left">显式告知OS此内存可被移除</td>
+</tr>
+</tbody>
+</table>
+<ol class="org-ol">
+<li>如果通过UEFI启动，系统内存映射通过GetMemoryMap()这个UEFI启动时服务获取；OS必须忽略/memory节点；</li>
+</ol>
+<p>
+/memory Example:
+</p>
+<ul class="org-ul">
+<li>一个64-bit的Power系统有以下物理内存布局：
+<ul class="org-ul">
+<li>RAM: start: 0x0, length: 0x80000000(2G)</li>
+<li>RAM: start: 0x100000000, length: 0x100000000(4G)</li>
+<li>假设#address-cells=&lt;2&gt; #size-cells=&lt;2&gt;</li>
+</ul></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-dts">  memory@0{
+  device_type = "memory";
+  reg = &lt;0x00000000 0x00000000 0x00000000 0x80000000
+         0x00000001 0x00000000 0x00000001 0x00000000&gt;;
+};
+</pre>
+</div>
+<p>
+或者：
+</p>
+<div class="org-src-container">
+<pre class="src src-dts">memory@0 {
+  device_type = "memory";
+  reg = &lt;0x00000000 0x00000000 0x00000000 0x80000000&gt;;
+};
+memory@100000000 {
+  device_type = "memory";
+  reg = &lt;0x00000001 0x00000000 0x00000001 0x00000000&gt;;
+};
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgefbfe1e" class="outline-2">
+<h2 id="orgefbfe1e"><span class="section-number-2">5.</span> Kernel设备树文档</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+2.1 High Level View
+</p>
+<ol class="org-ol">
+<li>DT既是描述硬件的数据结构；DT只是提供了一种解耦合硬件平台和软件驱动的能力；</li>
+<li>Linux使用DT有三个主要目的：
+<ol class="org-ol">
+<li>平台认证(platform identification)</li>
+<li>运行时配置(runtime configuration)</li>
+<li>设备填充(device population)</li>
+</ol></li>
+</ol>
+<p>
+2.2 Platform Identification
+</p>
+<ol class="org-ol">
+<li>Kernel使用DT中的数据信息来辨识指定机器；</li>
+</ol>
+<p>
+2.3 Runtime configuration
+</p>
+<div class="org-src-container">
+<pre class="src src-dts">  chosen {
+  bootargs = "console=ttyS0,115200 loglevel=8";
+  initrd-start = &lt;0xc8000000&gt;;
+  initrd-end = &lt;0xc8200000&gt;;
+};
+</pre>
+</div>
+<p>
+earlyboot期间，架构启动代码通过不同的helper多次回调of_scan_flat_dt()在页启动前，解析设备树数据。of_scan_flat_dt()代码遍历设备树，使用helpers提取earlyboot启动时所需的信息。比如early_init_dt_scan_chosen()用来解析chosen节点。early_init_dt_scan_root()用来初始化DT地址空间模型。early_init_dt_scan_memory()用来决定可用RAM的size和location。
+ARM平台上，setup_machine_fdt()函数用来负责挑选正确的machine_desc之后做早期设备树遍历。
+</p>
+</div>
+</div>
+<div id="outline-container-org61294f4" class="outline-2">
+<h2 id="org61294f4"><span class="section-number-2">6.</span> Device Population</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+辨识完板子，解析完早期配置数据之后，kernel初始化在normal方式下进行。在其中的某些位置处，unflatten_device_tree()将数据转换成更有效的运行时表达。这在一下位置也会调用：.init_early()/.init_irq()/.init_machine()。
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yang</p>
+<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

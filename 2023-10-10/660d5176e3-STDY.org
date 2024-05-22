@@ -1,0 +1,17 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: Power8 CACHE
+
+10.2 Chiplet
+10.2.1 Level-2 Cache
+L2是每个core都有一个,不分数据和指令; 8路组关联512K,可以通过私有低延迟总线快速访问私有8MB L3缓存区域;
+L2维护完全的硬件一致性,可以给其他core(无论是否同一个芯片)提供有效数据.
+逻辑上来说,L2缓存是一个行内缓存;不像L1是Store-through的,L2是Store-in类型的;
+每一个L2由512个相关联的sets(called congruence classes)组成;每一个congruence class包含8个128bytes的缓存行;
+9-bit congruence class address 中真实地址位48:56;
+L1数据缓存是Store-through设计. 因此当一个可缓存的store从SRQ(store record queue)中移除时,如果hit到了L1 D-cache,那么此行进行更新;?????
+此外,所有的stores(hit or miss)直接到L2 cache;
+如果store是L1 D-cache miss,则数据不写到当前D-cache,此行也不从L2 reload进L1,也就是在store miss时,不会进行L1 D-cache line allocate.
+
+10.2.2 Level-3 Cache
+Each L3 cache region on the POWER8 chip is a unified victim cache for its respective core/L2 cache, as well as for other L3 caches on chip.

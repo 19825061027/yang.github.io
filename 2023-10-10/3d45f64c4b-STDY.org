@@ -1,0 +1,10 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: Perf_event_exec(void)
+
+事件在目标二进制文件执行时使能
+load_elf_binary()
+  --> begin_new_exec(struct linux_binprm *bprm)
+    --> perf_event_exec()
+      --> perf_event_enable_on_exec()
+      --> perf_event_remove_on_exec()

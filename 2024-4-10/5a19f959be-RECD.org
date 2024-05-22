@@ -1,0 +1,23 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: 重装系统后的命令                          
+
+* 安装系统必备
+#+begin_src bash
+  apt install build-essential texinfo libncurses-dev terminfo flex bison libelf-dev bc mtools gdb qemu-system-x86 global
+  apt install xclip libjpeg-dev # 为了org-mode支持剪贴图片并显式，但是x window模式下，不想使用
+  apt install libgnutls28-dev # 为支持emacs ./configure --with-gnutls 以及后面builtin openssl访问https
+  apt install libmagickwand-dev # for --with-imagemagick. Even don't know what imagemagick doing.
+#+end_src
+
+* 安装 emacs
+#+begin_src bash
+  wget https://ftp.gnu.org/gnu/emacs/emacs-29.3.tar.xz
+  tar -Jxf emacs-29.3.tar.xz
+  cd emacs-29.3
+  make 
+  ./configure --enable-locallisppath=/home/yjl00405/.emacs.d/lisp --with-gnutls  --with-png --with-gif --with-jpeg --with-webp --with-imagemagick
+  make -j20 && make install
+  emacs --version
+
+#+end_src

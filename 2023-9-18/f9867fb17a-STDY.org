@@ -1,0 +1,5 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: linux-6.5版本编译perf命令
+
+make -j20 PYTHON=/bin/python3.9 NO_LIBTRACEEVENT=1

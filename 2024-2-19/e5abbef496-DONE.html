@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-05-22 Wed 16:46 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>clock子系统</title>
+<meta name="author" content="Yang" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../css/readtheorg.css"/>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
+<script type="text/javascript" src="../js/readtheorg.js"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">clock子系统</h1>
+<p>
+Reference: <a href="https://zhuanlan.zhihu.com/p/605593587">https://zhuanlan.zhihu.com/p/605593587</a>
+驱动调用通用API操作时钟。
+</p>
+
+<p>
+基本概念：
+晶振：晶源振荡器，提供时钟。
+PLL：Phase lock loop，锁相环。用于提升频率。
+OSC: oscillator的简写，振荡器。
+</p>
+
+<p>
+Clock子系统：
+由CCF(common clock framework)框架管理，向上给用户提供通用的时钟接口，向下给驱动
+开发者提供硬件操作接口。
+Consumer: struct clk
+CCF: struct clk_core, 每个注册设备都对应一个clk_core
+Provider: struct clk_hw, struct clk_init_data, struct clk_ops
+</p>
+
+<p>
+Consumer：
+时钟使用者，clock子系统向consumer提供通用时钟API接口，使其可以屏蔽顶层硬件差异：
+struct clk *clk_get(struct device *dev, const char *id);
+struct clk *devm_clk_get(struct device *dev, const char *id);
+int clk_enable(struct clk *clk);   <i>/ enable clock, no sleep
+void clk_disable(struct clk *clk); /</i> disabl clock, no sleep
+unsigned long clk_get_rate(struct clk *clk);
+void clk_put(struct clk *clk);
+long clk_round_rate(struct clk *clk, unsigned long rate);
+int clk_set_rate(struct clk *clk, unsigned long rate);
+int clk_set_parent(struct clk *clk, struct clk *parent);
+struct clk *clk_get_parent(struct clk *clk);
+int clk_prepare(struct clk *clk);
+void clk_unprepare(struct clk *clk);
+int clk_prepare_enable(struct clk *clk);    <i>/ enable clock, maybe sleep
+void clk_disable_unprepare(struct clk *clk);/</i> disabl clock, maybe sleep
+</p>
+
+<p>
+Provider:
+struct clk_hw: 表示一个具体的硬件时钟。
+struct clk_init_data: struct clk_hw结构体成员，用于表示该时钟下的初始化数据，如
+时钟名字name，操作函数ops等。
+</p>
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">clk_hw</span> {
+          <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">clk_core</span> *<span style="font-weight: bold; font-style: italic;">core</span>;
+          <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">clk</span> *<span style="font-weight: bold; font-style: italic;">clk</span>;
+          <span style="font-weight: bold;">const</span> <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">clk_init_data</span> *<span style="font-weight: bold; font-style: italic;">init</span>;
+  };
+
+  <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">clk_init_data</span> {
+          <span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">char</span> *<span style="font-weight: bold; font-style: italic;">name</span>; <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#26102;&#38047;&#21517;</span>
+          <span style="font-weight: bold;">const</span> <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">clk_ops</span> *<span style="font-weight: bold; font-style: italic;">ops</span>; <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#26102;&#38047;&#30828;&#20214;&#25805;&#20316;&#20989;&#25968;&#38598;&#21512;</span>
+          <span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">char</span> *<span style="font-weight: bold;">const</span> *<span style="font-weight: bold; font-style: italic;">parent_names</span>; <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#29238;&#26102;&#38047;&#21517;&#23383;</span>
+          <span style="font-weight: bold;">const</span> <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">clk_parent_data</span> *<span style="font-weight: bold; font-style: italic;">parent_data</span>;
+          <span style="font-weight: bold;">const</span> <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">clk_hw</span> **<span style="font-weight: bold; font-style: italic;">parent_hws</span>;
+          <span style="font-weight: bold; text-decoration: underline;">u8</span> <span style="font-weight: bold; font-style: italic;">num_parents</span>;
+          <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">flags</span>;
+  };
+</pre>
+</div>
+
+<p>
+clk_ops在consumer调用相关api时，ccf框架负责调用此ops。
+常用函数：
+recalc_rate: 通过查询硬件，重新计算此时钟速率。可选。如果函数为空，则时钟初始化频率为0
+round_rate: 给定目标速率作为输入，返回实际支持的最接近速率
+set_rate: 更改此时钟的速率。请求的速率由第二个参数指定。
+enable/disable: 使能/失能
+</p>
+
+<p>
+一般consumer驱动开发：
+</p>
+<div class="org-src-container">
+<pre class="src src-dts">  mmc0: mmc0@0x12340000 {
+  ......
+  clocks = &lt;&amp;peri PERI_MCI0&gt;; // 指定mmc0的时钟来自PERI_MCI0，PERI_MCI0的父时钟是peri
+  clocks-names = "mmc0";      // 时钟名，调用devm_clk_get获取时钟时，可以传入改名字
+};
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold; font-style: italic;">/* </span><span style="font-weight: bold; font-style: italic;">1. &#33719;&#21462;&#26102;&#38047;</span><span style="font-weight: bold; font-style: italic;"> */</span>
+  host-&gt;clk = devm_clk_get(&amp;pdev-&gt;dev, <span style="font-weight: bold; text-decoration: underline;">NULL</span>); <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">or devm_clk_get(&amp;pdev-&gt;dev, "mmc0")</span>
+  <span style="font-weight: bold; font-style: italic;">/* </span><span style="font-weight: bold; font-style: italic;">2. &#20351;&#33021;&#26102;&#38047;</span><span style="font-weight: bold; font-style: italic;"> */</span>
+  <span style="font-weight: bold;">clk_prepare_enable</span>(host-&gt;clk);
+</pre>
+</div>
+
+<p>
+像i2c, mmc等这些外设驱动，通常只需要使能门控即可，因为这些外设并不是时钟源。如果直接调用
+clk_set_rate函数设置频率，clk_set_rate会向上传递，即设置他的父时钟频率。如此例中，直接
+调用clk_set_rate，最终设置peri的频率。
+</p>
+
+<p>
+clock驱动实例(provider)：
+clock驱动在linux刚启动时就要完成，比initcall早。因此，clock驱动是内核中进行实现driver/clk。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">                            ______ ENC: 225M Hz
+                            |_____ DDR: 445M Hz
+                            |
+         PLL1: 900M Hz______|           _____ ISP: 333M Hz
+             |                          |____ PERI: 500M Hz
+         PLL0: 1G Hz____________________|____ DSP: 200M Hz
+     ________|
+     |
+24M OSC
+</pre>
+</div>
+<p>
+时钟树的根节点一般是晶振时钟，上图根节点为24M晶振时钟。根节点下面是PLL，PLL用于提升频率。
+PLL0下又分为PERI，DSP和ISP。PLL1分频给DDR和ENC。
+对于PLL来说，PLL频率可以通过寄存器设置，但通常是固定的，所以PLL属于固定时钟。
+对PERI，DSP模块来说，他们的频率来自PLL的分配，因此这些模块的时钟属于分频时钟。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-dts">  clocks{
+  osc24m: osc24m{
+  compatible = "fixed-clock";     // match driver
+  #clock-cells = &lt;0&gt;;             // 提供输出时钟的路数，0代表输出1路，1代表2路
+  clock-output-name = "osc24m";   // 输出时钟的名字
+  clock-frequency = &lt;24000000&gt;;   // 输出时钟的频率
+};
+};
+</pre>
+</div>
+<p>
+驱动实现：
+</p>
+<ol class="org-ol">
+<li>实现 clk_ops 相关成员函数</li>
+<li>定义分配clk_onecell_data结构体，初始化相关数据</li>
+<li>定义分配clk_init_data结构体，初始化相关数据</li>
+<li>调用clk_register将时钟注册进框架</li>
+<li>调用clk_register_clkdev注册时钟设备</li>
+<li>调用of_clk_add_provider，将clk provider存放到of_clk_provider链表中管理</li>
+<li>调用CLK_OF_DECLARE声明驱动</li>
+</ol>
+
+<p>
+fixed_clk固定时钟实现
+fixed_clk针对像PLL这种具有固定频率的时钟，对于PLL我们只需要实现.recalc_rate函数。
+</p>
+<div class="org-src-container">
+<pre class="src src-dts">  #define PLL0_CLK 0
+
+  clocks{
+  osc24M:osc24M{
+  compatible = "fixed-clock";
+  #clock-cells = &lt;0&gt;;
+  clock-output-names = "osc24M";
+  clock-frequency = &lt;24000000&gt;;
+ };
+ pll0:pll0{
+  compatible = "xx, choogle-fixed-clk";
+  #clock-cells = &lt;0&gt;;
+  clock-id = &lt;PLL0_CLK&gt;;
+  clock-frequency = &lt;1000000000&gt;;
+  clock-output-names = "pll0";
+  clocks = &lt;&amp;osc24M&gt;;
+ };
+};
+</pre>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yang</p>
+<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,150 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: ringbuffer学习
+
+Reference: Diving into Linux Perf Ring Buffer
+1. Linux perf ring buffer 不仅仅用在传输PMU事件数据，同样也是一个基础机制用来硬件跟踪Intel PT，Arm CoreSight等；
+2. 早期perf工具设计只支持CPU PMU，后来扩展到支持timers，software events，如今集成了硬件trace，甚至可以和eBPF一起工作；
+3. Question: How the buffer is synchronized between user space and kernel, and how to support SMP if the buffer is shared by multiple CPUs.
+4. Content in the sequential sections:
+   - The introduction for basic algorithm of the ring buffer;
+   - The mechanism for AUX ring buffer;
+   - At last, using Arm CoreSight as an example to explain how the ring buffer works with hardware trace.
+
+* ringbuffer实现
+基础算法
+1. rb通过头尾指针进行管理；头指针由writer操作，尾指针由reader更新；通过头尾指针的巧妙操作，将内存抽象为一个环；
+2. 两个关键因素：包含供rb管理的控制结构的页 & ringbuffer
+3. 前者约定称为user page； user page & ring buffer通过虚拟映射区域VMA映射到连续的用户空间地址；user page映射在ring buffer之前；
+控制结构定义：
+#+begin_src c
+  struct perf_event_mmap_page {
+	__u64 data_head; // head pointer
+	__u64 data_tail; // tail pointer
+  }
+#+end_src
+当内核开始将记录填进rb时，内核修改头指针，并存放数据；另一边，perf工具从尾端消费数据，并更新尾指针；
+| user page     | ring buffer |
+|---------------+-------------+
+| ⬇             | Data        |
+| data_head --> | Data        |
+| ⬇             | Empty       |
+| ⬇             | Empty       |
+| data_tail --> | Empty       |
+| ⬇             | Data        |
+| ⬇             | Data        |
+1. 内核对rb & up空间采取延迟映射，直到perf工具访问的时候才通过VMA进行映射；
+2. Kernel事件子系统通过线性线性内核虚拟地址访问rb&up；perf工具通过VMA；第一次访问，缺页异常，kernel此时再将rb&up pages映射进VMA；
+缺页异常处理函数：
+#+begin_src c
+  struct perf_buffer {
+	struct perf_event_mmap_page *user_page;
+	void *data_pages[];
+  }
+
+	static struct page* __perf_mmap_to_page(struct perf_buffer *rb, unsigned long pgoff) {
+	if(pgoff == 0) return virt_to_page(rb->user_page);
+	return virt_to_page(rb->data_pages[pgoff-1]);
+  }
+
+  static vm_fault_t perf_mmap_fault(struct vm_fault *vmf) {
+	struct perf_event *event = vmf->vma->vm_file->private_data;
+	struct perf_buffer *rb;
+	vm_fault_t ret = VM_FAULT_SIGBUS;
+
+	if(vmf->flags & FAULT_FLAG_MKWRITE) {
+	      if(vmf->pgoff == 0) ret = 0;
+	      return ret;
+	}
+
+	rb = rcu_dereference(event->rb);
+
+	vmf->page = perf_mmap_to_page(rb, vmf->pgoff);
+
+	vmf->page->mapping = vmf->vma->vm_file->f_mapping;
+	vmf->page->index = vmf->pgoff;
+
+	return ret = 0;
+  }
+#+end_src
+
+* 不同模式下ringbuffer的分配
+1. perf支持的模式：线程模式(目标是特定线程)，cpu模式(目标是特定cpu)，系统模式(目标是所有cpu)
+2. ringbuffer针对这些模式如何组织？
+
+Per thread mode
+1. perf命令通过--per-thread指定，ringbuffer为每个被分析的线程分配单独空间；
+2. In this mode when the profiled thread is scheduled on a CPU, the events on that CPU will be enabled;
+3. If the thread is scheduled out from the CPU, the events on the CPU will be disabled.
+4. If the thread is migrated from one CPU to another CPU, the events will be disabled on the previous CPU and enabled on the next CPU correspondingly.
+5. thread模式下，ringbuffer只需专心记录一个目标即可；不会有同一时间，多批记录；
+
+Per CPU mode
+1. -C选项指明要收集采样的CPUs列表，同一时刻可能有多批记录写道ringbuffer中；
+2. 每个CPU都有专门的ringbuffer；采样目标是CPUs；
+
+System wide mode
+1. 默认模式，或显式指明 -a or --all-cpus
+2. perf收集所有CPUs的样本；
+3. 每个CPU都有专门的ringbuffer；采样目标是CPUs；
+
+* 读写buffer
+1. ringbuffer是典型的生产-消费者模式；
+2. kernel events生产事件，perf用户层工具消费事件；
+3. 生产事件：
+   - PMU中断handler检测到中断溢出
+   - dynamic tracepoint with kprobe/uprobe
+   - static tracepoint, etc
+4. 一个样本放入到ringbuffer之后，kernel event core layer将会唤醒轮询关注此事件的线程；
+5. perf会轮询事件，会被唤醒去从ringbuffer中读取事件；
+6. perf在等待events的队列上睡眠，而非等待ringbuffer；
+7. ringbuffer自身不提供睡眠队列；
+8. kernel event core layer不仅仅唤醒基于事件的睡眠任务，还有唤醒基于整个ringbuffer的任务；
+9. 因为多个事件共享同一个ringbuffer，kernel core layer简单唤醒ringbuffer相关的睡眠进程；
+10. kernel函数ring_buffer_wakeup()递归和ringbuffer相关的每一个事件，并将事件上的等待队列进行唤醒；
+#+begin_src c
+  static void ring_buffer_wakeup(struct perf_event *event)
+  {
+	struct perf_buffer *rb;
+
+	rb = rcu_dereference(event->rb);
+	if (rb) {
+	      list_for_each_entry_rcu(event, &rb->event_list, rb_entry)
+		    wake_up_all(&event->waitq);
+	}
+  }
+#+end_src
+1. Perf 是一个单线程任务；唤醒后，一个接一个检测ringbuffer；如果找到有ringbuffer包含采样信息，读出来，进行统计；
+2. perf进程可以运行在任何CPUs上；这导致ringbuffer可以被多个CPUs同时访问，会导致竞争；
+
+* 将采样信息写到ringbuffer中
+当event counter溢出时，采样信息被拿出并保存进ringbuffer；
+#+begin_src c
+  static __always_inline int
+  __perf_event_output(struct perf_event *event,
+		      struct perf_sample_data *data,
+		      struct pt_regs *regs,
+		      int (*output_begin)(struct perf_output_handle *,
+					  struct perf_sample_data *,
+					  struct perf_event *,
+					  unsigned int))
+  {
+	struct perf_output_handle handle;
+	struct perf_event_header header;
+	int err;
+
+	// 根据采样类型，准备采样域
+	perf_prepare_sample(&header, data, event, regs);
+
+	// 一个函数指针，根据不同的写方向，动态传输；目的是准备写ringbuffer的信息；信息会被存放在handle中
+	err = output_begin(&handle, data, event, header.size);
+
+	// 将采样域放到ringbuffer中
+	perf_output_sample(&handle, &header, data, event);
+
+	// 修改user_page的头指针
+	perf_output_end(&handle);
+
+	return err;
+  }
+#+end_src

@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>perf分时复用究竟是perf层实现还是kernel层实现，如何实现的</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,79 +204,125 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
+<h1 class="title">perf分时复用究竟是perf层实现还是kernel层实现，如何实现的</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
+<li><a href="#org333e1a0">1. perf分时是在kernel层实现的证明</a></li>
+<li><a href="#org190a1a5">2. kernel层实现</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
+
+<div id="outline-container-org333e1a0" class="outline-2">
+<h2 id="org333e1a0"><span class="section-number-2">1.</span> perf分时是在kernel层实现的证明</h2>
 <div class="outline-text-2" id="text-1">
-<table>
+<p>
+通过更改man perf_event_open中的例子，同时跑6个cycles事件，发现有
+</p>
+<div class="org-src-container">
+<pre class="src src-c"><span style="font-weight: bold;">  #include</span> <span style="font-style: italic;">&lt;stdlib.h&gt;</span>
+<span style="font-weight: bold;">  #include</span> <span style="font-style: italic;">&lt;stdio.h&gt;</span>
+<span style="font-weight: bold;">  #include</span> <span style="font-style: italic;">&lt;unistd.h&gt;</span>
+<span style="font-weight: bold;">  #include</span> <span style="font-style: italic;">&lt;string.h&gt;</span>
+<span style="font-weight: bold;">  #include</span> <span style="font-style: italic;">&lt;sys/ioctl.h&gt;</span>
+<span style="font-weight: bold;">  #include</span> <span style="font-style: italic;">&lt;linux/perf_event.h&gt;</span>
+<span style="font-weight: bold;">  #include</span> <span style="font-style: italic;">&lt;asm/unistd.h&gt;</span>
+
+  <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">long</span>
+  <span style="font-weight: bold;">perf_event_open</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">perf_event_attr</span> *<span style="font-weight: bold; font-style: italic;">hw_event</span>, <span style="font-weight: bold; text-decoration: underline;">pid_t</span> <span style="font-weight: bold; font-style: italic;">pid</span>,
+                  <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">cpu</span>, <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">group_fd</span>, <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">flags</span>)
+  {
+        <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">ret</span>;
+
+        ret = syscall(__NR_perf_event_open, hw_event, pid, cpu,
+                      group_fd, flags);
+        <span style="font-weight: bold;">return</span> ret;
+  }
+
+  <span style="font-weight: bold; text-decoration: underline;">int</span>
+  <span style="font-weight: bold;">main</span>(<span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">argc</span>, <span style="font-weight: bold; text-decoration: underline;">char</span> **<span style="font-weight: bold; font-style: italic;">argv</span>)
+  {
+        <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">perf_event_attr</span> <span style="font-weight: bold; font-style: italic;">pe</span>;
+        <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">count</span>;
+        <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">fd</span>[10];
+        <span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">num</span> = 7;
+
+        memset(&amp;pe, 0, <span style="font-weight: bold;">sizeof</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">perf_event_attr</span>));
+        pe.type = PERF_TYPE_HARDWARE;
+        pe.size = <span style="font-weight: bold;">sizeof</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">perf_event_attr</span>);
+        pe.config = PERF_COUNT_HW_INSTRUCTIONS;
+        pe.disabled = 1;
+        pe.exclude_kernel = 1;
+        pe.exclude_hv = 1;
+        pe.read_format |= PERF_FORMAT_TOTAL_TIME_ENABLED | PERF_FORMAT_TOTAL_TIME_RUNNING;
+
+        <span style="font-weight: bold;">for</span>(<span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">i</span>=0; i&lt;num; i++) {
+              fd[i] = perf_event_open(&amp;pe, 0, -1, -1, 0);
+              <span style="font-weight: bold;">if</span> (fd[i] == -1) {
+                    fprintf(stderr, <span style="font-style: italic;">"Error opening leader %llx\n"</span>, pe.config);
+                    exit(EXIT_FAILURE);
+              }
+
+              ioctl(fd[i], PERF_EVENT_IOC_RESET, 0);
+              ioctl(fd[i], PERF_EVENT_IOC_ENABLE, 0);
+        }
+      
+
+        <span style="font-weight: bold;">for</span>(<span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">q</span>=0; q&lt;30000;q++)
+              printf(<span style="font-style: italic;">"Measuring instruction count for this printf\n"</span>);
 
 
-<colgroup>
-<col  class="org-left">
+        <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">read_format</span> {
+              <span style="font-weight: bold; text-decoration: underline;">__u64</span> <span style="font-weight: bold; font-style: italic;">value</span>;
+              <span style="font-weight: bold; text-decoration: underline;">__u64</span> <span style="font-weight: bold; font-style: italic;">time_enabled</span>;
+              <span style="font-weight: bold; text-decoration: underline;">__u64</span> <span style="font-weight: bold; font-style: italic;">time_running</span>;
+            
+        }<span style="font-weight: bold; font-style: italic;">rf</span>;
+        <span style="font-weight: bold;">for</span>(<span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">j</span>=0; j&lt;num; j++) {
+              ioctl(fd[j], PERF_EVENT_IOC_DISABLE, 0);
+              read(fd[j], &amp;rf, <span style="font-weight: bold;">sizeof</span>(rf));
 
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
+              printf(<span style="font-style: italic;">"Used %lld instructions  %lld total time  %lld enabled time\n"</span>, rf.value, rf.time_running, rf.time_enabled);
+
+              close(fd[j]);
+        }
+      
+  }
+
+</pre>
+</div>
+<p>
+上述代码跑的结果：
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">Measuring instruction count for this printf
+Measuring instruction count for this printf
+Measuring instruction count for this printf
+Measuring instruction count for this printf
+Measuring instruction count for this printf
+Measuring instruction count for this printf
+Used 17627029 instructions  54345224 total time  63658298 enabled time
+Used 17146052 instructions  52736348 total time  63700766 enabled time
+Used 17990127 instructions  55644260 total time  63703022 enabled time
+Used 15627260 instructions  48249592 total time  63704786 enabled time
+Used 15259268 instructions  47919268 total time  63706056 enabled time
+Used 9195625 instructions  30719774 total time  63706212 enabled time
+Used 8960377 instructions  28858462 total time  63704204 enabled time
+~ $ gcc ./perf_case.c &amp;&amp; ./a.out
+</pre>
+</div>
+<p>
+也知道，这里的enable事件，是相对于上层的enable，是事件注册下去的总时间，running事件才是真正在pmu硬件上运行的事件；
+</p>
 </div>
 </div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
+<div id="outline-container-org190a1a5" class="outline-2">
+<h2 id="org190a1a5"><span class="section-number-2">2.</span> kernel层实现</h2>
 <div class="outline-text-2" id="text-2">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
+<p>
+分为 事件注入列表 和 事件安排调度</p>
 </div>
 </div>
 </div>

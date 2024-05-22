@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-05-22 Wed 16:46 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>u-boot学习</title>
+<meta name="author" content="Yang" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../css/readtheorg.css"/>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
+<script type="text/javascript" src="../js/readtheorg.js"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">u-boot学习</h1>
+<p>
+u-boot:启动详细的代码调用流程
+</p>
+<div class="org-src-container">
+<pre class="src src-example">  u-boot.lds:(arch/arm/cpu/u-boot.lds)
+    |--&gt;_start:(arch/arm/lib/vectors.S)
+        |--&gt;reset(arch/arm/cpu/armv7/start.S)    
+            |--&gt;save_boot_params(arch/arm/cpu/armv7/start.S)/*将引导参数保存到内存中*/
+                |--&gt;save_boot_params_ret(arch/arm/cpu/armv7/start.S)
+                    |--&gt;cpu_init_cp15(arch/arm/cpu/armv7/start.S)/*初始化*/
+                    |--&gt;cpu_init_crit(arch/arm/cpu/armv7/start.S)
+                        |--&gt;lowlevel_init(arch/arm/cpu/armv7/lowlevel_init.S)
+                    |--&gt;_main(arch/arm/lib/crt0.S)
+                        |--&gt;board_init_f_alloc_reserve(common/init/board_init.c)/*为u-boot的gd结构体分配空间*/
+                        |--&gt;board_init_f_init_reserve(common/init/board_init.c)    /*将gd结构体清零*/
+                        |--&gt;board_init_f(common/board_f.c)
+                            |--&gt;initcall_run_list(include/initcall.h)    /*初始化序列函数*/
+                                |--&gt;init_sequence_f[](common/board_f.c)    /* 初始化序列函数数组 */
+                                    |--&gt;board_early_init_f(board/freescale/mx6ull_toto/mx6ull_toto.c)/*初始化串口的IO配置*/
+                                    |--&gt;timer_init(arch/arm/imx-common/timer.c)    /*初始化内核定时器，为uboot提供时钟节拍*/
+                                    |--&gt;init_baud_rate(common/board_f.c)        /*初始化波特率*/
+                                    |--&gt;serial_init(drivers/serial/serial.c)    /*初始化串口通信设置*/
+                                    |--&gt;console_init_f(common/console.c)        /*初始化控制台*/
+                                    |--&gt;...
+                        |--&gt;relocate_code(arch/arm/lib/relocate.S)    /*主要完成镜像拷贝和重定位*/
+                        |--&gt;relocate_vectors(arch/arm/lib/relocate.S)/*重定位向量表*/
+                        |--&gt;board_init_r(common/board_r.c)/*板级初始化*/
+                            |--&gt;initcall_run_list(include/initcall.h)/*初始化序列函数*/
+                                |--&gt;init_sequence_r[](common/board_f.c)/*序列函数*/
+                                    |--&gt;initr_reloc(common/board_r.c)    /*设置 gd-&gt;flags,标记重定位完成*/
+                                    |--&gt;serial_initialize(drivers/serial/serial-uclass.c)/*初始化串口*/
+                                        |--&gt;serial_init(drivers/serial/serial-uclass.c)     /*初始化串口*/
+                                    |--&gt;initr_mmc(common/board_r.c)                         /*初始化emmc*/
+                                        |--&gt;mmc_initialize(drivers/mmc/mmc.c)
+                                            |--&gt;mmc_do_preinit(drivers/mmc/mmc.c)
+                                                |--&gt;mmc_start_init(drivers/mmc/mmc.c)
+                                    |--&gt;console_init_r(common/console.c)                /*初始化控制台*/
+                                    |--&gt;interrupt_init(arch/arm/lib/interrupts.c)        /*初始化中断*/
+                                    |--&gt;initr_net(common/board_r.c)                        /*初始化网络设备*/
+                                        |--&gt;eth_initialize(net/eth-uclass.c)
+                                            |--&gt;eth_common_init(net/eth_common.c)
+                                                |--&gt;phy_init(drivers/net/phy/phy.c)
+                                            |--&gt;uclass_first_device_check(drivers/core/uclass.c)
+                                                |--&gt;uclass_find_first_device(drivers/core/uclass.c)
+                                                |--&gt;device_probe(drivers/core/device.c)
+                                                    |--&gt;device_of_to_plat(drivers/core/device.c)
+                                                        |--&gt;drv-&gt;of_to_plat
+                                                            |--&gt;fecmxc_of_to_plat(drivers/net/fec_mxc.c)/*解析设备树信息*/
+                                                    |--&gt;device_get_uclass_id(drivers/core/device.c)
+                                                    |--&gt;uclass_pre_probe_device(drivers/core/uclass.c)
+                                                    |--&gt;drv-&gt;probe(dev)
+                                                        /*drivers/net/fec_mxc.c*/
+                                                        U_BOOT_DRIVER(fecmxc_gem) = {
+                                                            .name    = "fecmxc",
+                                                            .id    = UCLASS_ETH,
+                                                            .of_match = fecmxc_ids,
+                                                            .of_to_plat = fecmxc_of_to_plat,
+                                                            .probe    = fecmxc_probe,
+                                                            .remove    = fecmxc_remove,
+                                                            .ops    = &amp;fecmxc_ops,
+                                                            .priv_auto    = sizeof(struct fec_priv),
+                                                            .plat_auto    = sizeof(struct eth_pdata),
+                                                        };
+                                                        |--&gt;fecmxc_probe(drivers/net/fec_mxc.c)/*探测和初始化*/
+                                                            |--&gt;fec_get_miibus(drivers/net/fec_mxc.c)
+                                                                |--&gt;mdio_alloc(drivers/net/fec_mxc.c)
+                                                                |--&gt;bus-&gt;read = fec_phy_read;
+                                                                |--&gt;bus-&gt;write = fec_phy_write;
+                                                                |--&gt;mdio_register(common/miiphyutil.c)
+                                                                |--&gt;fec_mii_setspeed(drivers/net/fec_mxc.c)
+                                                            |--&gt;fec_phy_init(drivers/net/fec_mxc.c)
+                                                                |--&gt;device_get_phy_addr(drivers/net/fec_mxc.c)
+                                                                |--&gt;phy_connect(drivers/net/phy/phy.c)
+                                                                    |--&gt;phy_find_by_mask(drivers/net/phy/phy.c)
+                                                                        |--&gt;bus-&gt;reset(bus)
+                                                                        |--&gt;get_phy_device_by_mask(drivers/net/phy/phy.c)
+                                                                            |--&gt;create_phy_by_mask(drivers/net/phy/phy.c)
+                                                                                |--&gt;phy_device_create(drivers/net/phy/phy.c)
+                                                                                    |--&gt;phy_probe(drivers/net/phy/phy.c)
+                                                                    |--&gt;phy_connect_dev(drivers/net/phy/phy.c)
+                                                                        |--&gt;phy_reset(drivers/net/phy/phy.c)
+                                                                |--&gt;phy_config(drivers/net/phy/phy.c)
+                                                                    |--&gt;board_phy_config(drivers/net/phy/phy.c)
+                                                                        |--&gt;phydev-&gt;drv-&gt;config(phydev)
+                                                                            /*drivers/net/phy/smsc.c*/
+                                                                            static struct phy_driver lan8710_driver = {
+                                                                                .name = "SMSC LAN8710/LAN8720",
+                                                                                .uid = 0x0007c0f0,
+                                                                                .mask = 0xffff0,
+                                                                                .features = PHY_BASIC_FEATURES,
+                                                                                .config = &amp;genphy_config_aneg,
+                                                                                .startup = &amp;genphy_startup,
+                                                                                .shutdown = &amp;genphy_shutdown,
+                                                                            };
+                                                                            |--&gt;genphy_config_aneg(drivers/net/phy/phy.c)
+                                                                                |--&gt;phy_reset(需要手动调用)(drivers/net/phy/phy.c)
+                                                                                |--&gt;genphy_setup_forced(drivers/net/phy/phy.c)
+                                                                                |--&gt;genphy_config_advert(drivers/net/phy/phy.c)
+                                                                                |--&gt;genphy_restart_aneg(drivers/net/phy/phy.c)
+                                                    |--&gt;uclass_post_probe_device(drivers/core/uclass.c)
+                                                        |--&gt;uc_drv-&gt;post_probe(drivers/core/uclass.c)
+                                                            /*net/eth-uclass.c*/
+                                                            UCLASS_DRIVER(ethernet) = {
+                                                                .name        = "ethernet",
+                                                                .id        = UCLASS_ETH,
+                                                                .post_bind    = eth_post_bind,
+                                                                .pre_unbind    = eth_pre_unbind,
+                                                                .post_probe    = eth_post_probe,
+                                                                .pre_remove    = eth_pre_remove,
+                                                                .priv_auto    = sizeof(struct eth_uclass_priv),
+                                                                .per_device_auto    = sizeof(struct eth_device_priv),
+                                                                .flags        = DM_UC_FLAG_SEQ_ALIAS,
+                                                            };
+                                                            |--&gt;eth_post_probe(net/eth-uclass.c)
+                                                                |--&gt;eth_write_hwaddr(drivers/core/uclass.c)
+                                    |--&gt;...
+                                    |--&gt;run_main_loop(common/board_r.c)/*主循环，处理命令*/
+                                        |--&gt;main_loop(common/main.c)
+                                            |--&gt;bootdelay_process(common/autoboot.c)    /*读取环境变量bootdelay和bootcmd的内容*/
+                                            |--&gt;autoboot_command(common/autoboot.c)        /*倒计时按下执行，没有操作执行bootcmd的参数*/
+                                                |--&gt;abortboot(common/autoboot.c)
+                                                    |--&gt;printf("Hit any key to stop autoboot: %2d ", bootdelay);
+                                                    /*到这里就是我们看到uboot延时3s启动内核的地方*/
+                                            |--&gt;cli_loop(common/cli.c)    /*倒计时按下space键,执行用户输入命令*/
+
+</pre>
+</div>
+<p>
+板子初始化流程
+空间布局：
+vectors.S中的向量表放在最开始，其中第一个reset = _start
+_start来自：
+</p>
+<ul class="org-ul">
+<li>arch/arm/cpu/armv7/start.S</li>
+<li>arch/powerpc/cpu/mpc83xx/start.S</li>
+<li>arch/mips/cpu/start.S</li>
+</ul>
+<p>
+...
+</p>
+
+<p>
+start.S有以下函数，在此描述其目的和限制
+lowlevel_init():
+目的：为board_init_f()函数执行做准备
+限制：
+</p>
+<ol class="org-ol">
+<li>没有global_data &amp; BSS &amp; stack</li>
+<li>不能初始化SDRAM或其他控制台</li>
+<li>此函数可以没有</li>
+</ol>
+
+<p>
+board_init_f():
+目的：初始化好机器，为board_init_r()做准备
+</p>
+<ol class="org-ol">
+<li>初始化好SDRAM &amp; UART</li>
+<li>global_data 可用</li>
+<li>stack在SRAM</li>
+<li>BSS不可用</li>
+<li></li>
+</ol>
+
+<p>
+REFERENCE:u-boot/doc/README.kconfig
+</p>
+
+<p>
+Migration steps to Kconfig
+</p>
+<hr>
+
+<p>
+Prior to Kconfig, the C preprocessor based board configuration had been used
+in U-Boot.
+</p>
+
+<p>
+Although Kconfig was introduced and some configs have been moved to Kconfig,
+many of configs are still defined in C header files.  It will take a very
+long term to move all of them to Kconfig.  In the interim, the two different
+configuration infrastructures should coexist.
+The configuration files are generated by both Kconfig and the old preprocessor
+based configuration as follows:
+</p>
+
+<p>
+Configuration files for use in C sources
+</p>
+<ul class="org-ul">
+<li>include/generated/autoconf.h     (generated by Kconfig for Normal)</li>
+<li>include/configs/&lt;board&gt;.h        (exists for all boards)</li>
+</ul>
+
+<p>
+Configuration file for use in makefiles
+</p>
+<ul class="org-ul">
+<li>include/config/auto.conf         (generated by Kconfig)</li>
+<li>include/autoconf.mk              (generated by the old config for Normal)</li>
+<li>spl/include/autoconfig.mk        (generated by the old config for SPL)</li>
+<li>tpl/include/autoconfig.mk        (generated by the old config for TPL)</li>
+</ul>
+
+<p>
+When adding a new CONFIG macro, it is highly recommended to add it to Kconfig
+rather than to a header file.
+</p>
+
+<p>
+boards.cfg已经移除，在uboot中没有找到这种文件
+</p>
+<div class="org-src-container">
+<pre class="src src-zhedie">  Conversion from boards.cfg to Kconfig
+-------------------------------------
+Prior to Kconfig, boards.cfg was a primary database that contained Arch, CPU,
+SoC, etc. of all the supported boards.  It was deleted when switching to
+Kconfig.  Each field of boards.cfg was converted as follows:
+
+ Status      -&gt;  "S:" entry of MAINTAINERS
+ Arch        -&gt;  CONFIG_SYS_ARCH defined by Kconfig
+ CPU         -&gt;  CONFIG_SYS_CPU defined by Kconfig
+ SoC         -&gt;  CONFIG_SYS_SOC defined by Kconfig
+ Vendor      -&gt;  CONFIG_SYS_VENDOR defined by Kconfig
+ Board       -&gt;  CONFIG_SYS_BOARD defined by Kconfig
+ Target      -&gt;  File name of defconfig (configs/&lt;target&gt;_defconfig)
+ Maintainers -&gt;  "M:" entry of MAINTAINERS
+</pre>
+</div>
+
+<p>
+Tips to add/remove boards
+</p>
+<hr>
+
+<p>
+When adding a new board, the following steps are generally needed:
+</p>
+
+<p>
+[1] Add a header file include/configs/&lt;target&gt;.h
+[2] Make sure to define necessary CONFIG_SYS_* in Kconfig:
+      Define CONFIG_SYS_CPU="cpu" to compile arch/&lt;arch&gt;/cpu/&lt;cpu&gt;
+      Define CONFIG_SYS_SOC="soc" to compile arch/&lt;arch&gt;/cpu/&lt;cpu&gt;/&lt;soc&gt;
+      Define CONFIG_SYS_VENDOR="vendor" to compile board/&lt;vendor&gt;/common/*
+	and board/&lt;vendor&gt;/&lt;board&gt;/*
+      Define CONFIG_SYS_BOARD="board" to compile board/&lt;board&gt;/*
+	(or board/&lt;vendor&gt;/&lt;board&gt;/* if CONFIG_SYS_VENDOR is defined)
+      Define CONFIG_SYS_CONFIG_NAME="target" to include
+	include/configs/&lt;target&gt;.h
+[3] Add a new entry to the board select menu in Kconfig.
+    The board select menu is located in arch/&lt;arch&gt;/Kconfig or
+    arch/&lt;arch&gt;/*/Kconfig.
+[4] Add a MAINTAINERS file
+    It is generally placed at board/&lt;board&gt;/MAINTAINERS or
+    board/&lt;vendor&gt;/&lt;board&gt;/MAINTAINERS
+[5] Add configs/&lt;target&gt;_defconfig
+    _defconfig文件只是为了省略make menuconfig等类似调用Kconfig的方法，而是采用defconfig直接调用Kconfig，提前配置
+</p>
+
+<p>
+When removing an obsolete board, the following steps are generally needed:
+</p>
+
+<p>
+[1] Remove configs/&lt;target&gt;_defconfig
+[2] Remove include/configs/&lt;target&gt;.h if it is not used by any other boards
+[3] Remove board/&lt;vendor&gt;/&lt;board&gt;/* or board/&lt;board&gt;/* if it is not used
+    by any other boards
+[4] Update MAINTAINERS if necessary
+[5] Remove the unused entry from the board select menu in Kconfig
+[6] Add an entry to doc/README.scrapyard
+</p>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yang</p>
+<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

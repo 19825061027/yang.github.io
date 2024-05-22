@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>ringbuffer aux</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,80 +204,93 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
-<div id="table-of-contents" role="doc-toc">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents" role="doc-toc">
-<ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
-</ul>
-</div>
-</div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
-<div class="outline-text-2" id="text-1">
-<table>
+<h1 class="title">ringbuffer aux</h1>
+<p>
+The mechanism for AUX ring buffer
+Chapter overview:
+</p>
+<ol class="org-ol">
+<li>It firstly concludes the relationship between the AUX ring buffer and the generic ring buffer.</li>
+<li>Then it reviews how the AUX ring buffer co-work with the generic ring buffer, and
+what's the extension introduced by the AUX ring buffer for the sampling mechanism.</li>
+</ol>
 
+<p>
+The RELATIONSHIP with the generic RING BUFFER
+</p>
+<ol class="org-ol">
+<li>In an overview, the AUX ring buffer is an auxiliary for the generic ring buffer.</li>
+<li>The generic ring buffer is primarily used to store the event samples, and every event format complies
+with the definition in the union perf_event;</li>
+<li>The AUX ring buffer is for recording the hardware tracing, and the trace data format is hardware IP dependent.</li>
+<li>The advantage of introducing AUX ring buffer is it can de-couple the data transferring between the generic
+perf events and the hardware tracing.</li>
 
-<colgroup>
-<col  class="org-left">
+<li>AUX ring buffer reuses the same algorithm with the generic ring buffer for the buffer management.</li>
+<li>The control structure perf_event_mmap_page extends the new fields aux_head and aux_tail for the head and tail
+pointers of the AUX ring buffer.</li>
 
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
-<div class="outline-text-2" id="text-2">
-<table>
+<li>The record option record_opts::auxtrace_mmap_pages is set during the  AUX trace initialisation, otherwise, if
+perf session has not attached to any AUX trace, this option is the default value '0'.</li>
+<li>When it's a non-zero value, the function auxtrace_mmap__mmap() invokes system call mmap() and the kernel
+function rb_alloc_aux() serves for allocating pages; these pages will be deferred to map into VMA when detects
+the page fault which is the exactly same mechanism with the generic ring buffer.</li>
+<li>As the result, the perf tool have two types of ring buffer and needs to manage every ring buffer individually.
+generic ring buffer: userpage/ringbuffer
+AUX ring buffer: userpage/ringbuffer</li>
+</ol>
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#20250;&#36890;&#36807;event&#23545;&#24212;&#30340;&#25991;&#20214;&#25551;&#36848;&#31526;&#65292;&#21040;&#36825;&#37324;</span>
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">file_ops::mmap&#20989;&#25968;&#65292;&#36127;&#36131;&#22312;user&#36890;&#36807;open&#20989;&#25968;&#25110;&#20854;&#20182;&#25343;&#21040;fd&#26102;&#65292;&#36890;&#36807;mmap&#65292;&#23558;&#25991;&#20214;&#20559;&#31227;&#22810;&#23569;&#65292;&#22823;&#23567;&#22810;&#23569;&#65292;&#26144;&#23556;&#21040;&#29992;&#25143;&#31354;&#38388;&#65292;&#36820;&#22238;&#22522;&#22320;&#22336;</span>
+  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#32780;&#27492;&#20989;&#25968;&#65292;&#26159;&#24050;&#32463;&#20998;&#37197;&#22909;&#20102;&#34394;&#25311;&#22320;&#22336;&#31354;&#38388;&#65292;&#38656;&#35201;&#27492;&#20989;&#25968;&#23558;&#34394;&#25311;&#22320;&#22336;&#31354;&#38388;&#21644;&#30913;&#30424;&#29289;&#29702;&#22320;&#22336;&#31354;&#38388;&#36827;&#34892;&#26144;&#23556;</span>
+  <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">perf_mmap</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">file</span> *<span style="font-weight: bold; font-style: italic;">file</span>, <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">vm_area_struct</span> *<span style="font-weight: bold; font-style: italic;">vma</span>) {
+        <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">perf_event</span> *<span style="font-weight: bold; font-style: italic;">event</span> = file-&gt;private_data;
+        <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">user_locked</span>, <span style="font-weight: bold; font-style: italic;">user_lock_limit</span>;
+        <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">user_struct</span> *<span style="font-weight: bold; font-style: italic;">user</span> = current_user();
+        <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">perf_buffer</span> *<span style="font-weight: bold; font-style: italic;">rb</span> = <span style="font-weight: bold; text-decoration: underline;">NULL</span>;
+        <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">locked</span>, <span style="font-weight: bold; font-style: italic;">lock_limit</span>;
+        <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">vma_size</span>;
+        <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">nr_pages</span>;
 
+        vma_size = vma-&gt;vm_end - vma-&gt;vm_start;
 
-<colgroup>
-<col  class="org-left">
+        <span style="font-weight: bold;">if</span> (vma-&gt;vm_pgoff == 0) {
+              nr_pages = (vma_size / PAGE_SIZE) - 1;
+        }
 
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
+        ring_buffer_attach(event, <span style="font-weight: bold; text-decoration: underline;">NULL</span>);
 
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
+        user_extra = nr_pages + 1;
 
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
+        <span style="font-weight: bold;">if</span> (!rb) {
+              rb = rb_alloc(nr_pages,
+                            event-&gt;attr.watermark ? event-&gt;attr.wakeup_watermark : 0,
+                            event-&gt;cpu, flags);
 
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
+              <span style="font-weight: bold;">if</span> (!rb) {
+                    ret = -ENOMEM;
+                    <span style="font-weight: bold;">goto</span> <span style="font-weight: bold; text-decoration: underline;">unlock</span>;
+              }
 
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
+              atomic_set(&amp;rb-&gt;mmap_count, 1);
+              rb-&gt;mmap_user = get_current_user();
+              rb-&gt;mmap_locked = extra;
 
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
+              ring_buffer_attach(event, rb);
+
+              perf_event_update_time(event);
+              perf_event_init_userpage(event);
+              perf_event_update_userpage(event);
+        }
+
+        vma-&gt;vm_ops = &amp;perf_mmap_vmops;
+
+        <span style="font-weight: bold;">if</span> (event-&gt;pmu-&gt;event_mapped)
+              event-&gt;pmu-&gt;event_mapped(event, vma-&gt;vm_mm);
+
+        <span style="font-weight: bold;">return</span> ret;
+  }
+</pre>
 </div>
 </div>
 <div id="postamble" class="status">

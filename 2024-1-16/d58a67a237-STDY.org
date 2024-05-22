@@ -1,0 +1,50 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: spin_lock & spin_lock_irq & spin_lock_irqsave区别 
+
+* 为什么需要自旋锁
+1. 其他锁(读写锁、互斥锁、信号量等)会发生上下文切换或睡眠(可中断睡眠和不可中断睡眠)，时间不可预期;
+2. 简单、极短临界区会带来性能损耗;
+
+* 为什么自旋锁会禁止抢占
+1. 自旋锁的原理是线程仍旧占有CPU，不退出，忙等待。
+2. 如果在自旋锁临界区内，时间片用完，进程调度，调度进来的线程也需要用该自旋锁，会导致此线程在这个时间片内一直处于忙等待状态，
+   直到某次，持有锁的线程又恢复执行。
+3. 如果是外来中断打断了临界区，而中断线程也需要这把锁，而中断线程无法打断，就会导致死锁。
+4. 因此，自旋锁禁止对已经开始运行的临界区设置禁止抢占标志。
+
+* 临界区禁止睡眠
+* spin_lock系列的分别
+1. 为防止中断线程也需要锁，导致死锁，因此临界区代码段执行前应该关闭CPU中断  --> spin_lock_irq
+2. spin_lock_irq(&lock1) --> spin_lock_irq(&lock2) --> spin_unlock_irq(&lock2) --> spin_unlock_irq(&lock1)
+   CPU irq是否锁住，量只有1，多少spin_lock_irq()都是那1，而一个unlock就解开了，
+   因此会导致第一个spin_unlock_irq(&lock2)时，中断其实已经开启了    --> spin_lock_irqsave()
+   spin_lock_irq(&lock1) --> spin_lock_irqsave(&lock2) -->spin_unlock_irqsave(&lock2) --> spin_unlock_irq(&lock1)
+   spin_lock_irqsave会保存当前的中断状态，解锁时恢复当前中断状态。
+
+* 什么场合使用什么锁
+spin_lock:
+   - 不会关闭中断抢占
+   1. 整个临界区只位于进程上下文，或工作队列中，不会在中断中申请同一把锁。
+   2. 不存在硬件中断嵌套的，也就是同一个irq_handler不会嵌套执行，可以用在irq_handler中。
+   
+spin_lock_irq:
+   - 会关闭抢占，关闭中断
+   - 
+   - 在进程上下文/软中断 + 硬件中断这样组合中使用，taskset属于软中断
+   
+spin_lock_irqsave:
+  - 最为安全且使用便捷
+  - 性能损耗最大，高速设备中已然称为一种降低性能的瓶颈
+  - 关本地中断，关抢占
+  - 最好只出现在需要尝试spin_lock之前无法确定是否已经关闭中断的代码才使用
+  - 如果代码能够确定在执行锁之前中断一定是打开的，那么使用spin_lock_irq最佳
+
+spin_lock_bh:
+  - 比spin_lock_irq更轻量的变种，只关闭中断底半部，其实就是关闭了软中断、taskset以及timer等的抢占。
+  - 如果代码临界区只存在软中断/takset/timer + 进程上下文，则最好考虑使用spin_lock_bh这样的锁来禁止软中断。
+
+使用什么锁，最主要的看竞争对手是谁?
+进程上下文/workqueue
+hardirq
+softirq/tasklet

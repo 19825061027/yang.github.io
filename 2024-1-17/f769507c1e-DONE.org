@@ -1,0 +1,12 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: 做一个专注点，C-x w标记当前位置为专注点, C-x C-w返回专注点 
+
+通过counsel-bookmark找到类似代码：
+(defvar me/bookmark-var "me/bookmark-var")
+(defun me/bookmark-set nil
+  (interactive)
+  (bookmark-set me/bookmark-var))
+(defun me/bookmark-jump nil
+  (interactive)
+  (bookmark-jump me/bookmark-var))

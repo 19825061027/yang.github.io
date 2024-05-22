@@ -1,0 +1,11 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: Kernel/Documentations/doc-guide/kernel-doc.rst翻译
+
+Writing kernel-doc comments
+.c可以包含kernel-doc格式的结构性文档注释描述函数，类型和代码的设计；
+当注释嵌入到源文件中时，这样做会很方便更新文档；
+**** note can be ignored
+kernel-doc格式有点像javadoc, gtk-doc或者Doxygen。但因为历史原因，已经和他们戒烟不同了；
+kernel-doc不负责Rust代码，Rust请看Documentation/rust/general-information.rst
+kernel-doc结构从注释中提取，

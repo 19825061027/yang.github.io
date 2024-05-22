@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>高精度事件定时器</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,79 +204,85 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
+<h1 class="title">高精度事件定时器</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
+<li><a href="#orgd6b67f5">1. detail</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
+
+<div id="outline-container-orgd6b67f5" class="outline-2">
+<h2 id="orgd6b67f5"><span class="section-number-2">1.</span> detail</h2>
 <div class="outline-text-2" id="text-1">
-<table>
+<p>
+HPET,High Precision Event Timer
+因为一般kernel tick心跳是100HZ, 也就是10ms才能触发一次;如果由此维护jiffies,则精度为10ms,过大;
+而HPET就保证了精度可以达到1us;
+<a href="https://zhuanlan.zhihu.com/p/90032269">https://zhuanlan.zhihu.com/p/90032269</a>
+通过频繁中断维护xtime和jiffies,而通过gettimeofday() -&gt; sys_gettimeofday()只是把xtime加以jiffies修正后返回给用户而已。而xtime变量和jiffies的维护更新频率，就决定了时间精度.
+</p>
 
 
-<colgroup>
-<col  class="org-left">
+<p>
+Ques:它的调用成本在所有的操作系统上代价一样吗？如果在系统繁忙时，1毫秒内调用多次有问题吗？
+最上面已经说了，对于x86_64系统来说，这是个虚拟系统调用vsyscall！所以，这里它不用发送中断！速度很快，成本低，调用一次的成本大概不到一微秒！
+对于i386体系来说，这就是系统调用了！最简单的系统调用都有无法避免的成本：陷入内核态。当我们调用gettimeofday时，将会向内核发送软中断，然后将陷入内核态，这时内核至少要做下列事：处理软中断、保存所有寄存器值、从用户态复制函数参数到内核态、执行、将结果复制到用户态。这些成本至少在1微秒以上！
+</p>
 
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
-<div class="outline-text-2" id="text-2">
-<table>
+<p>
+关于jiffies值得一提的两点
+</p>
 
+<p>
+先看看它的定义：
+</p>
 
-<colgroup>
-<col  class="org-left">
+<p>
+volatile unsigned long __jiffies;
+</p>
 
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
+<p>
+只谈两点。
+</p>
 
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
+<p>
+1、它用了一个C语言里比较罕见的关键字volatile，这个关键字用于解决并发问题。C语言编译器很喜欢做优化的，它不清楚某个变量可能会被并发的修改，例如上面的jiffies变量首先是0，如果首先一个CPU修改了它的值为1，紧接着另一个CPU在读它的值，例如 __jiffies = 0; while (__jiffies == 1)，那么在内核的C代码中，如果不加volatile字段，那么第二个CPU里的循环体可能不会被执行到，因为C编译器在对代码做优化时，生成的汇编代码不一定每次都会去读内存！它会根据代码把变量__jiffies设为0，并一直使用下去！而加了volatile字段后，就会要求编译器，每次使用到__jiffies时，都要到内存里真实的读取这个值。
+</p>
 
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
+<p>
+2、它的类型是unsigned long，在32位系统中，最大值也只有43亿不到，从系统启动后49天就到达最大值了，之后就会清0重新开始。那么jiffies达到最大值时的回转问题是怎么解决的呢？或者换句话说，我们需要保证当jiffies回转为一个小的正数时，例如1，要比几十秒毫秒前的大正数大，例如4294967290，要达到jiffies(1)&gt;jiffies(4294967290)这种效果。
+</p>
 
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
+<p>
+内核是通过定义了两个宏来解决的：
+</p>
 
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
+<p>
+#define time_after(a,b) \
+</p>
 
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
+<p>
+(typecheck(unsigned long, a) &amp;&amp; \
+</p>
+
+<p>
+typecheck(unsigned long, b) &amp;&amp; \
+</p>
+
+<p>
+((long)(b) - (long)(a) &lt; 0))
+</p>
+
+<p>
+#define time_before(a,b) time_after(b,a)
+</p>
+
+<p>
+很巧妙的设计！仅仅把unsigned long转为long类型后相减比较，就达到了jiffies(1)&gt;jiffies(4294967290)效果，简单的解决了jiffies的回转问题，赞一个。
+</p>
 </div>
 </div>
 </div>

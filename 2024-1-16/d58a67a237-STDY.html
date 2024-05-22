@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>spin_lock &amp; spin_lock_irq &amp; spin_lock_irqsave区别</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,79 +204,107 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
+<h1 class="title">spin_lock &amp; spin_lock_irq &amp; spin_lock_irqsave区别</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
+<li><a href="#orgb6b8571">1. 为什么需要自旋锁</a></li>
+<li><a href="#org2ef2e66">2. 为什么自旋锁会禁止抢占</a></li>
+<li><a href="#org9f12932">3. 临界区禁止睡眠</a></li>
+<li><a href="#org936c826">4. spin_lock系列的分别</a></li>
+<li><a href="#org95405b2">5. 什么场合使用什么锁</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
+
+<div id="outline-container-orgb6b8571" class="outline-2">
+<h2 id="orgb6b8571"><span class="section-number-2">1.</span> 为什么需要自旋锁</h2>
 <div class="outline-text-2" id="text-1">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
+<ol class="org-ol">
+<li>其他锁(读写锁、互斥锁、信号量等)会发生上下文切换或睡眠(可中断睡眠和不可中断睡眠)，时间不可预期;</li>
+<li>简单、极短临界区会带来性能损耗;</li>
+</ol>
 </div>
 </div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
+
+<div id="outline-container-org2ef2e66" class="outline-2">
+<h2 id="org2ef2e66"><span class="section-number-2">2.</span> 为什么自旋锁会禁止抢占</h2>
 <div class="outline-text-2" id="text-2">
-<table>
+<ol class="org-ol">
+<li>自旋锁的原理是线程仍旧占有CPU，不退出，忙等待。</li>
+<li>如果在自旋锁临界区内，时间片用完，进程调度，调度进来的线程也需要用该自旋锁，会导致此线程在这个时间片内一直处于忙等待状态，
+直到某次，持有锁的线程又恢复执行。</li>
+<li>如果是外来中断打断了临界区，而中断线程也需要这把锁，而中断线程无法打断，就会导致死锁。</li>
+<li>因此，自旋锁禁止对已经开始运行的临界区设置禁止抢占标志。</li>
+</ol>
+</div>
+</div>
 
+<div id="outline-container-org9f12932" class="outline-2">
+<h2 id="org9f12932"><span class="section-number-2">3.</span> 临界区禁止睡眠</h2>
+</div>
+<div id="outline-container-org936c826" class="outline-2">
+<h2 id="org936c826"><span class="section-number-2">4.</span> spin_lock系列的分别</h2>
+<div class="outline-text-2" id="text-4">
+<ol class="org-ol">
+<li>为防止中断线程也需要锁，导致死锁，因此临界区代码段执行前应该关闭CPU中断  --&gt; spin_lock_irq</li>
+<li>spin_lock_irq(&amp;lock1) --&gt; spin_lock_irq(&amp;lock2) --&gt; spin_unlock_irq(&amp;lock2) --&gt; spin_unlock_irq(&amp;lock1)
+CPU irq是否锁住，量只有1，多少spin_lock_irq()都是那1，而一个unlock就解开了，
+因此会导致第一个spin_unlock_irq(&amp;lock2)时，中断其实已经开启了    --&gt; spin_lock_irqsave()
+spin_lock_irq(&amp;lock1) --&gt; spin_lock_irqsave(&amp;lock2) --&gt;spin_unlock_irqsave(&amp;lock2) --&gt; spin_unlock_irq(&amp;lock1)
+spin_lock_irqsave会保存当前的中断状态，解锁时恢复当前中断状态。</li>
+</ol>
+</div>
+</div>
 
-<colgroup>
-<col  class="org-left">
+<div id="outline-container-org95405b2" class="outline-2">
+<h2 id="org95405b2"><span class="section-number-2">5.</span> 什么场合使用什么锁</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+spin_lock:
+</p>
+<ul class="org-ul">
+<li>不会关闭中断抢占</li>
+<li>整个临界区只位于进程上下文，或工作队列中，不会在中断中申请同一把锁。</li>
+<li>不存在硬件中断嵌套的，也就是同一个irq_handler不会嵌套执行，可以用在irq_handler中。</li>
+</ul>
 
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
+<p>
+spin_lock_irq:
+</p>
+<ul class="org-ul">
+<li>会关闭抢占，关闭中断</li>
+<li></li>
 
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
+<li>在进程上下文/软中断 + 硬件中断这样组合中使用，taskset属于软中断</li>
+</ul>
 
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
+<p>
+spin_lock_irqsave:
+</p>
+<ul class="org-ul">
+<li>最为安全且使用便捷</li>
+<li>性能损耗最大，高速设备中已然称为一种降低性能的瓶颈</li>
+<li>关本地中断，关抢占</li>
+<li>最好只出现在需要尝试spin_lock之前无法确定是否已经关闭中断的代码才使用</li>
+<li>如果代码能够确定在执行锁之前中断一定是打开的，那么使用spin_lock_irq最佳</li>
+</ul>
 
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
+<p>
+spin_lock_bh:
+</p>
+<ul class="org-ul">
+<li>比spin_lock_irq更轻量的变种，只关闭中断底半部，其实就是关闭了软中断、taskset以及timer等的抢占。</li>
+<li>如果代码临界区只存在软中断/takset/timer + 进程上下文，则最好考虑使用spin_lock_bh这样的锁来禁止软中断。</li>
+</ul>
 
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
+<p>
+使用什么锁，最主要的看竞争对手是谁?
+进程上下文/workqueue
+hardirq
+softirq/tasklet
+</p>
 </div>
 </div>
 </div>

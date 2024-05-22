@@ -1,0 +1,41 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: 高精度事件定时器
+
+* detail
+HPET,High Precision Event Timer
+因为一般kernel tick心跳是100HZ, 也就是10ms才能触发一次;如果由此维护jiffies,则精度为10ms,过大;
+而HPET就保证了精度可以达到1us;
+https://zhuanlan.zhihu.com/p/90032269
+通过频繁中断维护xtime和jiffies,而通过gettimeofday() -> sys_gettimeofday()只是把xtime加以jiffies修正后返回给用户而已。而xtime变量和jiffies的维护更新频率，就决定了时间精度.
+
+
+Ques:它的调用成本在所有的操作系统上代价一样吗？如果在系统繁忙时，1毫秒内调用多次有问题吗？
+最上面已经说了，对于x86_64系统来说，这是个虚拟系统调用vsyscall！所以，这里它不用发送中断！速度很快，成本低，调用一次的成本大概不到一微秒！
+对于i386体系来说，这就是系统调用了！最简单的系统调用都有无法避免的成本：陷入内核态。当我们调用gettimeofday时，将会向内核发送软中断，然后将陷入内核态，这时内核至少要做下列事：处理软中断、保存所有寄存器值、从用户态复制函数参数到内核态、执行、将结果复制到用户态。这些成本至少在1微秒以上！
+
+关于jiffies值得一提的两点
+
+先看看它的定义：
+
+volatile unsigned long __jiffies;
+
+只谈两点。
+
+1、它用了一个C语言里比较罕见的关键字volatile，这个关键字用于解决并发问题。C语言编译器很喜欢做优化的，它不清楚某个变量可能会被并发的修改，例如上面的jiffies变量首先是0，如果首先一个CPU修改了它的值为1，紧接着另一个CPU在读它的值，例如 __jiffies = 0; while (__jiffies == 1)，那么在内核的C代码中，如果不加volatile字段，那么第二个CPU里的循环体可能不会被执行到，因为C编译器在对代码做优化时，生成的汇编代码不一定每次都会去读内存！它会根据代码把变量__jiffies设为0，并一直使用下去！而加了volatile字段后，就会要求编译器，每次使用到__jiffies时，都要到内存里真实的读取这个值。
+
+2、它的类型是unsigned long，在32位系统中，最大值也只有43亿不到，从系统启动后49天就到达最大值了，之后就会清0重新开始。那么jiffies达到最大值时的回转问题是怎么解决的呢？或者换句话说，我们需要保证当jiffies回转为一个小的正数时，例如1，要比几十秒毫秒前的大正数大，例如4294967290，要达到jiffies(1)>jiffies(4294967290)这种效果。
+
+内核是通过定义了两个宏来解决的：
+
+#define time_after(a,b) \
+
+(typecheck(unsigned long, a) && \
+
+typecheck(unsigned long, b) && \
+
+((long)(b) - (long)(a) < 0))
+
+#define time_before(a,b) time_after(b,a)
+
+很巧妙的设计！仅仅把unsigned long转为long类型后相减比较，就达到了jiffies(1)>jiffies(4294967290)效果，简单的解决了jiffies的回转问题，赞一个。

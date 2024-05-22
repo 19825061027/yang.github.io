@@ -1,0 +1,234 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: 学习设备树格式及其生成使用原理
+
+* 2.2 Devicetree Structure and Conventions
+node-name@unit-address
+1. The node-name shall start with a lower or uppercase character and should describe the general class of device.
+2. The unit-address component of the name is specific to the bus type on which the node sits. It consists of one or more ASCLL characters from the set of characters in below table.
+   | Character | Description      |
+   |-----------+------------------|
+   | 0-9       | digit            |
+   | a-z       | lowercase letter |
+   | A-Z       | uppercase letter |
+   | ,         | comma            |
+   | .         | period           |
+   | -         | underscore       |
+   | +         | plus sign        |
+   | -         | dash             |
+3. In the case of node-name without an @unit-address the node-name shall be unique from any property names at the same level in the tree.
+4. The root node does not have a node-name or unit-address. It is identified by a forward slash(/).
+   - /
+     - cpus
+       - cpu@0
+       - cpu@1
+     - memory@0
+     - uart@fe0010000
+     - ethernet@fe002000
+     - ethernet@fe003000
+5. The nodes with the name cpu are distinguished by their unit-address values of 0 and 1.
+6. The nodes with the name ethernet are distinguished by their unit-address values of fe002000 and fe003000.
+
+** Generic Names Recommendation
+| adc                  | clock-controller | ethernet | accelerometer | co2-sensor     |
+| air-pollution-sensor | compact-flash    | fdc      | atm           | cpu            |
+| flash                | cpus             | gpio     | crypto        | disk           |
+| gpu                  | bluetooth        | display  | bus           | dma-controller |
+| hdmi                 | cache-controller | dsi      | hwlock        | camera         |
+| dsp                  | i2c              | can      | eeprom        | i2c-mux        |
+| charger              | efuse            | ide      | clock         | endpoint       |
+| interrupt-controller | iommu            | nvram    | serial        | isa            |
+| sound                | spi              | keyboard | key           | pci            |
+| sram-controller      | pcie             | led      | leds          | pmu            |
+| usb                  | scsi             | memory   | mmc           | mailbox        |
+
+** Path Names
+- A node in the devicetree can be uniquely identified by specifying the full path from the root node, through all descendant nodes, to the desired node.
+- The convention for specifying a devicee path is:
+  /node-name-1/node-name-2/node-name-N
+  - For example, the device path to cpu#1 would be:
+    /cpus/cpu@1
+  - The path to the root is /.
+- Nonstandard property names should specify a unique string prefix, such as a stock ticker symbol, identifying the name of the company or organization that defined the property. Examples:
+  fsl,channerl-fifo-len
+  ibm,ppc-interrupt-server#s
+  linux,network-index
+
+** Peoperty Values
+- A property value is an array of zero or more bytes that contain information associated with the property.
+| Value                | Description                                       |
+|----------------------+---------------------------------------------------|
+| <empty>              | Value is empty.                                   |
+| <u32>                | A 32-bit integer in big-endian format.            |
+| <u64>                | Represents a 64-bit integer in big-endian format. |
+| <string>             | Strings are printable and null-terminated.        |
+| <prop-encoded-array> | Format is specific to the property.               |
+| <phandle>            | A <u32> value.                                    |
+| <stringlist>         | A list of <string> values concatenated together.  |
+
+- Example: the 32-bit value 0x11223344 would be represented in memory as:
+  | address   | 11 |
+  | address+1 | 22 |
+  | address+2 | 33 |
+  | address+3 | 44 |
+   
+* Standard Properties
+** compatible
+  - Value type: <stringlist>
+  - Example: compatible = "fsl,mpc8641", "ns16550";
+** model
+  - Value type: <string>
+  - Example: mode = "fsl,MPC8349EMITX";
+** phandle
+  - Value type: <u32>
+  - Description: The phandle property specifies a numerical identifier for a node that is unique within the devicetree. The phandle property value is used by other nodes that need to refer to the node associated with the property.
+  - Example:
+    #+begin_src json
+      pic@10000000 {
+	 phandle = <1>;
+	 interrupt-controller;
+	  reg = <0x10000000 0x100>;
+      };
+
+      another-device-node {
+	  interrupt-parent = <1>;
+      };
+    #+end_src
+** status
+  - Value type: <string>
+  - The status property indicates the operaional status of a device. The lack of a status property should be treated as if the property existed with the value of "okay".
+    | Value      | Description                                                   |
+    |------------+---------------------------------------------------------------|
+    | "okay"     | Device is operational.                                        |
+    | "disabled" | Isn't operational. But may becomre operational in the future. |
+    | "reserved" | "Device is operational, but should not be used."              |
+    | "fail"     | Device is not operational.                                    |
+    | "fail-sss" | Device is not operational.                                    |
+** #address-cells and #size-cells
+  - Propery name: #address-cells, #size-cells
+  - Value type: <u32>
+  - Description:
+    The #address-cells and #size-cells properties may be used in any device node that has children in the devicetree hierarchy and describes how child device nodes should be addressed. The #address-cells property defines the number of <u32> cells used to encode the address field in a child node's reg property. The #size-cells property defines the number of <u32> cells used to encode the size field in a child node's reg property.
+    The #address-cells and #size-cells properties are not inherited from ancestors in the devicetree. They shall be explicitly defined.
+    A DTSpec-compliant boot program shall supply #address-cells and #size-cells on all nodes that have children. If missing, a client program should assume a default value of 2 for #address-cells, and a value of 1 for #size-cells.
+  - Example:
+    #+begin_src json
+      soc {
+	  #address-cells = <1>;
+	  #size-cells = <1>;
+
+	  serial@4600 {
+	      compatible = "ns16550";
+	      reg = <0x4600 0x100>;
+	      clock-frequency = <0>;
+	      interrupts = <0xA 0x8>;
+	      interrupt-parent = <&ipic>;
+	  };
+      };
+    #+end_src
+  - In this example, the #address-cells and #size-cells properties of the soc node are both set to 1. This setting specifies that one cell is required to represent an address and one cell is required to represent the size of nodes that are children of this node.
+** reg
+  - Property name: reg
+  - Property value: <prop-encoded-array> encoded as an arbitrary number of (address, length) pairs.
+  - Description: The reg property describes the address of the device's resources within the address space defined by its parent bus. Most commonly this means the offsets and lengths of memory-mapped IO register blocks, but may have a diffirent meaning on some bus types. Addresses in the address space defined by the root node are CPU real addresses.
+    The value is <prop-encoded-array>, composed of an arbitrary number of pairs of address and length, <address length>. The number of <u32> cells required to specify the address and length are bus-specific and are specified by the #size-cells, the filed in the value of reg shall be omitted.
+  - Example:
+    reg = <0x3000 0x20 0xFE00 0x100>;
+** ranges
+  - Value type: <empty> or <prop-encoded-array> encoded as an arbitrary number of(child-bus-address, parent-bus-address, length) triplet.
+  - Description: The ranges property provides a means of defining a mapping or translation between the address space of the bus(the child address space) and the address space of the bus node's parent(the parent address space).
+    
+* Properties for interrupt generating devices
+#+begin_src json
+  interrupts = <0xA 8>;
+#+end_src
+an interrupt number: 0xA
+level/sense encoding: 8
+
+#+begin_src json
+  interrupts-extended = <&pic 0xA 8>, <&gic 0xda>;
+#+end_src
+This example shows how a device with two interrupt outputs connected to two separate interrupt controllers would descibe the connection using an interrupts-extended property. pic is and interrupt controller with an #interrupt-cells specifier of 2, which gic is an interrupt controller with an #interrupts-cells specifier of 1.
+
+* Base Device Node Types
+- All devicetrees shall have a root node and the following nodes shall be present at the root of all devicetrees:
+  - One /cpus node
+  - At least one /memory node
+| Property Name  | Usage | Value Type   | Definition                             |
+|----------------+-------+--------------+----------------------------------------|
+| #address-cells | R     | <u32>        | 指明root的子节点reg属性中地址的数量    |
+| #size-cells    | R     | <u32>        | 指明root的子节点reg属性中size的数量    |
+| model          | R     | <string>     | 具体板子:"manufacturer,model-number"   |
+| compatible     | R     | <stringlist> | 指明兼容性:"manufacturer,model-number" |
+| serial-number  | O     | <string>     | 设备的序列号                           |
+| chassis-type   | OR    | <string>     | 系统类型：                             |
+Usage legend: R=Required, O=Optional, OR=Optional but Recommended, SD=See Definition.
+系统类型：
+- "desktop"
+- "laptop"
+- "convertible"
+- "server"
+- "tablet"
+- "handset"
+- "watch"
+- "embedded"
+
+#+begin_src json
+  aliases {
+      serial0 = "/simple-bus@fe000000/serial@11c500";
+      ethernet0 = "/simple-bus@fe000000/ethernet@31c000";
+  };
+#+end_src
+** /memory node
+| Property Name       | Usage | Value Type           | Definition                |
+|---------------------+-------+----------------------+---------------------------|
+| device_type         | R     | <string>             | 需要填上"memory"          |
+| reg                 | R     | <prop-encoded-array> | 任意数量addr & size组成   |
+| initial-mapped-area | O     | <prop-encoded-array> | 初始映射区域的addr & size |
+| hotplug             | O     | <empty>              | 显式告知OS此内存可被移除  |
+1. 如果通过UEFI启动，系统内存映射通过GetMemoryMap()这个UEFI启动时服务获取；OS必须忽略/memory节点；
+/memory Example:
+- 一个64-bit的Power系统有以下物理内存布局：
+  - RAM: start: 0x0, length: 0x80000000(2G)
+  - RAM: start: 0x100000000, length: 0x100000000(4G)
+  - 假设#address-cells=<2> #size-cells=<2>
+#+begin_src dts
+  memory@0{
+  device_type = "memory";
+  reg = <0x00000000 0x00000000 0x00000000 0x80000000
+         0x00000001 0x00000000 0x00000001 0x00000000>;
+};
+#+end_src
+或者：
+#+begin_src dts
+memory@0 {
+  device_type = "memory";
+  reg = <0x00000000 0x00000000 0x00000000 0x80000000>;
+};
+memory@100000000 {
+  device_type = "memory";
+  reg = <0x00000001 0x00000000 0x00000001 0x00000000>;
+};
+#+end_src
+
+* Kernel设备树文档
+2.1 High Level View
+    1. DT既是描述硬件的数据结构；DT只是提供了一种解耦合硬件平台和软件驱动的能力；
+    2. Linux使用DT有三个主要目的：
+       1. 平台认证(platform identification)
+       2. 运行时配置(runtime configuration)
+       3. 设备填充(device population)
+2.2 Platform Identification
+    1. Kernel使用DT中的数据信息来辨识指定机器；
+2.3 Runtime configuration
+#+begin_src dts
+  chosen {
+  bootargs = "console=ttyS0,115200 loglevel=8";
+  initrd-start = <0xc8000000>;
+  initrd-end = <0xc8200000>;
+};
+#+end_src
+earlyboot期间，架构启动代码通过不同的helper多次回调of_scan_flat_dt()在页启动前，解析设备树数据。of_scan_flat_dt()代码遍历设备树，使用helpers提取earlyboot启动时所需的信息。比如early_init_dt_scan_chosen()用来解析chosen节点。early_init_dt_scan_root()用来初始化DT地址空间模型。early_init_dt_scan_memory()用来决定可用RAM的size和location。
+ARM平台上，setup_machine_fdt()函数用来负责挑选正确的machine_desc之后做早期设备树遍历。
+* Device Population
+辨识完板子，解析完早期配置数据之后，kernel初始化在normal方式下进行。在其中的某些位置处，unflatten_device_tree()将数据转换成更有效的运行时表达。这在一下位置也会调用：.init_early()/.init_irq()/.init_machine()。

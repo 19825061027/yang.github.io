@@ -1,0 +1,50 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: busybox /bin/sh: can't access tty; job control turned off 
+
+* busybox配置
+# .config
+CONFIG_STATIC=y
+CONFIG_FEATURE_USE_INITTAB=n
+
+
+# etc/inittab Can be ignored.
+::sysinit:/etc/init.d/rcS
+::respawn:-/bin/sh
+ttyS0::askfirst:-/bin/sh
+::ctrlaltdel:/bin/umount -a -r
+
+# etc/profile: system-wide .profile file for the Bourne shells
+echo
+echo -n "Processing /etc/profile... "
+# no-op
+echo "Done"
+echo
+
+# etc/init.d/rcS
+#! /bin/sh
+mkdir /proc /sys
+
+/bin/mount -a
+
+# etc/fstab  man 6 fstab
+none		/proc	proc	  defaults    0	0
+none		/sys	sysfs	  defaults    0	0
+none		/dev	devtmpfs  defaults    0	0
+none  /sys/kernel/debug debugfs   defaults    0 0
+
+
+/bin/sh: can't access tty; job control turned off
+是因为/dev下没有/dev/ttyS0
+
+* linux配置
+# .config
+CONFIG_INITRAMFS_SOURCE="../busybox-1.36.1/_install"
+
+# start.sh
+#!/bin/bash
+qemu-system-x86_64 \
+    -kernel arch/x86/boot/bzImage \
+    -nographic \
+    -serial mon:stdio \
+    -append "console=ttyS0 loglevel=5 rdinit=/sbin/init debugfs=on" $@

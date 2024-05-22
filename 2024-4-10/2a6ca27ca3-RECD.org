@@ -1,0 +1,7 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: terminal配置文件                              
+
+本地配置文件位置：/mnt/c/Users/yjl00405/AppData/local/Packages/Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe/LocalState/setting.json
+但修改了没啥用。
+不得不从终端修改，此文件响应修改内容。

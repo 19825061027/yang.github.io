@@ -1,0 +1,7 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: CPU PVR和P8规格不一样                    
+
+CPU PVR = 0x660000
+P8:
+: 004[bcd][[:xdigit:]]{4}

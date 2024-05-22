@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>帮赵坤debug事件r44708e</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,79 +204,65 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
+<h1 class="title">帮赵坤debug事件r44708e</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
+<li><a href="#org40d026a">1. 帮助赵坤debug事件r44708e</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
+
+<div id="outline-container-org40d026a" class="outline-2">
+<h2 id="org40d026a"><span class="section-number-2">1.</span> 帮助赵坤debug事件r44708e</h2>
 <div class="outline-text-2" id="text-1">
-<table>
+<ol class="org-ol">
+<li><p>
+现象：此事件显示:
+</p>
+<pre class="example" id="orgd1f2b26">
+   ~/linux/tools/perf $ ./perf stat -e r44708e echo
+   
+
+   Performance counter stats for 'echo':
+
+   &lt;not supported&gt;      r44708e:u                                                   
+
+       0.001532151 seconds time elapsed
+
+       0.001666000 seconds user
+       0.000000000 seconds sys
 
 
-<colgroup>
-<col  class="org-left">
+   syscall_counts: 5
 
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
+</pre></li>
+<li>原因，bit[20:23]代表了cache selector</li>
+</ol>
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">isa207_get_constraint</span>(<span style="font-weight: bold; text-decoration: underline;">u64</span> <span style="font-weight: bold; font-style: italic;">event</span>, <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> *<span style="font-weight: bold; font-style: italic;">maskp</span>, <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> *<span style="font-weight: bold; font-style: italic;">valp</span>, <span style="font-weight: bold; text-decoration: underline;">u64</span> <span style="font-weight: bold; font-style: italic;">event_config1</span>)
+  {
+        ...;
+        <span style="font-weight: bold;">if</span> (cache &amp; 0x7) {
+              <span style="font-weight: bold; font-style: italic;">/*</span>
+<span style="font-weight: bold; font-style: italic;">               * L2/L3 events contain a cache selector field, which is</span>
+<span style="font-weight: bold; font-style: italic;">               * supposed to be programmed into MMCRC. However MMCRC is only</span>
+<span style="font-weight: bold; font-style: italic;">               * HV writable, and there is no API for guest kernels to modify</span>
+<span style="font-weight: bold; font-style: italic;">               * it. The solution is for the hypervisor to initialise the</span>
+<span style="font-weight: bold; font-style: italic;">               * field to zeroes, and for us to only ever allow events that</span>
+<span style="font-weight: bold; font-style: italic;">               * have a cache selector of zero. The bank selector (bit 3) is</span>
+<span style="font-weight: bold; font-style: italic;">               * irrelevant, as long as the rest of the value is 0.</span>
+<span style="font-weight: bold; font-style: italic;">               */</span>
+              <span style="font-weight: bold;">return</span> -1;
+        }
+        ...;
+  }
+</pre>
 </div>
-</div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
-<div class="outline-text-2" id="text-2">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
+<ol class="org-ol">
+<li>MMCRC是hypervisor mode下才可访问，也就是说此事件，只可在hypervisor mode下测试；</li>
+</ol>
 </div>
 </div>
 </div>

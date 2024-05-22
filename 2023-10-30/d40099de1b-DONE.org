@@ -1,0 +1,5 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: cbd添加配置文件功能                          
+
+将ccc.sh中的-MM改为-M

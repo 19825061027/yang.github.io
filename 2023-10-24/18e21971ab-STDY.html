@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-05-22 Wed 16:46 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>mmap系统调用回溯</title>
+<meta name="author" content="Yang" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../css/readtheorg.css"/>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
+<script type="text/javascript" src="../js/readtheorg.js"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">mmap系统调用回溯</h1>
+<p>
+Reference: <a href="https://blog.csdn.net/qq_41687938/article/details/119901916">https://blog.csdn.net/qq_41687938/article/details/119901916</a>
+知，
+</p>
+<ol class="org-ol">
+<li>用户看到的虚拟地址空间vm_area_struct</li>
+<li>实际物理内存地址空间</li>
+<li>实际磁盘物理地址空间</li>
+</ol>
+
+<p>
+mmap的过程只实现了:
+虚拟地址空间 -- 磁盘物理地址空间 的联系
+</p>
+
+<p>
+缺页引发的异常实现了：
+虚拟地址空间     -- 物理内存地址空间 的联系
+磁盘物理地址空间 -- 物理内存地址空间 的联系
+</p>
+
+<p>
+userspace::mmap
+    --&gt; sys_mmap2(unsigned long addr, unsigned long len, unsigned long prot,
+                  unsigned long flags,unsigned long fd, unsigned long pgoff);
+           --&gt; ksys_mmap_pgoff(unsigned long addr, unsigned long len, unsigned long prot,
+                  unsigned long flags,unsigned long fd, unsigned long pgoff);
+		  --&gt; vm_mmap_pgoff(unsigned long addr, unsigned long len, unsigned long prot,
+                          unsigned long flags,unsigned long fd, unsigned long pgoff);
+		          --&gt; do_mmap(struct file *file, unsigned long addr,
+			             unsigned long len, unsigned long prot,
+			             unsigned long flags, unsigned long pgoff,
+			             unsigned long *populate, struct list_head *uf)
+				     --&gt; mmap_region(struct file *file, unsigned long addr,
+		                                    unsigned long len, vm_flags_t vm_flags, unsigned long pgoff,
+		                                    struct list_head *uf)
+</p>
+<div class="org-src-container">
+<pre class="src src-c">    <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold;">mmap_region</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">file</span> *<span style="font-weight: bold; font-style: italic;">file</span>, <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">addr</span>,
+                  <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">len</span>, <span style="font-weight: bold; text-decoration: underline;">vm_flags_t</span> <span style="font-weight: bold; font-style: italic;">vm_flags</span>, <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">pgoff</span>,
+                  <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">list_head</span> *<span style="font-weight: bold; font-style: italic;">uf</span>)
+  {
+          <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">mm_struct</span> *<span style="font-weight: bold; font-style: italic;">mm</span> = current-&gt;mm;
+          <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">vm_area_struct</span> *<span style="font-weight: bold; font-style: italic;">vma</span> = <span style="font-weight: bold; text-decoration: underline;">NULL</span>;
+          <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">vm_area_struct</span> *<span style="font-weight: bold; font-style: italic;">next</span>, *<span style="font-weight: bold; font-style: italic;">prev</span>, *<span style="font-weight: bold; font-style: italic;">merge</span>;
+          <span style="font-weight: bold; text-decoration: underline;">pgoff_t</span> <span style="font-weight: bold; font-style: italic;">pglen</span> = len &gt;&gt; PAGE_SHIFT;
+          <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">charged</span> = 0;
+          <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">end</span> = addr + len;
+          <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">long</span> <span style="font-weight: bold; font-style: italic;">merge_start</span> = addr, <span style="font-weight: bold; font-style: italic;">merge_end</span> = end;
+          <span style="font-weight: bold; text-decoration: underline;">pgoff_t</span> <span style="font-weight: bold; font-style: italic;">vm_pgoff</span>;
+          <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">error</span>;
+          VMA_ITERATOR(vmi, mm, addr);
+
+          <span style="font-weight: bold; font-style: italic;">/* </span><span style="font-weight: bold; font-style: italic;">&#20808;&#23558;&#24050;&#32463;&#26144;&#23556;&#21040;&#34394;&#25311;&#22320;&#22336;&#31354;&#38388; addr --&gt; addr+len&#30340;&#25991;&#20214;&#37096;&#20998;&#35299;&#38500;&#26144;&#23556;</span><span style="font-weight: bold; font-style: italic;"> */</span>
+          <span style="font-weight: bold;">if</span> (do_vmi_munmap(&amp;vmi, mm, addr, len, uf, <span style="font-weight: bold; text-decoration: underline;">false</span>))
+                  <span style="font-weight: bold;">return</span> -ENOMEM;
+
+          next = vma_next(&amp;vmi);
+          prev = vma_prev(&amp;vmi);
+          <span style="font-weight: bold;">if</span> (vm_flags &amp; VM_SPECIAL)
+                  <span style="font-weight: bold;">goto</span> <span style="font-weight: bold; text-decoration: underline;">cannot_expand</span>;
+
+          <span style="font-weight: bold; font-style: italic;">/* </span><span style="font-weight: bold; font-style: italic;">&#23581;&#35797;&#23558;&#38656;&#35201;&#26144;&#23556;&#37096;&#20998;&#65292;&#23637;&#24320;&#21040;&#21069;&#19968;&#20010;&#25110;&#21518;&#19968;&#20010;vm_area_struct&#23454;&#20363;&#20013;&#65292;&#22914;&#26524;&#23637;&#24320;&#25104;&#21151;&#23601;&#19981;&#29992;&#20877;&#20998;&#37197;&#26032;&#30340;&#23454;&#20363;&#20102;</span><span style="font-weight: bold; font-style: italic;"> */</span>
+          <span style="font-weight: bold; font-style: italic;">/* </span><span style="font-weight: bold; font-style: italic;">Check next</span><span style="font-weight: bold; font-style: italic;"> */</span>
+          <span style="font-weight: bold;">if</span> (next &amp;&amp; next-&gt;vm_start == end &amp;&amp; !vma_policy(next) &amp;&amp;
+              can_vma_merge_before(next, vm_flags, <span style="font-weight: bold; text-decoration: underline;">NULL</span>, file, pgoff+pglen,
+                                   NULL_VM_UFFD_CTX, <span style="font-weight: bold; text-decoration: underline;">NULL</span>)) {
+                  merge_end = next-&gt;vm_end;
+                  vma = next;
+                  vm_pgoff = next-&gt;vm_pgoff - pglen;
+          }
+
+          <span style="font-weight: bold; font-style: italic;">/* </span><span style="font-weight: bold; font-style: italic;">Check prev</span><span style="font-weight: bold; font-style: italic;"> */</span>
+          <span style="font-weight: bold;">if</span> (prev &amp;&amp; prev-&gt;vm_end == addr &amp;&amp; !vma_policy(prev) &amp;&amp;
+              (vma ? can_vma_merge_after(prev, vm_flags, vma-&gt;anon_vma, file,
+                                         pgoff, vma-&gt;vm_userfaultfd_ctx, <span style="font-weight: bold; text-decoration: underline;">NULL</span>) :
+                     can_vma_merge_after(prev, vm_flags, <span style="font-weight: bold; text-decoration: underline;">NULL</span>, file, pgoff,
+                                         NULL_VM_UFFD_CTX, <span style="font-weight: bold; text-decoration: underline;">NULL</span>))) {
+                  merge_start = prev-&gt;vm_start;
+                  vma = prev;
+                  vm_pgoff = prev-&gt;vm_pgoff;
+          }
+
+
+          <span style="font-weight: bold; font-style: italic;">/* </span><span style="font-weight: bold; font-style: italic;">Actually expand, if possible</span><span style="font-weight: bold; font-style: italic;"> */</span>
+          <span style="font-weight: bold;">if</span> (vma &amp;&amp;
+              !vma_expand(&amp;vmi, vma, merge_start, merge_end, vm_pgoff, next)) {
+                  khugepaged_enter_vma(vma, vm_flags);
+                  <span style="font-weight: bold;">goto</span> <span style="font-weight: bold; text-decoration: underline;">expanded</span>;
+          }
+
+  <span style="font-weight: bold; text-decoration: underline;">cannot_expand</span>:
+          <span style="font-weight: bold;">if</span> (prev)
+                  vma_iter_next_range(&amp;vmi);
+
+          <span style="font-weight: bold; font-style: italic;">/*</span>
+<span style="font-weight: bold; font-style: italic;">           * Determine the object being mapped and call the appropriate</span>
+<span style="font-weight: bold; font-style: italic;">           * specific mapper. the address has already been validated, but</span>
+<span style="font-weight: bold; font-style: italic;">           * not unmapped, but the maps are removed from the list.</span>
+<span style="font-weight: bold; font-style: italic;">           */</span>
+          vma = vm_area_alloc(mm);
+          <span style="font-weight: bold;">if</span> (!vma) {
+                  error = -ENOMEM;
+                  <span style="font-weight: bold;">goto</span> <span style="font-weight: bold; text-decoration: underline;">unacct_error</span>;
+          }
+
+          vma_iter_set(&amp;vmi, addr);
+          vma-&gt;vm_start = addr;
+          vma-&gt;vm_end = end;
+          vm_flags_init(vma, vm_flags);
+          vma-&gt;vm_page_prot = vm_get_page_prot(vm_flags);
+          vma-&gt;vm_pgoff = pgoff;
+
+          <span style="font-weight: bold;">if</span> (file) {
+                  <span style="font-weight: bold;">if</span> (vm_flags &amp; VM_SHARED) {
+                          error = mapping_map_writable(file-&gt;f_mapping);
+                          <span style="font-weight: bold;">if</span> (error)
+                                  <span style="font-weight: bold;">goto</span> <span style="font-weight: bold; text-decoration: underline;">free_vma</span>;
+                  }
+
+                  vma-&gt;vm_file = get_file(file);
+                  error = file-&gt;f_op-&gt;mmap(file, vma); <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">IMPORTANT!! &#22312;&#27492;&#22788;&#35843;&#29992;file_ops::mmap,&#36890;&#36807;&#34394;&#25311;&#25991;&#20214;&#31995;&#32479;inode&#27169;&#22359;&#23450;&#20301;&#21040;&#25991;&#20214;&#30913;&#30424;&#29289;&#29702;&#22320;&#22336;&#65292;&#36890;&#36807;remap_pfn_range&#20989;&#25968;&#24314;&#31435;&#39029;&#34920;&#65292;&#21363;&#23454;&#29616;&#20102;&#25991;&#20214;&#22320;&#22336;&#21644;&#34394;&#25311;&#22320;&#22336;&#21306;&#22495;&#30340;&#26144;&#23556;&#20851;&#31995;&#65307;&#27492;&#26102;&#36825;&#29255;&#34394;&#25311;&#22320;&#22336;&#24182;&#27809;&#26377;&#20219;&#20309;&#25968;&#25454;&#20851;&#32852;&#21040;&#20027;&#23384;&#20013;&#65307;</span>
+                  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#20063;&#23601;&#26159;&#35843;&#29992;&#23436;file_ops::mmap&#20043;&#21518;&#65292;&#34394;&#25311;&#22320;&#22336;&#31354;&#38388; -- &#29289;&#29702;&#20869;&#23384;&#22320;&#22336;&#31354;&#38388;&#36824;&#27809;&#26377;&#24314;&#31435;&#32852;&#31995;</span>
+                  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#32780;&#26159;&#34394;&#25311;&#22320;&#22336;&#31354;&#38388; -- &#30913;&#30424;&#29289;&#29702;&#22320;&#22336;&#24314;&#31435;&#20102;&#32852;&#31995;</span>
+                  <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#24453;&#20043;&#21518;&#35775;&#38382;&#26102;&#65292;&#20877;&#36890;&#36807;&#19978;&#36848;&#32852;&#31995;&#65292;&#24314;&#31435; &#30913;&#30424;&#29289;&#29702;&#22320;&#22336; -- &#29289;&#29702;&#20869;&#23384;&#22320;&#22336; &#30340;&#32852;&#31995;&#65292;&#20197;&#21450;&#30913;&#30424;&#29289;&#29702;&#22320;&#22336; -- &#34394;&#25311;&#22320;&#22336;&#31354;&#38388;&#20043;&#38388;&#30340;&#32852;&#31995;</span>
+                  <span style="font-weight: bold;">if</span> (error)
+                          <span style="font-weight: bold;">goto</span> <span style="font-weight: bold; text-decoration: underline;">unmap_and_free_vma</span>;
+
+                  <span style="font-weight: bold; font-style: italic;">/*</span>
+<span style="font-weight: bold; font-style: italic;">                   * Expansion is handled above, merging is handled below.</span>
+<span style="font-weight: bold; font-style: italic;">                   * Drivers should not alter the address of the VMA.</span>
+<span style="font-weight: bold; font-style: italic;">                   */</span>
+                  error = -EINVAL;
+                  <span style="font-weight: bold;">if</span> (WARN_ON((addr != vma-&gt;vm_start)))
+                          <span style="font-weight: bold;">goto</span> <span style="font-weight: bold; text-decoration: underline;">close_and_free_vma</span>;
+
+                  vma_iter_set(&amp;vmi, addr);
+                  <span style="font-weight: bold; font-style: italic;">/*</span>
+<span style="font-weight: bold; font-style: italic;">                   * If vm_flags changed after call_mmap(), we should try merge</span>
+<span style="font-weight: bold; font-style: italic;">                   * vma again as we may succeed this time.</span>
+<span style="font-weight: bold; font-style: italic;">                   */</span>
+                  <span style="font-weight: bold;">if</span> (unlikely(vm_flags != vma-&gt;vm_flags &amp;&amp; prev)) {
+                          merge = vma_merge(&amp;vmi, mm, prev, vma-&gt;vm_start,
+                                      vma-&gt;vm_end, vma-&gt;vm_flags, <span style="font-weight: bold; text-decoration: underline;">NULL</span>,
+                                      vma-&gt;vm_file, vma-&gt;vm_pgoff, <span style="font-weight: bold; text-decoration: underline;">NULL</span>,
+                                      NULL_VM_UFFD_CTX, <span style="font-weight: bold; text-decoration: underline;">NULL</span>);
+                          <span style="font-weight: bold;">if</span> (merge) {
+                                  <span style="font-weight: bold; font-style: italic;">/*</span>
+<span style="font-weight: bold; font-style: italic;">                                   * -&gt;mmap() can change vma-&gt;vm_file and fput</span>
+<span style="font-weight: bold; font-style: italic;">                                   * the original file. So fput the vma-&gt;vm_file</span>
+<span style="font-weight: bold; font-style: italic;">                                   * here or we would add an extra fput for file</span>
+<span style="font-weight: bold; font-style: italic;">                                   * and cause general protection fault</span>
+<span style="font-weight: bold; font-style: italic;">                                   * ultimately.</span>
+<span style="font-weight: bold; font-style: italic;">                                   */</span>
+                                  fput(vma-&gt;vm_file);
+                                  vm_area_free(vma);
+                                  vma = merge;
+                                  <span style="font-weight: bold; font-style: italic;">/* </span><span style="font-weight: bold; font-style: italic;">Update vm_flags to pick up the change.</span><span style="font-weight: bold; font-style: italic;"> */</span>
+                                  vm_flags = vma-&gt;vm_flags;
+                                  <span style="font-weight: bold;">goto</span> <span style="font-weight: bold; text-decoration: underline;">unmap_writable</span>;
+                          }
+                  }
+
+                  vm_flags = vma-&gt;vm_flags;
+          } <span style="font-weight: bold;">else</span> <span style="font-weight: bold;">if</span> (vm_flags &amp; VM_SHARED) {
+                  error = shmem_zero_setup(vma);
+                  <span style="font-weight: bold;">if</span> (error)
+                          <span style="font-weight: bold;">goto</span> <span style="font-weight: bold; text-decoration: underline;">free_vma</span>;
+          } <span style="font-weight: bold;">else</span> {
+                  vma_set_anonymous(vma);
+          }
+
+          <span style="font-weight: bold;">if</span> (map_deny_write_exec(vma, vma-&gt;vm_flags)) {
+                  error = -EACCES;
+                  <span style="font-weight: bold;">goto</span> <span style="font-weight: bold; text-decoration: underline;">close_and_free_vma</span>;
+          }
+
+          <span style="font-weight: bold; font-style: italic;">/* </span><span style="font-weight: bold; font-style: italic;">Allow architectures to sanity-check the vm_flags</span><span style="font-weight: bold; font-style: italic;"> */</span>
+          error = -EINVAL;
+          <span style="font-weight: bold;">if</span> (!arch_validate_flags(vma-&gt;vm_flags))
+                  <span style="font-weight: bold;">goto</span> <span style="font-weight: bold; text-decoration: underline;">close_and_free_vma</span>;
+
+          error = -ENOMEM;
+          <span style="font-weight: bold;">if</span> (vma_iter_prealloc(&amp;vmi))
+                  <span style="font-weight: bold;">goto</span> <span style="font-weight: bold; text-decoration: underline;">close_and_free_vma</span>;
+
+          <span style="font-weight: bold; font-style: italic;">/* </span><span style="font-weight: bold; font-style: italic;">Lock the VMA since it is modified after insertion into VMA tree</span><span style="font-weight: bold; font-style: italic;"> */</span>
+          vma_start_write(vma);
+          <span style="font-weight: bold;">if</span> (vma-&gt;vm_file)
+                  i_mmap_lock_write(vma-&gt;vm_file-&gt;f_mapping);
+
+          vma_iter_store(&amp;vmi, vma);
+          mm-&gt;map_count++;
+          <span style="font-weight: bold;">if</span> (vma-&gt;vm_file) {
+                  <span style="font-weight: bold;">if</span> (vma-&gt;vm_flags &amp; VM_SHARED)
+                          mapping_allow_writable(vma-&gt;vm_file-&gt;f_mapping);
+
+                  flush_dcache_mmap_lock(vma-&gt;vm_file-&gt;f_mapping);
+                  vma_interval_tree_insert(vma, &amp;vma-&gt;vm_file-&gt;f_mapping-&gt;i_mmap);
+                  flush_dcache_mmap_unlock(vma-&gt;vm_file-&gt;f_mapping);
+                  i_mmap_unlock_write(vma-&gt;vm_file-&gt;f_mapping);
+          }
+
+          <span style="font-weight: bold; font-style: italic;">/*</span>
+<span style="font-weight: bold; font-style: italic;">           * vma_merge() calls khugepaged_enter_vma() either, the below</span>
+<span style="font-weight: bold; font-style: italic;">           * call covers the non-merge case.</span>
+<span style="font-weight: bold; font-style: italic;">           */</span>
+          khugepaged_enter_vma(vma, vma-&gt;vm_flags);
+
+          <span style="font-weight: bold; font-style: italic;">/* </span><span style="font-weight: bold; font-style: italic;">Once vma denies write, undo our temporary denial count</span><span style="font-weight: bold; font-style: italic;"> */</span>
+  <span style="font-weight: bold; text-decoration: underline;">unmap_writable</span>:
+          <span style="font-weight: bold;">if</span> (file &amp;&amp; vm_flags &amp; VM_SHARED)
+                  mapping_unmap_writable(file-&gt;f_mapping);
+          file = vma-&gt;vm_file;
+          ksm_add_vma(vma);
+  <span style="font-weight: bold; text-decoration: underline;">expanded</span>:
+          perf_event_mmap(vma);
+
+          vm_stat_account(mm, vm_flags, len &gt;&gt; PAGE_SHIFT);
+          <span style="font-weight: bold;">if</span> (vm_flags &amp; VM_LOCKED) {
+                  <span style="font-weight: bold;">if</span> ((vm_flags &amp; VM_SPECIAL) || vma_is_dax(vma) ||
+                                          is_vm_hugetlb_page(vma) ||
+                                          vma == get_gate_vma(current-&gt;mm))
+                          vm_flags_clear(vma, VM_LOCKED_MASK);
+                  <span style="font-weight: bold;">else</span>
+                          mm-&gt;locked_vm += (len &gt;&gt; PAGE_SHIFT);
+          }
+
+          <span style="font-weight: bold;">if</span> (file)
+                  uprobe_mmap(vma);
+
+          <span style="font-weight: bold; font-style: italic;">/*</span>
+<span style="font-weight: bold; font-style: italic;">           * New (or expanded) vma always get soft dirty status.</span>
+<span style="font-weight: bold; font-style: italic;">           * Otherwise user-space soft-dirty page tracker won't</span>
+<span style="font-weight: bold; font-style: italic;">           * be able to distinguish situation when vma area unmapped,</span>
+<span style="font-weight: bold; font-style: italic;">           * then new mapped in-place (which must be aimed as</span>
+<span style="font-weight: bold; font-style: italic;">           * a completely new data area).</span>
+<span style="font-weight: bold; font-style: italic;">           */</span>
+          vm_flags_set(vma, VM_SOFTDIRTY);
+
+          vma_set_page_prot(vma);
+
+          validate_mm(mm);
+          <span style="font-weight: bold;">return</span> addr;
+
+  <span style="font-weight: bold; text-decoration: underline;">close_and_free_vma</span>:
+          <span style="font-weight: bold;">if</span> (file &amp;&amp; vma-&gt;vm_ops &amp;&amp; vma-&gt;vm_ops-&gt;close)
+                  vma-&gt;vm_ops-&gt;close(vma);
+
+          <span style="font-weight: bold;">if</span> (file || vma-&gt;vm_file) {
+  <span style="font-weight: bold; text-decoration: underline;">unmap_and_free_vma</span>:
+                  fput(vma-&gt;vm_file);
+                  vma-&gt;vm_file = <span style="font-weight: bold; text-decoration: underline;">NULL</span>;
+
+                  <span style="font-weight: bold; font-style: italic;">/* </span><span style="font-weight: bold; font-style: italic;">Undo any partial mapping done by a device driver.</span><span style="font-weight: bold; font-style: italic;"> */</span>
+                  unmap_region(mm, &amp;mm-&gt;mm_mt, vma, prev, next, vma-&gt;vm_start,
+                               vma-&gt;vm_end, <span style="font-weight: bold; text-decoration: underline;">true</span>);
+          }
+          <span style="font-weight: bold;">if</span> (file &amp;&amp; (vm_flags &amp; VM_SHARED))
+                  mapping_unmap_writable(file-&gt;f_mapping);
+  <span style="font-weight: bold; text-decoration: underline;">free_vma</span>:
+          vm_area_free(vma);
+  <span style="font-weight: bold; text-decoration: underline;">unacct_error</span>:
+          <span style="font-weight: bold;">if</span> (charged)
+                  vm_unacct_memory(charged);
+          validate_mm(mm);
+          <span style="font-weight: bold;">return</span> error;
+  }
+
+</pre>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yang</p>
+<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

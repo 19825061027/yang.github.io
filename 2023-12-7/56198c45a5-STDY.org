@@ -1,0 +1,16 @@
+#+INCLUDE: "../../prefix.org"
+
+#+TITLE: mtdnand
+
+The generic NAND driver supports almost all NAND and AG-AND based chips and connects them
+to the Memory Technology Devices (MTD) subsystem of the Linux Kernel.
+
+This documentation is provided for developers who want to implement board drivers or filesystem
+drivers suitable for NAND devices.
+
+Function identifiers [xxx]
+- [MTD interface]: 给MTD内核API提供接口。不可替换，提供完全由硬件实现的功能。
+- [NAND interface]: 给NAND内核API提供接口。
+- [GENERIC]: 不可替代，提供完全由硬件独立实现的功能。
+- [DEFAULT]: 默认实现。可替代。通过NAND芯片描述结构体中的指针调用。在调用nand_scan()之前进行
+  指针填充，否则就在nand_scan()中用默认填充。

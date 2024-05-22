@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>Call function directly in cmd line</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,79 +204,113 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
+<h1 class="title">Call function directly in cmd line</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
+<li><a href="#orgb38a9d8">1. Introduce</a></li>
+<li><a href="#org368cf63">2. Features</a></li>
+<li><a href="#org4251483">3. Code example</a></li>
+<li><a href="#orgad7a9f3">4. Run the code</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
+
+<div id="outline-container-orgb38a9d8" class="outline-2">
+<h2 id="orgb38a9d8"><span class="section-number-2">1.</span> Introduce</h2>
 <div class="outline-text-2" id="text-1">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
+<ol class="org-ol">
+<li>Allow user calls functions directly in command line.</li>
+<li>Generate help tips automatically.</li>
+</ol>
 </div>
 </div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
+
+<div id="outline-container-org368cf63" class="outline-2">
+<h2 id="org368cf63"><span class="section-number-2">2.</span> Features</h2>
 <div class="outline-text-2" id="text-2">
-<table>
+<ol class="org-ol">
+<li>Allow user calls functions directly in command line.</li>
+<li>Generate help tips <code>automatically</code>.</li>
+</ol>
+</div>
+</div>
 
+<div id="outline-container-org4251483" class="outline-2">
+<h2 id="org4251483"><span class="section-number-2">3.</span> Code example</h2>
+<div class="outline-text-2" id="text-3">
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">#</span><span style="font-weight: bold; font-style: italic;">!/bin/bash</span>
+<span style="font-weight: bold;">from</span> autocall <span style="font-weight: bold;">import</span> *
 
-<colgroup>
-<col  class="org-left">
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">The tar @cmdline is used to register the function.</span>
+<span style="font-weight: bold; text-decoration: underline;">@cmdline</span>
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">test1</span>():
+        <span style="font-weight: bold;">pass</span>
+    
+<span style="font-weight: bold; text-decoration: underline;">@cmdline</span>
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">test2</span>(arg):
+        <span style="font-weight: bold;">pass</span>
+    
+<span style="font-weight: bold; text-decoration: underline;">@cmdline</span>
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">test3</span>(arg1, arg2: <span style="font-weight: bold;">str</span> = <span style="font-style: italic;">'this is a string'</span>):
+        <span style="font-weight: bold;">print</span>(arg2)
+    
+<span style="font-weight: bold; text-decoration: underline;">@cmdline</span>
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">test4</span>(arg1, arg2: <span style="font-weight: bold;">int</span>):
+        <span style="font-style: italic;">'You can add some extra information here.'</span>
+        <span style="font-weight: bold;">pass</span>
+    
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">main function</span>
+parse_and_run()
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgad7a9f3" class="outline-2">
+<h2 id="orgad7a9f3"><span class="section-number-2">4.</span> Run the code</h2>
+<div class="outline-text-2" id="text-4">
+<div class="org-src-container">
+<pre class="src src-bash">$ ./main.py --help
+Help Tips Provided by Autocall.
+  option:
+    --test1
+    
+    --test2     arg
+    
+    --test3     arg1  [arg2 = this is a string]
+    
+    --test4     arg1  arg2
+                    You can add some extra information here.
+    
+    --help      [verbose = notverbose]
+                    Give the argument <span style="font-style: italic;">"verbose"</span> instead of <span style="font-style: italic;">"notverbose"</span> to print detail information.
+    
+$ ./main.py --help verbose
+Help Tips Provided by Autocall.
+  option:
+    --test1
+    
+    --test2     arg
+    
+    --test3     arg1  [arg2(str) = this is a string]
+    
+    --test4     arg1  arg2(int)
+                    You can add some extra information here.
+    
+    --help      [verbose(str) = notverbose]
+                    Give the argument <span style="font-style: italic;">"verbose"</span> instead of <span style="font-style: italic;">"notverbose"</span> to print detail information.
 
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
+$ <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">call function test3 and pass arguments arg1=1</span>
+$ ./main.py --test3 1
+this is a string
 
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
+$ <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">call function test3 and pass arguments arg1=1, arg2="this will be showed."     </span>
+$ ./main.py --test3 1 <span style="font-style: italic;">"this will be showed."</span>
+this will be showed.
+</pre>
+</div>
 </div>
 </div>
 </div>

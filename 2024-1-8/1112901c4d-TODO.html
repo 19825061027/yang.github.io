@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-05-22 Wed 16:46 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>global-&gt;gtags大量后台进程导致卡死</title>
+<meta name="author" content="Yang" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../css/readtheorg.css"/>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
+<script type="text/javascript" src="../js/readtheorg.js"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">global-&gt;gtags大量后台进程导致卡死</h1>
+<p>
+~/linux-6.5 $ ps -aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.0  0.0   2456  1604 hvc0     Sl+  14:57   0:00 <i>init
+root         4  0.0  0.0   2456     4 hvc0     Sl+  14:57   0:00 plan9 --control-socket 5 --l
+root        88  0.0  0.0   2464   116 ?        Ss   14:57   0:00 /init
+root        89  0.0  0.0   2480   120 ?        S    14:57   0:04 /init
+yjl00405    90  0.0  0.0  10440  5440 pts/1    Ss   14:57   0:00 -bash
+yjl00405  3189  0.0  0.0   2516   644 pts/1    S+   16:43   0:00 emacsclient -a  -s serid -t 
+yjl00405  3191  3.5  0.6 152140 101792 ?       Rs   16:43   1:52 emacs --daemon=serid
+yjl00405  3249  0.0  0.0   5816  2684 ?        Ss   16:44   0:00 /usr/bin/global --single-upd
+yjl00405  3250  0.0  0.0   2616   596 ?        S    16:44   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  3251 90.5  0.3  54936 51876 ?        R    16:44  46:12 /usr/bin/gtags -i --single-u
+yjl00405  3253  0.0  0.0  19264   812 ?        S    16:44   0:00 /usr/bin/sort -k 1,1
+yjl00405  3254  0.0  0.0  19264   812 ?        S    16:44   0:00 /usr/bin/sort -k 1,1
+yjl00405  3457  0.0  0.0   5816  2712 ?        Ss   16:46   0:00 /usr/bin/global --single-upd
+yjl00405  3458  0.0  0.0   2616   596 ?        S    16:46   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  3459 90.0  0.3  54936 52056 ?        R    16:46  43:59 /usr/bin/gtags -i --single-u
+yjl00405  3461  0.0  0.0  19264   820 ?        S    16:46   0:00 /usr/bin/sort -k 1,1
+yjl00405  3462  0.0  0.0  19264   812 ?        S    16:46   0:00 /usr/bin/sort -k 1,1
+yjl00405  3510  0.0  0.0   5816  2804 ?        Ss   16:46   0:00 /usr/bin/global --single-upd
+yjl00405  3511  0.0  0.0   2616   532 ?        S    16:46   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  3512 92.2  0.3  54936 52124 ?        R    16:46  44:36 /usr/bin/gtags -i --single-u
+yjl00405  3514  0.0  0.0  19264   756 ?        S    16:46   0:00 /usr/bin/sort -k 1,1
+yjl00405  3515  0.0  0.0  19264   812 ?        S    16:46   0:00 /usr/bin/sort -k 1,1
+yjl00405  3519  0.0  0.0   5816  2592 ?        Ss   16:46   0:00 /usr/bin/global --single-upd
+yjl00405  3520  0.0  0.0   2616   528 ?        S    16:46   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  3521 92.3  0.3  54936 52128 ?        R    16:46  44:25 /usr/bin/gtags -i --single-u
+yjl00405  3523  0.0  0.0  19264   752 ?        S    16:46   0:00 /usr/bin/sort -k 1,1
+yjl00405  3524  0.0  0.0  19264   812 ?        S    16:46   0:00 /usr/bin/sort -k 1,1
+yjl00405  3554  0.0  0.0   5816  2684 ?        Ss   16:47   0:00 /usr/bin/global --single-upd
+yjl00405  3555  0.0  0.0   2616   532 ?        S    16:47   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  3556 90.1  0.3  54936 52092 ?        R    16:47  43:01 /usr/bin/gtags -i --single-u
+yjl00405  3558  0.0  0.0  19264   812 ?        S    16:47   0:00 /usr/bin/sort -k 1,1
+yjl00405  3559  0.0  0.0  19264   808 ?        S    16:47   0:00 /usr/bin/sort -k 1,1
+yjl00405  3568  0.0  0.0   5816  2556 ?        Ss   16:47   0:00 /usr/bin/global --single-upd
+yjl00405  3569  0.0  0.0   2616   532 ?        S    16:47   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  3570 92.3  0.3  54936 52092 ?        R    16:47  43:45 /usr/bin/gtags -i --single-u
+yjl00405  3572  0.0  0.0  19264   752 ?        S    16:47   0:00 /usr/bin/sort -k 1,1
+yjl00405  3573  0.0  0.0  19264   812 ?        S    16:47   0:00 /usr/bin/sort -k 1,1
+yjl00405  3579  0.0  0.0   5816  2700 ?        Ss   16:47   0:00 /usr/bin/global --single-upd
+yjl00405  3580  0.0  0.0   2616   528 ?        S    16:47   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  3581 90.1  0.3  54936 52092 ?        R    16:47  42:38 /usr/bin/gtags -i --single-u
+yjl00405  3583  0.0  0.0  19264   744 ?        S    16:47   0:00 /usr/bin/sort -k 1,1
+yjl00405  3584  0.0  0.0  19264   756 ?        S    16:47   0:00 /usr/bin/sort -k 1,1
+yjl00405  3592  0.0  0.0   5816  2616 ?        Ss   16:48   0:00 /usr/bin/global --single-upd
+yjl00405  3593  0.0  0.0   2616   532 ?        S    16:48   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  3594 89.3  0.3  54936 52000 ?        R    16:48  41:37 /usr/bin/gtags -i --single-u
+yjl00405  3596  0.0  0.0  19264   748 ?        S    16:48   0:00 /usr/bin/sort -k 1,1
+yjl00405  3597  0.0  0.0  19264   812 ?        S    16:48   0:00 /usr/bin/sort -k 1,1
+yjl00405  3601  0.0  0.0   5816  2564 ?        Ss   16:48   0:00 /usr/bin/global --single-upd
+yjl00405  3602  0.0  0.0   2616   596 ?        S    16:48   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  3603 92.2  0.3  54936 52008 ?        R    16:48  42:53 /usr/bin/gtags -i --single-u
+yjl00405  3605  0.0  0.0  19264   748 ?        S    16:48   0:00 /usr/bin/sort -k 1,1
+yjl00405  3606  0.0  0.0  19264   812 ?        S    16:48   0:00 /usr/bin/sort -k 1,1
+yjl00405  3613  0.0  0.0   5816  2696 ?        Ss   16:48   0:00 /usr/bin/global --single-upd
+yjl00405  3614  0.0  0.0   2616   592 ?        S    16:48   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  3615 91.9  0.3  54936 51932 ?        R    16:48  42:37 /usr/bin/gtags -i --single-u
+yjl00405  3617  0.0  0.0  19264   812 ?        S    16:48   0:00 /usr/bin/sort -k 1,1
+yjl00405  3618  0.0  0.0  19264   812 ?        S    16:48   0:00 /usr/bin/sort -k 1,1
+yjl00405  3622  0.0  0.0   5816  2732 ?        Ss   16:49   0:00 /usr/bin/global --single-upd
+yjl00405  3623  0.0  0.0   2616   532 ?        S    16:49   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  3624 89.9  0.3  54936 51920 ?        R    16:49  41:22 /usr/bin/gtags -i --single-u
+yjl00405  3626  0.0  0.0  19264   748 ?        S    16:49   0:00 /usr/bin/sort -k 1,1
+yjl00405  3627  0.0  0.0  19264   756 ?        S    16:49   0:00 /usr/bin/sort -k 1,1
+yjl00405  3630  0.0  0.0   5816  2788 ?        Ss   16:49   0:00 /usr/bin/global --single-upd
+yjl00405  3631  0.0  0.0   2616   592 ?        S    16:49   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  3632 92.1  0.3  54936 52048 ?        R    16:49  42:19 /usr/bin/gtags -i --single-u
+yjl00405  3634  0.0  0.0  19264   816 ?        S    16:49   0:00 /usr/bin/sort -k 1,1
+yjl00405  3635  0.0  0.0  19264   752 ?        S    16:49   0:00 /usr/bin/sort -k 1,1
+yjl00405  3672  0.0  0.0   5816  2592 ?        Ss   16:50   0:00 /usr/bin/global --single-upd
+yjl00405  3673  0.0  0.0   2616   600 ?        S    16:50   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  3674 89.1  0.3  54936 52088 ?        R    16:50  40:02 /usr/bin/gtags -i --single-u
+yjl00405  3676  0.0  0.0  19264   752 ?        S    16:50   0:00 /usr/bin/sort -k 1,1
+yjl00405  3677  0.0  0.0  19264   812 ?        S    16:50   0:00 /usr/bin/sort -k 1,1
+yjl00405  4896  0.0  0.0   5816  2616 ?        Ss   16:58   0:00 /usr/bin/global --single-upd
+yjl00405  4897  0.0  0.0   2616   592 ?        S    16:58   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  4898 87.8  0.3  54936 51972 ?        R    16:58  32:27 /usr/bin/gtags -i --single-u
+yjl00405  4900  0.0  0.0  19264   816 ?        S    16:58   0:00 /usr/bin/sort -k 1,1
+yjl00405  4901  0.0  0.0  19264   816 ?        S    16:58   0:00 /usr/bin/sort -k 1,1
+yjl00405  4905  0.0  0.0   5816  2732 ?        Ss   16:58   0:00 /usr/bin/global --single-upd
+yjl00405  4906  0.0  0.0   2616   532 ?        S    16:58   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  4907 89.6  0.3  54936 51972 ?        R    16:58  32:55 /usr/bin/gtags -i --single-u
+yjl00405  4909  0.0  0.0  19264   812 ?        S    16:58   0:00 /usr/bin/sort -k 1,1
+yjl00405  4910  0.0  0.0  19264   752 ?        S    16:58   0:00 /usr/bin/sort -k 1,1
+yjl00405  4915  0.0  0.0   5816  2684 ?        Ss   16:58   0:00 /usr/bin/global --single-upd
+yjl00405  4916  0.0  0.0   2616   596 ?        S    16:58   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  4917 90.3  0.3  54936 52000 ?        R    16:58  33:05 /usr/bin/gtags -i --single-u
+yjl00405  4919  0.0  0.0  19264   812 ?        S    16:58   0:00 /usr/bin/sort -k 1,1
+yjl00405  4920  0.0  0.0  19264   820 ?        S    16:58   0:00 /usr/bin/sort -k 1,1
+yjl00405  5041  0.0  0.0   5816  2796 ?        Ss   17:04   0:00 /usr/bin/global --single-upd
+yjl00405  5042  0.0  0.0   2616   592 ?        S    17:04   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  5043 85.6  0.3  54936 51996 ?        R    17:04  25:50 /usr/bin/gtags -i --single-u
+yjl00405  5045  0.0  0.0  19264   748 ?        S    17:04   0:00 /usr/bin/sort -k 1,1
+yjl00405  5046  0.0  0.0  19264   812 ?        S    17:04   0:00 /usr/bin/sort -k 1,1
+yjl00405  5055  0.0  0.0   5816  2716 ?        Ss   17:05   0:00 /usr/bin/global --single-upd
+yjl00405  5056  0.0  0.0   2616   528 ?        S    17:05   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  5057 87.7  0.3  54936 52000 ?        R    17:05  26:16 /usr/bin/gtags -i --single-u
+yjl00405  5059  0.0  0.0  19264   776 ?        S    17:05   0:00 /usr/bin/sort -k 1,1
+yjl00405  5060  0.0  0.0  19264   784 ?        S    17:05   0:00 /usr/bin/sort -k 1,1
+root      6682  0.0  0.0   2464   116 ?        Ss   17:26   0:00 /init
+root      6683  0.0  0.0   2480   120 ?        S    17:26   0:00 /init
+yjl00405  6684  0.0  0.0  10308  5304 pts/0    Ss+  17:26   0:00 -bash
+yjl00405  6733  0.0  0.0   5816  2700 pts/2    Ss+  17:29   0:00 global -u
+yjl00405  6734  0.0  0.0   2616   596 pts/2    S+   17:29   0:00 sh -c '/usr/bin/gtags' -i '</i>
+yjl00405  6735 63.3  0.4  75788 72892 pts/2    R+   17:29   3:36 /usr/bin/gtags -i /home/yjl0
+yjl00405  6762  0.0  0.0   5816  2608 ?        Ss   17:29   0:00 /usr/bin/global --single-upd
+yjl00405  6763  0.0  0.0   2616   528 ?        S    17:29   0:00 sh -c '/usr/bin/gtags' -i --
+yjl00405  6764 80.6  0.3  54936 51924 ?        R    17:29   4:24 /usr/bin/gtags -i --single-u
+yjl00405  6766  0.0  0.0  19264   812 ?        S    17:29   0:00 /usr/bin/sort -k 1,1
+yjl00405  6767  0.0  0.0  19264   756 ?        S    17:29   0:00 /usr/bin/sort -k 1,1
+yjl00405  6789  0.0  0.0  19264   808 pts/2    S+   17:30   0:00 /usr/bin/sort -k 1,1
+yjl00405  6790  0.0  0.0  19264   812 pts/2    S+   17:30   0:00 /usr/bin/sort -k 1,1
+yjl00405  6835  1.0  0.0  10860  3352 pts/3    Rs+  17:35   0:00 /usr/bin/ps -aux
+</p>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yang</p>
+<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

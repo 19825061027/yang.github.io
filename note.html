@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-05-22 Wed 16:46 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>欢迎来到我的博客</title>
+<meta name="author" content="Yang" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../css/readtheorg.css"/>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
+<script type="text/javascript" src="../js/readtheorg.js"></script>
+<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
+<script type="text/javascript" src="./js/readtheorg.js"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">欢迎来到我的博客</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org591afe8">1. busybox</a></li>
+<li><a href="#orgdb8da9e">2. cc</a></li>
+<li><a href="#orgc8991de">3. elisp</a></li>
+<li><a href="#org08a85cf">4. git</a></li>
+<li><a href="#org612192e">5. libc</a></li>
+<li><a href="#org75102cb">6. linux</a></li>
+<li><a href="#orgf5e7785">7. mail</a></li>
+<li><a href="#org3046abd">8. micropython</a></li>
+<li><a href="#org0c6fc6b">9. perf</a></li>
+<li><a href="#orgee545ff">10. python</a></li>
+<li><a href="#orgc88c28e">11. wsl</a></li>
+<li><a href="#org2d5120b">12. others</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org591afe8" class="outline-2">
+<h2 id="org591afe8"><span class="section-number-2">1.</span> busybox</h2>
+<div class="outline-text-2" id="text-1">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><a href="./2024-4-11/4607f8e230-RECD.html">busybox /bin/sh: can't access tty; job control turned off                       </a></td>
+<td class="org-left">2024年04月11日</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-orgdb8da9e" class="outline-2">
+<h2 id="orgdb8da9e"><span class="section-number-2">2.</span> cc</h2>
+<div class="outline-text-2" id="text-2">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><a href="./2024-4-29/e1e3cddb89-RECD.html">文件同时可被bash和C使用                                                                  </a></td>
+<td class="org-left">2024年04月29日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-18/6d537c26fc-RECD.html">宏里面无法直接使用sizeof                                                                 </a></td>
+<td class="org-left">2024年01月18日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-16/31f55c452f-STDY.html">C语言别名 &amp; 数组指针降级 &amp; 宏#和##                                                          </a></td>
+<td class="org-left">2024年01月16日</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-orgc8991de" class="outline-2">
+<h2 id="orgc8991de"><span class="section-number-2">3.</span> elisp</h2>
+<div class="outline-text-2" id="text-3">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><a href="./2024-4-24/fe01846929-RECD.html">auto-fill-mode可以设置每行字长                                                          </a></td>
+<td class="org-left">2024年04月24日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-20/5e84f53a0e-DONE.html">ivy-read function                                                               </a></td>
+<td class="org-left">2024年01月20日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-17/f769507c1e-DONE.html">做一个专注点，C-x w标记当前位置为专注点, C-x C-w返回专注点                                            </a></td>
+<td class="org-left">2024年01月17日</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org08a85cf" class="outline-2">
+<h2 id="org08a85cf"><span class="section-number-2">4.</span> git</h2>
+<div class="outline-text-2" id="text-4">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><a href="./2024-3-7/08c9bf980b-STDY.html">git format-patch部分选项功能说明                                                        </a></td>
+<td class="org-left">2024年03月07日</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org612192e" class="outline-2">
+<h2 id="org612192e"><span class="section-number-2">5.</span> libc</h2>
+<div class="outline-text-2" id="text-5">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><a href="./2024-3-22/7a734fd719-STDY.html">glibc库探究                                                                        </a></td>
+<td class="org-left">2024年03月22日</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org75102cb" class="outline-2">
+<h2 id="org75102cb"><span class="section-number-2">6.</span> linux</h2>
+<div class="outline-text-2" id="text-6">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><a href="./2024-3-25/7781575475-STDY.html">perf-record学习                                                                   </a></td>
+<td class="org-left">2024年03月25日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-3-14/11a943c043-STDY.html">进程间通信---信号                                                                      </a></td>
+<td class="org-left">2024年03月14日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-3-8/0977a0092b-STDY.html">workqueue学习                                                                     </a></td>
+<td class="org-left">2024年03月08日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-2-19/e5abbef496-DONE.html">clock子系统                                                                        </a></td>
+<td class="org-left">2024年02月19日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-2-2/5b5416a50a-TODO.html">reset singal device tree bindings                                               </a></td>
+<td class="org-left">2024年02月02日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-24/517497bb23-STDY.html">ffs &amp; fls &amp; __ffs &amp; __fls                                                       </a></td>
+<td class="org-left">2024年01月24日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-22/bb5256ac83-RECD.html">驱动BUG总结                                                                         </a></td>
+<td class="org-left">2024年01月22日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-20/d7ad64af74-TODO.html">IRQ总结                                                                           </a></td>
+<td class="org-left">2024年01月20日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-19/d9669e4397-RECD.html">64bit系统中32位寄存器映射                                                                </a></td>
+<td class="org-left">2024年01月19日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-18/861b7e9838-STDY.html">自定义设备树节点属性                                                                      </a></td>
+<td class="org-left">2024年01月18日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-18/2259f59c19-RECD.html">pdev-&gt;id                                                                        </a></td>
+<td class="org-left">2024年01月18日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-16/d630604437-TODO.html">linux抢占                                                                         </a></td>
+<td class="org-left">2024年01月16日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-16/d58a67a237-STDY.html">spin_lock &amp; spin_lock_irq &amp; spin_lock_irqsave区别                                 </a></td>
+<td class="org-left">2024年01月16日</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-orgf5e7785" class="outline-2">
+<h2 id="orgf5e7785"><span class="section-number-2">7.</span> mail</h2>
+<div class="outline-text-2" id="text-7">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><a href="./2024-3-7/08c9bf980b-STDY.html">git format-patch部分选项功能说明                                                        </a></td>
+<td class="org-left">2024年03月07日</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org3046abd" class="outline-2">
+<h2 id="org3046abd"><span class="section-number-2">8.</span> micropython</h2>
+<div class="outline-text-2" id="text-8">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><a href="./2024-5-21/93579856c8-TODO.html">python async def                                                                </a></td>
+<td class="org-left">2024年05月21日</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org0c6fc6b" class="outline-2">
+<h2 id="org0c6fc6b"><span class="section-number-2">9.</span> perf</h2>
+<div class="outline-text-2" id="text-9">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><a href="./2024-3-25/7781575475-STDY.html">perf-record学习                                                                   </a></td>
+<td class="org-left">2024年03月25日</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-orgee545ff" class="outline-2">
+<h2 id="orgee545ff"><span class="section-number-2">10.</span> python</h2>
+<div class="outline-text-2" id="text-10">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><a href="./2024-4-29/e1e3cddb89-RECD.html">文件同时可被bash和C使用                                                                  </a></td>
+<td class="org-left">2024年04月29日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
+<td class="org-left">2024年03月29日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-2-4/d42736ec4d-STDY.html">python 学习                                                                       </a></td>
+<td class="org-left">2024年02月04日</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-orgc88c28e" class="outline-2">
+<h2 id="orgc88c28e"><span class="section-number-2">11.</span> wsl</h2>
+<div class="outline-text-2" id="text-11">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><a href="./2024-4-18/4c8fed2e7c-RECD.html">wsl export and import issues                                                    </a></td>
+<td class="org-left">2024年04月18日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-4-16/64f63e77dd-RECD.html">shared with windows clipboard and screenshot                                    </a></td>
+<td class="org-left">2024年04月16日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-4-10/10beed6b18-RECD.html">wsl未注册类                                                                         </a></td>
+<td class="org-left">2024年04月10日</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org2d5120b" class="outline-2">
+<h2 id="org2d5120b"><span class="section-number-2">12.</span> others</h2>
+<div class="outline-text-2" id="text-12">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
+<td class="org-left">2024年05月22日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
+<td class="org-left">2024年04月10日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-12/f01d530ba5-RECD.html">format/event/cpumask中struct attribute*数字以NULL结尾                                 </a></td>
+<td class="org-left">2024年01月12日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-12/6884b2da75-RECD.html">驱动MMIO操作细节                                                                      </a></td>
+<td class="org-left">2024年01月12日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-11/11cb435382-STDY.html">device IO mapping操作                                                             </a></td>
+<td class="org-left">2024年01月11日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-10/d4d7be2464-STDY.html">位域操作                                                                            </a></td>
+<td class="org-left">2024年01月10日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-10/51286c3ee0-STDY.html">void*指针+1                                                                       </a></td>
+<td class="org-left">2024年01月10日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-10/c0e6b03a7a-DONE.html">pr_err和dev_err的区别                                                               </a></td>
+<td class="org-left">2024年01月10日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-10/d660577af2-STDY.html">devm_xxx设备资源管理                                                                  </a></td>
+<td class="org-left">2024年01月10日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2024-1-8/1112901c4d-TODO.html">global-&gt;gtags大量后台进程导致卡死                                                         </a></td>
+<td class="org-left">2024年01月08日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-12-21/09b2e39c93-STDY.html">perf工具-a用法                                                                      </a></td>
+<td class="org-left">2023年12月21日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-12-19/d656f61fce-STDY.html">workqueue工作队列                                                                   </a></td>
+<td class="org-left">2023年12月19日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-12-18/a39e0a172b-STDY.html">busybox/mdev学习                                                                  </a></td>
+<td class="org-left">2023年12月18日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-12-18/164db53ad1-STDY.html">linux insmod报错问题探究                                                              </a></td>
+<td class="org-left">2023年12月18日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-12-18/887909460d-STDY.html">跑SMMU中断问题                                                                       </a></td>
+<td class="org-left">2023年12月18日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-12-7/56198c45a5-STDY.html">mtdnand                                                                         </a></td>
+<td class="org-left">2023年12月07日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-12-6/aa6631199a-STDY.html">gcc编译选项mcmodel=medium                                                           </a></td>
+<td class="org-left">2023年12月06日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-12-5/cc7617c356-CANCELED.html">C-mode实现宏判断                                                                     </a></td>
+<td class="org-left">2023年12月05日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-12-1/8ccc65a748-STDY.html">Cache翻译Documentation/admin-guide/device-mapper/cache.rst                        </a></td>
+<td class="org-left">2023年12月01日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-11-22/810bac682c-STDY.html">IOMMU.txt翻译学习，设备树属性层面                                                           </a></td>
+<td class="org-left">2023年11月22日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-11-20/58b9833a46-STDY.html">tty源码探究                                                                         </a></td>
+<td class="org-left">2023年11月20日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-11-20/20d45a10e9-STDY.html">回车与换行的区别                                                                        </a></td>
+<td class="org-left">2023年11月20日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-11-17/1d12211c12-STDY.html">TTY文档翻译                                                                         </a></td>
+<td class="org-left">2023年11月17日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-11-6/706f2a7431-STDY.html">串口方式传送OS binary到DSRAM问题分析                                                       </a></td>
+<td class="org-left">2023年11月06日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-11-3/e82f84e04f-STDY.html">u-boot::pinctrl                                                                 </a></td>
+<td class="org-left">2023年11月03日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-11-1/dfb2e9f41b-STDY.html">u-boot学习                                                                        </a></td>
+<td class="org-left">2023年11月01日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-10-27/517f849de0-STDY.html">提交补丁到社区的方法                                                                      </a></td>
+<td class="org-left">2023年10月27日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-10-27/a3adc8f4b3-STDY.html">Kernel/Documentations/doc-guide/kernel-doc.rst翻译                                </a></td>
+<td class="org-left">2023年10月27日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-10-25/3e37be6130-STDY.html">-finstrument-functions                                                          </a></td>
+<td class="org-left">2023年10月25日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-10-24/18e21971ab-STDY.html">mmap系统调用回溯                                                                      </a></td>
+<td class="org-left">2023年10月24日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-10-24/cddb39bd48-STDY.html">ringbuffer aux                                                                  </a></td>
+<td class="org-left">2023年10月24日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-10-18/d45967f391-STDY.html">ringbuffer学习                                                                    </a></td>
+<td class="org-left">2023年10月18日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-10-16/2d858f2f90-DONE.html">event list                                                                      </a></td>
+<td class="org-left">2023年10月16日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-10-13/471d156f64-STDY.html">使用BHT进行分支预测 翻译                                                                  </a></td>
+<td class="org-left">2023年10月13日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-10-11/93818c5d29-DONE.html">checklist                                                                       </a></td>
+<td class="org-left">2023年10月11日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-10-11/ddd241836e-STDY.html">如何实现分时采样                                                                        </a></td>
+<td class="org-left">2023年10月11日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-10-10/3d45f64c4b-STDY.html">Perf_event_exec(void)                                                           </a></td>
+<td class="org-left">2023年10月10日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-10-10/660d5176e3-STDY.html">Power8 CACHE                                                                    </a></td>
+<td class="org-left">2023年10月10日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-10-8/5dbc6c6838-STDY.html">Linux性能优化--Tuned特性原理及使用指南                                                       </a></td>
+<td class="org-left">2023年10月08日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-10-8/9507716c42-STDY.html">高精度事件定时器                                                                        </a></td>
+<td class="org-left">2023年10月08日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-9-27/2a09fa83bd-STDY.html">devicetree                                                                      </a></td>
+<td class="org-left">2023年09月27日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-9-25/a09d109529-STDY.html">/sys/bus/event_source 目录下devices/有内容, drivers/没有驱动                              </a></td>
+<td class="org-left">2023年09月25日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-9-22/2fd7c0c249-STDY.html">pmu-&gt;type                                                                       </a></td>
+<td class="org-left">2023年09月22日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-9-22/2ec691b423-STDY.html">Overflow handling                                                               </a></td>
+<td class="org-left">2023年09月22日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
+<td class="org-left">2023年09月21日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
+<td class="org-left">2023年09月19日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-9-18/f9867fb17a-STDY.html">linux-6.5版本编译perf命令                                                             </a></td>
+<td class="org-left">2023年09月18日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-9-15/cc96be43a4-STDY.html">如何统计cpu在某个状态驻留的时间                                                               </a></td>
+<td class="org-left">2023年09月15日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-9-8/489ffd4a40-STDY.html">学习cpu_hotplug                                                                   </a></td>
+<td class="org-left">2023年09月08日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-9-7/78fbb3d99c-STDY.html">学习kbuild                                                                        </a></td>
+<td class="org-left">2023年09月07日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-9-5/f7c76da9cf-STDY.html">学习设备树格式及其生成使用原理                                                                 </a></td>
+<td class="org-left">2023年09月05日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-9-1/3102704bc9-DEBG.html">PowerPC 架构学习以及处理器idle相关内容学习                                                     </a></td>
+<td class="org-left">2023年09月01日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-8-31/bb0dd09c9f-DEBG.html">解决启动问题 can't access tty job control turned off                                  </a></td>
+<td class="org-left">2023年08月31日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
+<td class="org-left">2023年08月30日</td>
+</tr>
+
+<tr>
+<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
+<td class="org-left">2023年08月29日</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yang</p>
+<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

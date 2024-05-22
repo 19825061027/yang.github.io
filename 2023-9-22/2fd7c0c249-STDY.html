@@ -4,7 +4,7 @@
 <!-- 2024-05-22 Wed 16:46 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>pmu-&gt;type</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,80 +204,57 @@
  |
  <a accesskey="H" href="../index.html"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
-<div id="table-of-contents" role="doc-toc">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents" role="doc-toc">
-<ul>
-<li><a href="#org5b784df">1. python</a></li>
-<li><a href="#orgfda065a">2. others</a></li>
-</ul>
+<h1 class="title">pmu-&gt;type</h1>
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold;">static</span> <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">idr</span> <span style="font-weight: bold; font-style: italic;">pmu_idr</span>;
+
+  <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">ssize_t</span>
+  <span style="font-weight: bold;">type_show</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>, <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device_attribute</span> *<span style="font-weight: bold; font-style: italic;">attr</span>, <span style="font-weight: bold; text-decoration: underline;">char</span> *<span style="font-weight: bold; font-style: italic;">page</span>)
+  {
+        <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">pmu</span> *<span style="font-weight: bold; font-style: italic;">pmu</span> = dev_get_drvdata(dev);
+
+        <span style="font-weight: bold;">return</span> snprintf(page, PAGE_SIZE-1, <span style="font-style: italic;">"%d\n"</span>, pmu-&gt;type);
+  }
+  <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">DEVICE_ATTR_RO</span>(<span style="font-weight: bold; font-style: italic;">type</span>);
+
+  <span style="font-weight: bold;">static</span> <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">attribute</span> *<span style="font-weight: bold; font-style: italic;">pmu_dev_attrs</span>[] = {
+        &amp;dev_attr_type.attr,
+        <span style="font-weight: bold; text-decoration: underline;">NULL</span>,
+  };
+  <span style="font-weight: bold;">ATTRIBUTE_GROUPS</span>(pmu_dev);
+
+  <span style="font-weight: bold;">static</span> <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">bus_type</span> <span style="font-weight: bold; font-style: italic;">pmu_bus</span> = {
+        .name           = <span style="font-style: italic;">"event_source"</span>,
+        .dev_groups     = pmu_dev_groups,
+  };
+</pre>
 </div>
-</div>
-<div id="outline-container-org5b784df" class="outline-2">
-<h2 id="org5b784df"><span class="section-number-2">1.</span> python</h2>
-<div class="outline-text-2" id="text-1">
-<table>
+<p>
+type &amp; perf_event_mux_interval_ms 这两个属性是由bus通过dev_groups提供给子设备的;
+</p>
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-style: italic;">/**</span>
+<span style="font-style: italic;">   * bus_add_device - add device to bus</span>
+<span style="font-style: italic;">   * </span><span style="font-weight: bold; font-style: italic; text-decoration: underline;">@dev</span><span style="font-style: italic;">: device being added</span>
+<span style="font-style: italic;">   *</span>
+<span style="font-style: italic;">   * - Add device's bus attributes.</span>
+<span style="font-style: italic;">   * - Create links to device's bus.</span>
+<span style="font-style: italic;">   * - Add the device to its bus's list of devices.</span>
+<span style="font-style: italic;">   */</span>
+  <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">bus_add_device</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>)
+  {
+        <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">bus_type</span> *<span style="font-weight: bold; font-style: italic;">bus</span> = bus_get(dev-&gt;bus);
 
+        <span style="font-weight: bold;">if</span> (bus) {
+              device_add_groups(dev, bus-&gt;dev_groups);
+              sysfs_create_link(&amp;bus-&gt;p-&gt;devices_kset-&gt;kobj, &amp;dev-&gt;kobj, dev_name(dev));
+              sysfs_create_link(&amp;dev-&gt;kobj, &amp;dev-&gt;bus-&gt;p-&gt;subsys.kobj, <span style="font-style: italic;">"subsystem"</span>);
+              klist_add_tail(&amp;dev-&gt;p-&gt;knode_bus, &amp;bus-&gt;p-&gt;klist_devices);
+        }
+        <span style="font-weight: bold;">return</span> 0;
+  }
 
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/d67c092dd0-DONE.html">Call function directly in cmd line                                              </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div id="outline-container-orgfda065a" class="outline-2">
-<h2 id="orgfda065a"><span class="section-number-2">2.</span> others</h2>
-<div class="outline-text-2" id="text-2">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/7e74f59268-RECD.html">blog 方案                                                                         </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2024-4-10/2a6ca27ca3-RECD.html">terminal配置文件                                                                    </a></td>
-<td class="org-left">2024年04月10日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-21/cdcf1fd0a8-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-9-19/ee98557e7d-STDY.html">理清bus/device_driver/device之间的关系                                                 </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-30/57a7184543-STDY.html">epapr 的生成及其初始运行                                                                 </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/614a00c829-STDY.html">学习rootfs相关内容并理解多种方式加载的区别                                                        </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
-</div>
+</pre>
 </div>
 </div>
 <div id="postamble" class="status">
