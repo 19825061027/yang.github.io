@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2024-05-22 Wed 16:46 -->
+<!-- 2024-05-22 Wed 17:05 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>DTB格式</title>
@@ -209,10 +209,10 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgc013af7">1. Header</a></li>
-<li><a href="#org6f70cd0">2. Memory Reservation Block</a></li>
-<li><a href="#org9906e9f">3. Structure Block</a></li>
-<li><a href="#org0dcb51f">4. Strings Block</a></li>
+<li><a href="#orgc9d7dcb">1. Header</a></li>
+<li><a href="#orgd6133e3">2. Memory Reservation Block</a></li>
+<li><a href="#orge36b0f8">3. Structure Block</a></li>
+<li><a href="#orgc439fbf">4. Strings Block</a></li>
 </ul>
 </div>
 </div>
@@ -269,8 +269,8 @@ free space可能存在，也可能不存在，存在的原因可以是对齐；
 Versioning
 header中的域会给出当前DTB的版本，此文档只描述V17版格式；
 </p>
-<div id="outline-container-orgc013af7" class="outline-2">
-<h2 id="orgc013af7"><span class="section-number-2">1.</span> Header</h2>
+<div id="outline-container-orgc9d7dcb" class="outline-2">
+<h2 id="orgc9d7dcb"><span class="section-number-2">1.</span> Header</h2>
 <div class="outline-text-2" id="text-1">
 <div class="org-src-container">
 <pre class="src src-c">  <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">fdt_header</span> {
@@ -301,8 +301,8 @@ header中的域会给出当前DTB的版本，此文档只描述V17版格式；
 </div>
 </div>
 
-<div id="outline-container-org6f70cd0" class="outline-2">
-<h2 id="org6f70cd0"><span class="section-number-2">2.</span> Memory Reservation Block</h2>
+<div id="outline-container-orgd6133e3" class="outline-2">
+<h2 id="orgd6133e3"><span class="section-number-2">2.</span> Memory Reservation Block</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 目的：讲述了保留块是存放内存保留区列表的，以及内存保留区的一些实现和限制
@@ -359,8 +359,8 @@ should be listed with type EfiReservedMemoryType.
 </div>
 </div>
 
-<div id="outline-container-org9906e9f" class="outline-2">
-<h2 id="org9906e9f"><span class="section-number-2">3.</span> Structure Block</h2>
+<div id="outline-container-orge36b0f8" class="outline-2">
+<h2 id="orge36b0f8"><span class="section-number-2">3.</span> Structure Block</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 描述了设备树本身的结构和内容；由一系列带有数据的tokens组成；
@@ -442,8 +442,8 @@ structure block由根节点组成，之后是FDT_END标志其结束；
 </div>
 </div>
 
-<div id="outline-container-org0dcb51f" class="outline-2">
-<h2 id="org0dcb51f"><span class="section-number-2">4.</span> Strings Block</h2>
+<div id="outline-container-orgc439fbf" class="outline-2">
+<h2 id="orgc439fbf"><span class="section-number-2">4.</span> Strings Block</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 包含树种使用的所有属性名字符；
@@ -454,7 +454,7 @@ structure block由根节点组成，之后是FDT_END标志其结束；
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>
-<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="date">Created: 2024-05-22 Wed 17:05</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

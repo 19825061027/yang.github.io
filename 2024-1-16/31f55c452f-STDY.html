@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2024-05-22 Wed 16:46 -->
+<!-- 2024-05-22 Wed 17:05 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>C语言别名 &amp; 数组指针降级 &amp; 宏#和##</title>
@@ -209,15 +209,15 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org61b2107">1. 数组指针降级</a></li>
-<li><a href="#org4e362de">2. C语言别名</a></li>
-<li><a href="#org191841f">3. 宏#和##</a></li>
+<li><a href="#org63e9710">1. 数组指针降级</a></li>
+<li><a href="#org819b7df">2. C语言别名</a></li>
+<li><a href="#orgf10749c">3. 宏#和##</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org61b2107" class="outline-2">
-<h2 id="org61b2107"><span class="section-number-2">1.</span> 数组指针降级</h2>
+<div id="outline-container-org63e9710" class="outline-2">
+<h2 id="org63e9710"><span class="section-number-2">1.</span> 数组指针降级</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 int qwe[] = {
@@ -236,8 +236,8 @@ ARRAY_SIZE(qwe) == 4;
 </div>
 </div>
 
-<div id="outline-container-org4e362de" class="outline-2">
-<h2 id="org4e362de"><span class="section-number-2">2.</span> C语言别名</h2>
+<div id="outline-container-org819b7df" class="outline-2">
+<h2 id="org819b7df"><span class="section-number-2">2.</span> C语言别名</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 int qwe[] = {
@@ -252,8 +252,8 @@ extern int qwe_alias[] __attribute__((__alias__("qwe")));
 </div>
 </div>
 
-<div id="outline-container-org191841f" class="outline-2">
-<h2 id="org191841f"><span class="section-number-2">3.</span> 宏#和##</h2>
+<div id="outline-container-orgf10749c" class="outline-2">
+<h2 id="orgf10749c"><span class="section-number-2">3.</span> 宏#和##</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 一个#代表字符串
@@ -283,7 +283,7 @@ int name_ONE;
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>
-<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="date">Created: 2024-05-22 Wed 17:05</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

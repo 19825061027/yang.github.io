@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2024-05-22 Wed 16:46 -->
+<!-- 2024-05-22 Wed 17:05 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>perf分时复用究竟是perf层实现还是kernel层实现，如何实现的</title>
@@ -209,14 +209,14 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org333e1a0">1. perf分时是在kernel层实现的证明</a></li>
-<li><a href="#org190a1a5">2. kernel层实现</a></li>
+<li><a href="#orgc33ff1e">1. perf分时是在kernel层实现的证明</a></li>
+<li><a href="#org18a1c38">2. kernel层实现</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org333e1a0" class="outline-2">
-<h2 id="org333e1a0"><span class="section-number-2">1.</span> perf分时是在kernel层实现的证明</h2>
+<div id="outline-container-orgc33ff1e" class="outline-2">
+<h2 id="orgc33ff1e"><span class="section-number-2">1.</span> perf分时是在kernel层实现的证明</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 通过更改man perf_event_open中的例子，同时跑6个cycles事件，发现有
@@ -318,8 +318,8 @@ Used 8960377 instructions  28858462 total time  63704204 enabled time
 </p>
 </div>
 </div>
-<div id="outline-container-org190a1a5" class="outline-2">
-<h2 id="org190a1a5"><span class="section-number-2">2.</span> kernel层实现</h2>
+<div id="outline-container-org18a1c38" class="outline-2">
+<h2 id="org18a1c38"><span class="section-number-2">2.</span> kernel层实现</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 分为 事件注入列表 和 事件安排调度</p>
@@ -328,7 +328,7 @@ Used 8960377 instructions  28858462 total time  63704204 enabled time
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>
-<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="date">Created: 2024-05-22 Wed 17:05</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

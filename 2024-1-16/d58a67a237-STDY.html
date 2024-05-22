@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2024-05-22 Wed 16:46 -->
+<!-- 2024-05-22 Wed 17:05 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>spin_lock &amp; spin_lock_irq &amp; spin_lock_irqsave区别</title>
@@ -209,17 +209,17 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgb6b8571">1. 为什么需要自旋锁</a></li>
-<li><a href="#org2ef2e66">2. 为什么自旋锁会禁止抢占</a></li>
-<li><a href="#org9f12932">3. 临界区禁止睡眠</a></li>
-<li><a href="#org936c826">4. spin_lock系列的分别</a></li>
-<li><a href="#org95405b2">5. 什么场合使用什么锁</a></li>
+<li><a href="#orgc519984">1. 为什么需要自旋锁</a></li>
+<li><a href="#org31892b8">2. 为什么自旋锁会禁止抢占</a></li>
+<li><a href="#orgaedb1d4">3. 临界区禁止睡眠</a></li>
+<li><a href="#org383e36d">4. spin_lock系列的分别</a></li>
+<li><a href="#org1b6d8b3">5. 什么场合使用什么锁</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgb6b8571" class="outline-2">
-<h2 id="orgb6b8571"><span class="section-number-2">1.</span> 为什么需要自旋锁</h2>
+<div id="outline-container-orgc519984" class="outline-2">
+<h2 id="orgc519984"><span class="section-number-2">1.</span> 为什么需要自旋锁</h2>
 <div class="outline-text-2" id="text-1">
 <ol class="org-ol">
 <li>其他锁(读写锁、互斥锁、信号量等)会发生上下文切换或睡眠(可中断睡眠和不可中断睡眠)，时间不可预期;</li>
@@ -228,8 +228,8 @@
 </div>
 </div>
 
-<div id="outline-container-org2ef2e66" class="outline-2">
-<h2 id="org2ef2e66"><span class="section-number-2">2.</span> 为什么自旋锁会禁止抢占</h2>
+<div id="outline-container-org31892b8" class="outline-2">
+<h2 id="org31892b8"><span class="section-number-2">2.</span> 为什么自旋锁会禁止抢占</h2>
 <div class="outline-text-2" id="text-2">
 <ol class="org-ol">
 <li>自旋锁的原理是线程仍旧占有CPU，不退出，忙等待。</li>
@@ -241,11 +241,11 @@
 </div>
 </div>
 
-<div id="outline-container-org9f12932" class="outline-2">
-<h2 id="org9f12932"><span class="section-number-2">3.</span> 临界区禁止睡眠</h2>
+<div id="outline-container-orgaedb1d4" class="outline-2">
+<h2 id="orgaedb1d4"><span class="section-number-2">3.</span> 临界区禁止睡眠</h2>
 </div>
-<div id="outline-container-org936c826" class="outline-2">
-<h2 id="org936c826"><span class="section-number-2">4.</span> spin_lock系列的分别</h2>
+<div id="outline-container-org383e36d" class="outline-2">
+<h2 id="org383e36d"><span class="section-number-2">4.</span> spin_lock系列的分别</h2>
 <div class="outline-text-2" id="text-4">
 <ol class="org-ol">
 <li>为防止中断线程也需要锁，导致死锁，因此临界区代码段执行前应该关闭CPU中断  --&gt; spin_lock_irq</li>
@@ -258,8 +258,8 @@ spin_lock_irqsave会保存当前的中断状态，解锁时恢复当前中断状
 </div>
 </div>
 
-<div id="outline-container-org95405b2" class="outline-2">
-<h2 id="org95405b2"><span class="section-number-2">5.</span> 什么场合使用什么锁</h2>
+<div id="outline-container-org1b6d8b3" class="outline-2">
+<h2 id="org1b6d8b3"><span class="section-number-2">5.</span> 什么场合使用什么锁</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 spin_lock:
@@ -310,7 +310,7 @@ softirq/tasklet
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>
-<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="date">Created: 2024-05-22 Wed 17:05</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

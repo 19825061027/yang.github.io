@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2024-05-22 Wed 16:46 -->
+<!-- 2024-05-22 Wed 17:05 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>workqueue工作队列</title>
@@ -209,18 +209,18 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org74990eb">1. 为什么需要工作队列?</a></li>
-<li><a href="#org8b7759f">2. 工作队列的概念</a></li>
-<li><a href="#orgf81beb0">3. 工作队列的特性</a></li>
-<li><a href="#org3d88a4d">4. 实现（共享工作队列和自定义工作队列）</a></li>
+<li><a href="#orga1e7ca0">1. 为什么需要工作队列?</a></li>
+<li><a href="#org8048766">2. 工作队列的概念</a></li>
+<li><a href="#orgb3504ee">3. 工作队列的特性</a></li>
+<li><a href="#org1b43478">4. 实现（共享工作队列和自定义工作队列）</a></li>
 </ul>
 </div>
 </div>
 <p>
 REFERENCE: <a href="https://blog.csdn.net/u013253075/article/details/128396565">https://blog.csdn.net/u013253075/article/details/128396565</a>
 </p>
-<div id="outline-container-org74990eb" class="outline-2">
-<h2 id="org74990eb"><span class="section-number-2">1.</span> 为什么需要工作队列?</h2>
+<div id="outline-container-orga1e7ca0" class="outline-2">
+<h2 id="orga1e7ca0"><span class="section-number-2">1.</span> 为什么需要工作队列?</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 内核代码中，经常遇到不能或不合适去马上调用某个处理过程，此时希望将该工作推送给某个
@@ -240,8 +240,8 @@ REFERENCE: <a href="https://blog.csdn.net/u013253075/article/details/128396565">
 </div>
 </div>
 
-<div id="outline-container-org8b7759f" class="outline-2">
-<h2 id="org8b7759f"><span class="section-number-2">2.</span> 工作队列的概念</h2>
+<div id="outline-container-org8048766" class="outline-2">
+<h2 id="org8048766"><span class="section-number-2">2.</span> 工作队列的概念</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 <b>工作队列</b> 是将操作(或回调)延期异步执行的一种机制。工作队列可以把工作推后，交由一个
@@ -253,8 +253,8 @@ REFERENCE: <a href="https://blog.csdn.net/u013253075/article/details/128396565">
 </div>
 </div>
 
-<div id="outline-container-orgf81beb0" class="outline-2">
-<h2 id="orgf81beb0"><span class="section-number-2">3.</span> 工作队列的特性</h2>
+<div id="outline-container-orgb3504ee" class="outline-2">
+<h2 id="orgb3504ee"><span class="section-number-2">3.</span> 工作队列的特性</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 通过一个工作队列来执行一个工作相比于直接执行，会有以下特性：
@@ -271,8 +271,8 @@ REFERENCE: <a href="https://blog.csdn.net/u013253075/article/details/128396565">
 </div>
 </div>
 
-<div id="outline-container-org3d88a4d" class="outline-2">
-<h2 id="org3d88a4d"><span class="section-number-2">4.</span> 实现（共享工作队列和自定义工作队列）</h2>
+<div id="outline-container-org1b43478" class="outline-2">
+<h2 id="org1b43478"><span class="section-number-2">4.</span> 实现（共享工作队列和自定义工作队列）</h2>
 <div class="outline-text-2" id="text-4">
 <ol class="org-ol">
 <li>共享工作队列：将新创建的工作任务添加到Linux内核创建的全局工作队列system_wq中，
@@ -296,7 +296,7 @@ REFERENCE: <a href="https://blog.csdn.net/u013253075/article/details/128396565">
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>
-<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="date">Created: 2024-05-22 Wed 17:05</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

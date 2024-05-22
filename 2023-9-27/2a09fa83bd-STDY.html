@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2024-05-22 Wed 16:46 -->
+<!-- 2024-05-22 Wed 17:05 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>devicetree</title>
@@ -209,22 +209,22 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgc78ba49">1. Device Tree usage</a>
+<li><a href="#org66487c1">1. Device Tree usage</a>
 <ul>
-<li><a href="#org1bf6965">1.1. Basic Data Format</a></li>
-<li><a href="#orgbb8445f">1.2. Basic Concepts</a></li>
-<li><a href="#org0b9b951">1.3. How Addressing Works</a></li>
-<li><a href="#org11bdea3">1.4. How Interrupts Work</a></li>
-<li><a href="#org14ef8f9">1.5. Device Specific Data</a></li>
-<li><a href="#orga98a5b5">1.6. Special Nodes</a></li>
-<li><a href="#org6ccca2f">1.7. Advanced Topics</a></li>
-<li><a href="#org8cefede">1.8. Notes</a></li>
+<li><a href="#orgb0e1a37">1.1. Basic Data Format</a></li>
+<li><a href="#org8a7aa21">1.2. Basic Concepts</a></li>
+<li><a href="#org0b68484">1.3. How Addressing Works</a></li>
+<li><a href="#org82a2d64">1.4. How Interrupts Work</a></li>
+<li><a href="#orgee983d4">1.5. Device Specific Data</a></li>
+<li><a href="#org8c1c4b1">1.6. Special Nodes</a></li>
+<li><a href="#orga074be6">1.7. Advanced Topics</a></li>
+<li><a href="#orge99af6c">1.8. Notes</a></li>
 </ul>
 </li>
-<li><a href="#orgab973d1">2. of_unittest.rst</a>
+<li><a href="#org3ac771c">2. of_unittest.rst</a>
 <ul>
-<li><a href="#org26a5cb5">2.1. Test-data</a></li>
-<li><a href="#orgffc5ca5">2.2. Adding the test data</a></li>
+<li><a href="#orgc3e9998">2.1. Test-data</a></li>
+<li><a href="#orgeb42ea7">2.2. Adding the test data</a></li>
 </ul>
 </li>
 </ul>
@@ -234,8 +234,8 @@
 Kernel支持一套平台无关的设备树测试用例,执行OF unittest所需的测试数据如何附着到live tree上;
 </p>
 
-<div id="outline-container-orgc78ba49" class="outline-2">
-<h2 id="orgc78ba49"><span class="section-number-2">1.</span> Device Tree usage</h2>
+<div id="outline-container-org66487c1" class="outline-2">
+<h2 id="org66487c1"><span class="section-number-2">1.</span> Device Tree usage</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 <a href="http://www.devicetree.org/Device_Tree_Usage">http://www.devicetree.org/Device_Tree_Usage</a>
@@ -244,8 +244,8 @@ Kernel支持一套平台无关的设备树测试用例,执行OF unittest所需�
 ePAPR当前采用一个新的名字进行更新: Devicetree Specification Documentation
 </p>
 </div>
-<div id="outline-container-org1bf6965" class="outline-3">
-<h3 id="org1bf6965"><span class="section-number-3">1.1.</span> Basic Data Format</h3>
+<div id="outline-container-orgb0e1a37" class="outline-3">
+<h3 id="orgb0e1a37"><span class="section-number-3">1.1.</span> Basic Data Format</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 属性键值对:
@@ -262,8 +262,8 @@ string-list="red fish","blue fish";
 </p>
 </div>
 </div>
-<div id="outline-container-orgbb8445f" class="outline-3">
-<h3 id="orgbb8445f"><span class="section-number-3">1.2.</span> Basic Concepts</h3>
+<div id="outline-container-org8a7aa21" class="outline-3">
+<h3 id="org8a7aa21"><span class="section-number-3">1.2.</span> Basic Concepts</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 制造商 Acme || 名字 Coyote's Revenge 
@@ -403,8 +403,8 @@ ns16550没有manufacturer纯粹是历史原因,所有新的兼容值需要使用
 </p>
 </div>
 </div>
-<div id="outline-container-org0b9b951" class="outline-3">
-<h3 id="org0b9b951"><span class="section-number-3">1.3.</span> How Addressing Works</h3>
+<div id="outline-container-org0b68484" class="outline-3">
+<h3 id="org0b68484"><span class="section-number-3">1.3.</span> How Addressing Works</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 CPU addressing
@@ -526,28 +526,28 @@ Non Memory Mapped Devices
 </div>
 </div>
 
-<div id="outline-container-org11bdea3" class="outline-3">
-<h3 id="org11bdea3"><span class="section-number-3">1.4.</span> How Interrupts Work</h3>
+<div id="outline-container-org82a2d64" class="outline-3">
+<h3 id="org82a2d64"><span class="section-number-3">1.4.</span> How Interrupts Work</h3>
 </div>
-<div id="outline-container-org14ef8f9" class="outline-3">
-<h3 id="org14ef8f9"><span class="section-number-3">1.5.</span> Device Specific Data</h3>
+<div id="outline-container-orgee983d4" class="outline-3">
+<h3 id="orgee983d4"><span class="section-number-3">1.5.</span> Device Specific Data</h3>
 </div>
-<div id="outline-container-orga98a5b5" class="outline-3">
-<h3 id="orga98a5b5"><span class="section-number-3">1.6.</span> Special Nodes</h3>
+<div id="outline-container-org8c1c4b1" class="outline-3">
+<h3 id="org8c1c4b1"><span class="section-number-3">1.6.</span> Special Nodes</h3>
 </div>
-<div id="outline-container-org6ccca2f" class="outline-3">
-<h3 id="org6ccca2f"><span class="section-number-3">1.7.</span> Advanced Topics</h3>
+<div id="outline-container-orga074be6" class="outline-3">
+<h3 id="orga074be6"><span class="section-number-3">1.7.</span> Advanced Topics</h3>
 </div>
-<div id="outline-container-org8cefede" class="outline-3">
-<h3 id="org8cefede"><span class="section-number-3">1.8.</span> Notes</h3>
+<div id="outline-container-orge99af6c" class="outline-3">
+<h3 id="orge99af6c"><span class="section-number-3">1.8.</span> Notes</h3>
 </div>
 </div>
-<div id="outline-container-orgab973d1" class="outline-2">
-<h2 id="orgab973d1"><span class="section-number-2">2.</span> of_unittest.rst</h2>
+<div id="outline-container-org3ac771c" class="outline-2">
+<h2 id="org3ac771c"><span class="section-number-2">2.</span> of_unittest.rst</h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-org26a5cb5" class="outline-3">
-<h3 id="org26a5cb5"><span class="section-number-3">2.1.</span> Test-data</h3>
+<div id="outline-container-orgc3e9998" class="outline-3">
+<h3 id="orgc3e9998"><span class="section-number-3">2.1.</span> Test-data</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 drivers/of/unittest-data/testcases.dts 包含在 drivers/of/unittest.c 所需的自动测试数据;
@@ -580,8 +580,8 @@ drivers/of/unittest-data/tests-match.dtsi
 </p>
 </div>
 </div>
-<div id="outline-container-orgffc5ca5" class="outline-3">
-<h3 id="orgffc5ca5"><span class="section-number-3">2.2.</span> Adding the test data</h3>
+<div id="outline-container-orgeb42ea7" class="outline-3">
+<h3 id="orgeb42ea7"><span class="section-number-3">2.2.</span> Adding the test data</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 非平坦设备树结构由树结构连接的device_node组成:
@@ -743,7 +743,7 @@ attach_node_and_children() 使用 of_attach_node()将节点放进live tree中;
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>
-<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="date">Created: 2024-05-22 Wed 17:05</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

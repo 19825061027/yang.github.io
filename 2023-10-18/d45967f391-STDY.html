@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2024-05-22 Wed 16:46 -->
+<!-- 2024-05-22 Wed 17:05 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ringbuffer学习</title>
@@ -209,10 +209,10 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org211e469">1. ringbuffer实现</a></li>
-<li><a href="#orgb439b8c">2. 不同模式下ringbuffer的分配</a></li>
-<li><a href="#org1993d91">3. 读写buffer</a></li>
-<li><a href="#org290a3f7">4. 将采样信息写到ringbuffer中</a></li>
+<li><a href="#org8200e23">1. ringbuffer实现</a></li>
+<li><a href="#org345927a">2. 不同模式下ringbuffer的分配</a></li>
+<li><a href="#orgf17cd8f">3. 读写buffer</a></li>
+<li><a href="#orge0192c6">4. 将采样信息写到ringbuffer中</a></li>
 </ul>
 </div>
 </div>
@@ -231,8 +231,8 @@ Reference: Diving into Linux Perf Ring Buffer
 </ul></li>
 </ol>
 
-<div id="outline-container-org211e469" class="outline-2">
-<h2 id="org211e469"><span class="section-number-2">1.</span> ringbuffer实现</h2>
+<div id="outline-container-org8200e23" class="outline-2">
+<h2 id="org8200e23"><span class="section-number-2">1.</span> ringbuffer实现</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 基础算法
@@ -348,8 +348,8 @@ Reference: Diving into Linux Perf Ring Buffer
 </div>
 </div>
 
-<div id="outline-container-orgb439b8c" class="outline-2">
-<h2 id="orgb439b8c"><span class="section-number-2">2.</span> 不同模式下ringbuffer的分配</h2>
+<div id="outline-container-org345927a" class="outline-2">
+<h2 id="org345927a"><span class="section-number-2">2.</span> 不同模式下ringbuffer的分配</h2>
 <div class="outline-text-2" id="text-2">
 <ol class="org-ol">
 <li>perf支持的模式：线程模式(目标是特定线程)，cpu模式(目标是特定cpu)，系统模式(目标是所有cpu)</li>
@@ -386,8 +386,8 @@ System wide mode
 </div>
 </div>
 
-<div id="outline-container-org1993d91" class="outline-2">
-<h2 id="org1993d91"><span class="section-number-2">3.</span> 读写buffer</h2>
+<div id="outline-container-orgf17cd8f" class="outline-2">
+<h2 id="orgf17cd8f"><span class="section-number-2">3.</span> 读写buffer</h2>
 <div class="outline-text-2" id="text-3">
 <ol class="org-ol">
 <li>ringbuffer是典型的生产-消费者模式；</li>
@@ -426,8 +426,8 @@ System wide mode
 </div>
 </div>
 
-<div id="outline-container-org290a3f7" class="outline-2">
-<h2 id="org290a3f7"><span class="section-number-2">4.</span> 将采样信息写到ringbuffer中</h2>
+<div id="outline-container-orge0192c6" class="outline-2">
+<h2 id="orge0192c6"><span class="section-number-2">4.</span> 将采样信息写到ringbuffer中</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 当event counter溢出时，采样信息被拿出并保存进ringbuffer；
@@ -467,7 +467,7 @@ System wide mode
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>
-<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="date">Created: 2024-05-22 Wed 17:05</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

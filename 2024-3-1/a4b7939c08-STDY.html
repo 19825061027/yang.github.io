@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2024-05-22 Wed 16:46 -->
+<!-- 2024-05-22 Wed 17:05 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>mail学习 rfc2822</title>
@@ -209,12 +209,12 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orge009910">1. 3.6.1 The origination date field(rarely used)</a></li>
-<li><a href="#orgd94f55e">2. 3.6.2 Originator fields(from/sender(rarely used)/reply-to)</a></li>
-<li><a href="#org0fd02ca">3. 3.6.3 Destination address fields(to/cc/bcc)</a></li>
-<li><a href="#orgb424bf6">4. 3.6.4 Identification fields(message-id/in-reply-to/references)</a></li>
-<li><a href="#orga4e9f61">5. 3.6.5 Informational field(subject/comments(rarely-used)/keywords(rarely-used))</a></li>
-<li><a href="#org4f12eb8">6. 3.6.6 resent fields(rarely-used)</a></li>
+<li><a href="#orge94f734">1. 3.6.1 The origination date field(rarely used)</a></li>
+<li><a href="#org6442286">2. 3.6.2 Originator fields(from/sender(rarely used)/reply-to)</a></li>
+<li><a href="#orgf7c5eeb">3. 3.6.3 Destination address fields(to/cc/bcc)</a></li>
+<li><a href="#org914a550">4. 3.6.4 Identification fields(message-id/in-reply-to/references)</a></li>
+<li><a href="#orgbb37698">5. 3.6.5 Informational field(subject/comments(rarely-used)/keywords(rarely-used))</a></li>
+<li><a href="#orge221450">6. 3.6.6 resent fields(rarely-used)</a></li>
 </ul>
 </div>
 </div>
@@ -257,11 +257,11 @@ in arm_ni_0_cd_0/events.</li>
 </ol>
 <hr>
 
-<div id="outline-container-orge009910" class="outline-2">
-<h2 id="orge009910"><span class="section-number-2">1.</span> 3.6.1 The origination date field(rarely used)</h2>
+<div id="outline-container-orge94f734" class="outline-2">
+<h2 id="orge94f734"><span class="section-number-2">1.</span> 3.6.1 The origination date field(rarely used)</h2>
 </div>
-<div id="outline-container-orgd94f55e" class="outline-2">
-<h2 id="orgd94f55e"><span class="section-number-2">2.</span> 3.6.2 Originator fields(from/sender(rarely used)/reply-to)</h2>
+<div id="outline-container-org6442286" class="outline-2">
+<h2 id="org6442286"><span class="section-number-2">2.</span> 3.6.2 Originator fields(from/sender(rarely used)/reply-to)</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 From: "JiaLong.Yang" &lt;jialong.yang@shingroup.cn&gt;
@@ -280,8 +280,8 @@ from中的一员，指明信息应该是由谁回复。
 </p>
 </div>
 </div>
-<div id="outline-container-org0fd02ca" class="outline-2">
-<h2 id="org0fd02ca"><span class="section-number-2">3.</span> 3.6.3 Destination address fields(to/cc/bcc)</h2>
+<div id="outline-container-orgf7c5eeb" class="outline-2">
+<h2 id="orgf7c5eeb"><span class="section-number-2">3.</span> 3.6.3 Destination address fields(to/cc/bcc)</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 To: Robin Murphy &lt;robin.murphy@arm.com&gt;, Will Deacon &lt;will@kernel.org&gt;,
@@ -299,8 +299,8 @@ bcc, blind carbon copy，类似cc，但目标人不会cc/to的目标人看到。
 </div>
 </div>
 
-<div id="outline-container-orgb424bf6" class="outline-2">
-<h2 id="orgb424bf6"><span class="section-number-2">4.</span> 3.6.4 Identification fields(message-id/in-reply-to/references)</h2>
+<div id="outline-container-org914a550" class="outline-2">
+<h2 id="org914a550"><span class="section-number-2">4.</span> 3.6.4 Identification fields(message-id/in-reply-to/references)</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 Message-ID: &lt;e0feef57-e609-4e14-acb0-65212a39380b@shingroup.cn&gt;
@@ -325,8 +325,8 @@ Reference: parent's in-reply-to + parent's Message-Id
 </div>
 </div>
 
-<div id="outline-container-orga4e9f61" class="outline-2">
-<h2 id="orga4e9f61"><span class="section-number-2">5.</span> 3.6.5 Informational field(subject/comments(rarely-used)/keywords(rarely-used))</h2>
+<div id="outline-container-orgbb37698" class="outline-2">
+<h2 id="orgbb37698"><span class="section-number-2">5.</span> 3.6.5 Informational field(subject/comments(rarely-used)/keywords(rarely-used))</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 Subject: Re: [PATCH v2] perf/hx_arm_ni: Support uncore ARM NI-700 PMU
@@ -337,13 +337,13 @@ comments是包含附加信息。
 </div>
 </div>
 
-<div id="outline-container-org4f12eb8" class="outline-2">
-<h2 id="org4f12eb8"><span class="section-number-2">6.</span> 3.6.6 resent fields(rarely-used)</h2>
+<div id="outline-container-orge221450" class="outline-2">
+<h2 id="orge221450"><span class="section-number-2">6.</span> 3.6.6 resent fields(rarely-used)</h2>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>
-<p class="date">Created: 2024-05-22 Wed 16:46</p>
+<p class="date">Created: 2024-05-22 Wed 17:05</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
