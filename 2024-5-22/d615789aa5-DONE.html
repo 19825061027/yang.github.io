@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2024-05-23 Thu 09:47 -->
+<!-- 2024-05-23 Thu 09:51 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>=windows= 平台粘贴图片到 =wsl= 的 =emacs= 的 =org= 中</title>
@@ -209,19 +209,19 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org07792b8">1. 意图</a></li>
-<li><a href="#org4ef429b">2. 实现</a>
+<li><a href="#orgaae068d">1. 意图</a></li>
+<li><a href="#orgfaf2f05">2. 实现</a>
 <ul>
-<li><a href="#orgc612fc7">2.1. 说明</a></li>
-<li><a href="#org0f44f5e">2.2. 注意</a></li>
+<li><a href="#org7145c7b">2.1. 说明</a></li>
+<li><a href="#org2f1d235">2.2. 注意</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org07792b8" class="outline-2">
-<h2 id="org07792b8"><span class="section-number-2">1.</span> 意图</h2>
+<div id="outline-container-orgaae068d" class="outline-2">
+<h2 id="orgaae068d"><span class="section-number-2">1.</span> 意图</h2>
 <div class="outline-text-2" id="text-1">
 <ol class="org-ol">
 <li>采用 <code>org-mode</code> 写文档，需要图片进行补充，因此，图片基本上都是单向复制的，也就是从 <code>windows</code> 到 <code>org</code> 。</li>
@@ -231,8 +231,8 @@
 </div>
 </div>
 
-<div id="outline-container-org4ef429b" class="outline-2">
-<h2 id="org4ef429b"><span class="section-number-2">2.</span> 实现</h2>
+<div id="outline-container-orgfaf2f05" class="outline-2">
+<h2 id="orgfaf2f05"><span class="section-number-2">2.</span> 实现</h2>
 <div class="outline-text-2" id="text-2">
 <div class="org-src-container">
 <pre class="src src-elisp"><span style="font-weight: bold; font-style: italic;">;; </span><span style="font-weight: bold; font-style: italic;">image from windows clipboard to emacs</span>
@@ -259,8 +259,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgc612fc7" class="outline-3">
-<h3 id="orgc612fc7"><span class="section-number-3">2.1.</span> 说明</h3>
+<div id="outline-container-org7145c7b" class="outline-3">
+<h3 id="org7145c7b"><span class="section-number-3">2.1.</span> 说明</h3>
 <div class="outline-text-3" id="text-2-1">
 <ol class="org-ol">
 <li><code>org-download-org-mode-p</code> 确保当前是 <code>org-mode</code> 。</li>
@@ -277,8 +277,8 @@
 </div>
 </div>
 
-<div id="outline-container-org0f44f5e" class="outline-3">
-<h3 id="org0f44f5e"><span class="section-number-3">2.2.</span> 注意</h3>
+<div id="outline-container-org2f1d235" class="outline-3">
+<h3 id="org2f1d235"><span class="section-number-3">2.2.</span> 注意</h3>
 <div class="outline-text-3" id="text-2-2">
 <ol class="org-ol">
 <li><code>cd /</code> 是为了防止 <code>root</code> 用户找不到 <code>gcb</code> 命令。</li>
@@ -290,7 +290,7 @@
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>
-<p class="date">Created: 2024-05-23 Thu 09:47</p>
+<p class="date">Created: 2024-05-23 Thu 09:51</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
