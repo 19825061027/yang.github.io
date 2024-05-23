@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2024-05-23 Thu 09:51 -->
+<!-- 2024-05-23 Thu 09:54 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>理清 =bus/device_driver/device= 之间的关系</title>
@@ -209,36 +209,36 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org593a9b1">1. 总线及平台总线，平台设备和平台驱动</a>
+<li><a href="#org9471abf">1. 总线及平台总线，平台设备和平台驱动</a>
 <ul>
-<li><a href="#org41cb843">1.1. 总线</a></li>
-<li><a href="#org2062d38">1.2. 平台总线</a></li>
-<li><a href="#org6a47474">1.3. 平台设备</a></li>
-<li><a href="#orga884fee">1.4. 平台驱动</a></li>
-<li><a href="#orgff0fa7c">1.5. 设备枚举</a></li>
-<li><a href="#org672a118">1.6. 设备命名和驱动绑定</a></li>
-<li><a href="#org0732583">1.7. 早期平台设备和驱动</a></li>
-<li><a href="#org0f3811e">1.8. kernfs kernel3.14引入的内存文件系统，其提供内核子系统内部伪文件系统所需的功能</a></li>
+<li><a href="#org76e369d">1.1. 总线</a></li>
+<li><a href="#orgd30eeea">1.2. 平台总线</a></li>
+<li><a href="#org9bfbb5b">1.3. 平台设备</a></li>
+<li><a href="#orgf3657c2">1.4. 平台驱动</a></li>
+<li><a href="#orgdaf60aa">1.5. 设备枚举</a></li>
+<li><a href="#org6aaf1ff">1.6. 设备命名和驱动绑定</a></li>
+<li><a href="#orgcd89108">1.7. 早期平台设备和驱动</a></li>
+<li><a href="#org8a08470">1.8. kernfs kernel3.14引入的内存文件系统，其提供内核子系统内部伪文件系统所需的功能</a></li>
 </ul>
 </li>
-<li><a href="#org1f56930">2. 代码逻辑追溯</a>
+<li><a href="#org1a355dd">2. 代码逻辑追溯</a>
 <ul>
-<li><a href="#org4caefd0">2.1. struct bus_type platform_bus_type::match() 作用及调用逻辑</a></li>
-<li><a href="#orgb41a2e9">2.2. struct platform_driver::probe() 及 struct platform_driver::driver::probe() 之间的关系</a></li>
-<li><a href="#org55dd386">2.3. /sys/bus/platform/drivers_probe 的作用及代码逻辑</a></li>
-<li><a href="#org6728091">2.4. 挂在platform_bus_type这个总线上的驱动注册时struct platform_driver::probe的调用逻辑</a></li>
+<li><a href="#org0ee434c">2.1. struct bus_type platform_bus_type::match() 作用及调用逻辑</a></li>
+<li><a href="#orgb84abb8">2.2. struct platform_driver::probe() 及 struct platform_driver::driver::probe() 之间的关系</a></li>
+<li><a href="#orga85893a">2.3. /sys/bus/platform/drivers_probe 的作用及代码逻辑</a></li>
+<li><a href="#orga843289">2.4. 挂在platform_bus_type这个总线上的驱动注册时struct platform_driver::probe的调用逻辑</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org593a9b1" class="outline-2">
-<h2 id="org593a9b1"><span class="section-number-2">1.</span> 总线及平台总线，平台设备和平台驱动</h2>
+<div id="outline-container-org9471abf" class="outline-2">
+<h2 id="org9471abf"><span class="section-number-2">1.</span> 总线及平台总线，平台设备和平台驱动</h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-org41cb843" class="outline-3">
-<h3 id="org41cb843"><span class="section-number-3">1.1.</span> 总线</h3>
+<div id="outline-container-org76e369d" class="outline-3">
+<h3 id="org76e369d"><span class="section-number-3">1.1.</span> 总线</h3>
 <div class="outline-text-3" id="text-1-1">
 <ul class="org-ul">
 <li>总线就是处理器到设备的通道；</li>
@@ -250,11 +250,11 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-org2062d38" class="outline-3">
-<h3 id="org2062d38"><span class="section-number-3">1.2.</span> 平台总线</h3>
+<div id="outline-container-orgd30eeea" class="outline-3">
+<h3 id="orgd30eeea"><span class="section-number-3">1.2.</span> 平台总线</h3>
 </div>
-<div id="outline-container-org6a47474" class="outline-3">
-<h3 id="org6a47474"><span class="section-number-3">1.3.</span> 平台设备</h3>
+<div id="outline-container-org9bfbb5b" class="outline-3">
+<h3 id="org9bfbb5b"><span class="section-number-3">1.3.</span> 平台设备</h3>
 <div class="outline-text-3" id="text-1-3">
 <ol class="org-ol">
 <li><p>
@@ -273,8 +273,8 @@ Platform devices are given a name, used in driver binding, and a list of resourc
 </ol>
 </div>
 </div>
-<div id="outline-container-orga884fee" class="outline-3">
-<h3 id="orga884fee"><span class="section-number-3">1.4.</span> 平台驱动</h3>
+<div id="outline-container-orgf3657c2" class="outline-3">
+<h3 id="orgf3657c2"><span class="section-number-3">1.4.</span> 平台驱动</h3>
 <div class="outline-text-3" id="text-1-4">
 <div class="org-src-container">
 <pre class="src src-c">     <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_driver</span> {
@@ -326,8 +326,8 @@ Kernel modules可以由多个platform drivers组成，platform core提供helpers
 </div>
 </div>
 
-<div id="outline-container-orgff0fa7c" class="outline-3">
-<h3 id="orgff0fa7c"><span class="section-number-3">1.5.</span> 设备枚举</h3>
+<div id="outline-container-orgdaf60aa" class="outline-3">
+<h3 id="orgdaf60aa"><span class="section-number-3">1.5.</span> 设备枚举</h3>
 <div class="outline-text-3" id="text-1-5">
 <ol class="org-ol">
 <li><p>
@@ -353,8 +353,8 @@ Kernel modules可以由多个platform drivers组成，platform core提供helpers
 </div>
 </div>
 
-<div id="outline-container-org672a118" class="outline-3">
-<h3 id="org672a118"><span class="section-number-3">1.6.</span> 设备命名和驱动绑定</h3>
+<div id="outline-container-org6aaf1ff" class="outline-3">
+<h3 id="org6aaf1ff"><span class="section-number-3">1.6.</span> 设备命名和驱动绑定</h3>
 <div class="outline-text-3" id="text-1-6">
 <ol class="org-ol">
 <li>platform_device.dev.bus_id是设备的官方名字；通过以下组件建构：
@@ -375,8 +375,8 @@ Kernel modules可以由多个platform drivers组成，platform core提供helpers
 </div>
 </div>
 
-<div id="outline-container-org0732583" class="outline-3">
-<h3 id="org0732583"><span class="section-number-3">1.7.</span> 早期平台设备和驱动</h3>
+<div id="outline-container-orgcd89108" class="outline-3">
+<h3 id="orgcd89108"><span class="section-number-3">1.7.</span> 早期平台设备和驱动</h3>
 <div class="outline-text-3" id="text-1-7">
 <ol class="org-ol">
 <li>early platform interfaces 提供给早期系统启动时驱动所需的部分平台数据；</li>
@@ -386,7 +386,7 @@ Kernel modules可以由多个platform drivers组成，platform core提供helpers
 </div>
 
 <ol class="org-ol">
-<li><a id="orgfd8f33c"></a>1. 注册早期平台设备数据<br>
+<li><a id="org4b203bf"></a>1. 注册早期平台设备数据<br>
 <div class="outline-text-4" id="text-1-7-1">
 <ul class="org-ul">
 <li>架构代码使用函数 early_platform_add_devices() 注册平台设备数据；</li>
@@ -395,7 +395,7 @@ Kernel modules可以由多个platform drivers组成，platform core提供helpers
 </ul>
 </div>
 </li>
-<li><a id="orgbd8baa2"></a>2. 解析内核命令行<br>
+<li><a id="org8b12c3a"></a>2. 解析内核命令行<br>
 <div class="outline-text-4" id="text-1-7-2">
 <ul class="org-ul">
 <li>架构代码调用 parse_early_param() 解析内核命令行；这会执行所有匹配到的 early_param() 回调；</li>
@@ -404,7 +404,7 @@ Kernel modules可以由多个platform drivers组成，platform core提供helpers
 </ul>
 </div>
 </li>
-<li><a id="org8860db6"></a>3. 安装属于某一类的早期平台驱动<br>
+<li><a id="orgd505a10"></a>3. 安装属于某一类的早期平台驱动<br>
 <div class="outline-text-4" id="text-1-7-3">
 <p>
 The architecture code may optionally force registration of all early
@@ -416,7 +416,7 @@ unless the user has specified port on the kernel command line.
 </p>
 </div>
 </li>
-<li><a id="org609ac51"></a>4. 早期平台驱动注册<br>
+<li><a id="org8322a55"></a>4. 早期平台驱动注册<br>
 <div class="outline-text-4" id="text-1-7-4">
 <p>
 Compiled-in platform drivers making use of early_platform_init() are
@@ -425,7 +425,7 @@ should use early_platform_init("earlyprintk", &amp;platform_driver).
 </p>
 </div>
 </li>
-<li><a id="orgec44001"></a>5. 属于某一类的早期平台驱动的probing<br>
+<li><a id="orge2f187a"></a>5. 属于某一类的早期平台驱动的probing<br>
 <div class="outline-text-4" id="text-1-7-5">
 <p>
 The architecture code calls early_platform_driver_probe() to match
@@ -436,7 +436,7 @@ as possible may be good for the serial port case.
 </p>
 </div>
 </li>
-<li><a id="orge64a3e2"></a>6. 早期平台驱动probe()<br>
+<li><a id="org17e2813"></a>6. 早期平台驱动probe()<br>
 <div class="outline-text-4" id="text-1-7-6">
 <p>
 The driver code needs to take special care during early boot, especially
@@ -450,8 +450,8 @@ time. The early serial driver performs register_console() at this point.
 </ol>
 </div>
 
-<div id="outline-container-org0f3811e" class="outline-3">
-<h3 id="org0f3811e"><span class="section-number-3">1.8.</span> kernfs kernel3.14引入的内存文件系统，其提供内核子系统内部伪文件系统所需的功能</h3>
+<div id="outline-container-org8a08470" class="outline-3">
+<h3 id="org8a08470"><span class="section-number-3">1.8.</span> kernfs kernel3.14引入的内存文件系统，其提供内核子系统内部伪文件系统所需的功能</h3>
 <div class="outline-text-3" id="text-1-8">
 <ul class="org-ul">
 <li>源于拆分sysfs使用的部分内部逻辑，它通过将有关硬件设备和相关设备驱动程序的信息从内核的设备模型导出到用户空间，提供一组虚拟文件，从而实现独立且可重用的功能。其他内部子系统可以更容易，更一致地实现自己的伪文件系统；</li>
@@ -474,17 +474,17 @@ time. The early serial driver performs register_console() at this point.
 </div>
 </div>
 </div>
-<div id="outline-container-org1f56930" class="outline-2">
-<h2 id="org1f56930"><span class="section-number-2">2.</span> 代码逻辑追溯</h2>
+<div id="outline-container-org1a355dd" class="outline-2">
+<h2 id="org1a355dd"><span class="section-number-2">2.</span> 代码逻辑追溯</h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-org4caefd0" class="outline-3">
-<h3 id="org4caefd0"><span class="section-number-3">2.1.</span> struct bus_type platform_bus_type::match() 作用及调用逻辑</h3>
+<div id="outline-container-org0ee434c" class="outline-3">
+<h3 id="org0ee434c"><span class="section-number-3">2.1.</span> struct bus_type platform_bus_type::match() 作用及调用逻辑</h3>
 <div class="outline-text-3" id="text-2-1">
 <hr>
 </div>
 <ol class="org-ol">
-<li><a id="org10a9b8f"></a>作用<br>
+<li><a id="org28e97d6"></a>作用<br>
 <div class="outline-text-4" id="text-2-1-1">
 <ol class="org-ol">
 <li>判断struct device *dev和struct device_driver *drv是否匹配；</li>
@@ -524,10 +524,10 @@ time. The early serial driver performs register_console() at this point.
 </ol>
 </div>
 </li>
-<li><a id="orgb42f3d8"></a>调用逻辑<br>
+<li><a id="org0c26680"></a>调用逻辑<br>
 <div class="outline-text-4" id="text-2-1-2">
 
-<div id="orgc40e800" class="figure">
+<div id="orgf56449f" class="figure">
 <p><img src="match.png" alt="match.png">
 </p>
 </div>
@@ -536,8 +536,8 @@ time. The early serial driver performs register_console() at this point.
 </ol>
 </div>
 
-<div id="outline-container-orgb41a2e9" class="outline-3">
-<h3 id="orgb41a2e9"><span class="section-number-3">2.2.</span> struct platform_driver::probe() 及 struct platform_driver::driver::probe() 之间的关系</h3>
+<div id="outline-container-orgb84abb8" class="outline-3">
+<h3 id="orgb84abb8"><span class="section-number-3">2.2.</span> struct platform_driver::probe() 及 struct platform_driver::driver::probe() 之间的关系</h3>
 <div class="outline-text-3" id="text-2-2">
 <hr>
 <ol class="org-ol">
@@ -547,20 +547,20 @@ time. The early serial driver performs register_console() at this point.
 </div>
 </div>
 
-<div id="outline-container-org55dd386" class="outline-3">
-<h3 id="org55dd386"><span class="section-number-3">2.3.</span> /sys/bus/platform/drivers_probe 的作用及代码逻辑</h3>
+<div id="outline-container-orga85893a" class="outline-3">
+<h3 id="orga85893a"><span class="section-number-3">2.3.</span> /sys/bus/platform/drivers_probe 的作用及代码逻辑</h3>
 <div class="outline-text-3" id="text-2-3">
 <hr>
 </div>
 <ol class="org-ol">
-<li><a id="orga4b8af7"></a>作用<br>
+<li><a id="org4c8f33a"></a>作用<br>
 <div class="outline-text-4" id="text-2-3-1">
 <p>
 手动写入设备名，一般都是未匹配到驱动的设备名；如果已经有绑定上驱动，则会返回 -EINVAL；
 </p>
 </div>
 </li>
-<li><a id="org785f0c4"></a>代码逻辑<br>
+<li><a id="orgdb2e41e"></a>代码逻辑<br>
 <div class="outline-text-4" id="text-2-3-2">
 <ol class="org-ol">
 <li><p>
@@ -643,8 +643,8 @@ time. The early serial driver performs register_console() at this point.
 </ol>
 </div>
 
-<div id="outline-container-org6728091" class="outline-3">
-<h3 id="org6728091"><span class="section-number-3">2.4.</span> 挂在platform_bus_type这个总线上的驱动注册时struct platform_driver::probe的调用逻辑</h3>
+<div id="outline-container-orga843289" class="outline-3">
+<h3 id="orga843289"><span class="section-number-3">2.4.</span> 挂在platform_bus_type这个总线上的驱动注册时struct platform_driver::probe的调用逻辑</h3>
 <div class="outline-text-3" id="text-2-4">
 <hr>
 <div class="org-src-container">
@@ -740,7 +740,7 @@ time. The early serial driver performs register_console() at this point.
 </pre>
 </div>
 
-<div id="orgc9342d1" class="figure">
+<div id="org2e37e59" class="figure">
 <p><img src="platform_driver_probe.png" alt="platform_driver_probe.png">
 </p>
 </div>
@@ -750,7 +750,7 @@ time. The early serial driver performs register_console() at this point.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>
-<p class="date">Created: 2024-05-23 Thu 09:51</p>
+<p class="date">Created: 2024-05-23 Thu 09:54</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2024-05-23 Thu 09:51 -->
+<!-- 2024-05-23 Thu 09:54 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>=wsl= 平台 =emacs= 和 =windows= 文本粘贴互通</title>
@@ -209,18 +209,18 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgbe87846">1. 意图</a></li>
-<li><a href="#org45809b4">2. 实现</a>
+<li><a href="#org4314944">1. 意图</a></li>
+<li><a href="#orgdfebef9">2. 实现</a>
 <ul>
-<li><a href="#orgb491287">2.1. 说明</a></li>
+<li><a href="#org0604e46">2.1. 说明</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgbe87846" class="outline-2">
-<h2 id="orgbe87846"><span class="section-number-2">1.</span> 意图</h2>
+<div id="outline-container-org4314944" class="outline-2">
+<h2 id="org4314944"><span class="section-number-2">1.</span> 意图</h2>
 <div class="outline-text-2" id="text-1">
 <ol class="org-ol">
 <li><code>windows</code> 文本复制之后，可以通过 <code>ctrl-shift v</code> 粘贴到终端，而从终端中的 <code>emacs</code> 往外复制，却没有默认行为。</li>
@@ -251,11 +251,26 @@ CLIP
 </ol>
 </div>
 </div>
-<div id="outline-container-org45809b4" class="outline-2">
-<h2 id="org45809b4"><span class="section-number-2">2.</span> 实现</h2>
+<div id="outline-container-orgdfebef9" class="outline-2">
+<h2 id="orgdfebef9"><span class="section-number-2">2.</span> 实现</h2>
 <div class="outline-text-2" id="text-2">
 <div class="org-src-container">
-<pre class="src src-elisp">(<span style="font-weight: bold;">defun</span> <span style="font-weight: bold;">me/also-copy-to-windows-clip</span> (text)
+<pre class="src src-elisp"><span style="font-weight: bold; font-style: italic;">;; </span><span style="font-weight: bold; font-style: italic;">text from emacs to windows</span>
+(<span style="font-weight: bold;">defun</span> <span style="font-weight: bold;">me/also-copy-to-windows-clip</span> (text)
+  <span style="font-style: italic;">"cd / makes sure right in root user.</span>
+<span style="font-style: italic;">   iconv makes sure chinese is OK.</span>
+<span style="font-style: italic;">   iconv -c option will force illegal character converting.</span>
+<span style="font-style: italic;">   Couldn't handle quote in text."</span>
+  (shell-command
+   (format <span style="font-style: italic;">"cd / &amp;&amp; echo '</span><span style="font-weight: bold; font-style: italic; text-decoration: underline;">%s</span><span style="font-style: italic;">' |</span>
+<span style="font-style: italic;">            iconv -c -f utf-8 -t gbk |</span>
+<span style="font-style: italic;">            /mnt/c/Windows/System32/clip.exe"</span>
+           text)))
+<span style="font-weight: bold; font-style: italic;">;; </span><span style="font-weight: bold; font-style: italic;">'</span><span style="font-weight: bold; font-style: italic; text-decoration: underline;">hello</span><span style="font-weight: bold; font-style: italic;">'</span>
+<span style="font-weight: bold; font-style: italic;">;; </span><span style="font-weight: bold; font-style: italic;">copy -&gt;</span>
+<span style="font-weight: bold; font-style: italic;">;; </span><span style="font-weight: bold; font-style: italic;">hello</span>
+
+(<span style="font-weight: bold;">defun</span> <span style="font-weight: bold;">me/also-copy-to-windows-clip</span> (text)
   <span style="font-style: italic;">"Could handle quote in text."</span>
   (<span style="font-weight: bold;">let*</span> ((tmp/file (format <span style="font-style: italic;">"/tmp/emacs.clip.%s"</span> user-real-login-name))
          (clip_exe <span style="font-style: italic;">"/mnt/c/Windows/System32/clip.exe"</span>))
@@ -284,13 +299,14 @@ CLIP
 </pre>
 </div>
 </div>
-<div id="outline-container-orgb491287" class="outline-3">
-<h3 id="orgb491287"><span class="section-number-3">2.1.</span> 说明</h3>
+<div id="outline-container-org0604e46" class="outline-3">
+<h3 id="org0604e46"><span class="section-number-3">2.1.</span> 说明</h3>
 <div class="outline-text-3" id="text-2-1">
 <ol class="org-ol">
 <li>主要逻辑是先将文本保存到临时文件，并修改临时文件字符集，然后传递给 <code>clip.exe</code> 。</li>
 <li>临时文件考虑 <code>root</code> 用户，需要不同 <code>user</code> 指定不同文件。</li>
 <li><code>cd /</code> 是为了防止 <code>root</code> 用户找不到 <code>clip.exe</code> 可执行文件。</li>
+<li>两种实现方式，第一种有引号忽略问题。</li>
 </ol>
 </div>
 </div>
@@ -298,7 +314,7 @@ CLIP
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>
-<p class="date">Created: 2024-05-23 Thu 09:51</p>
+<p class="date">Created: 2024-05-23 Thu 09:54</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
