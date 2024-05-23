@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2024-05-23 Thu 09:43 -->
+<!-- 2024-05-23 Thu 09:47 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>=blog= 方案</title>
@@ -209,21 +209,21 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org48f648a">1. 需求</a></li>
-<li><a href="#orgecd7c1b">2. 处理脚本</a></li>
-<li><a href="#orgd451751">3. 问题和改进</a>
+<li><a href="#orgdcd9781">1. 需求</a></li>
+<li><a href="#org976eb5b">2. 处理脚本</a></li>
+<li><a href="#orge951a4e">3. 问题和改进</a>
 <ul>
-<li><a href="#orgadbbc6b">3.1. 转换优化</a></li>
-<li><a href="#org3f0a3f4">3.2. 转换优化(Deprecated)</a></li>
-<li><a href="#org4c848a7">3.3. 不同组表格对齐</a></li>
+<li><a href="#org30e1025">3.1. 转换优化</a></li>
+<li><a href="#orgd858d67">3.2. 转换优化(Deprecated)</a></li>
+<li><a href="#org577c238">3.3. 不同组表格对齐</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org48f648a" class="outline-2">
-<h2 id="org48f648a"><span class="section-number-2">1.</span> 需求</h2>
+<div id="outline-container-orgdcd9781" class="outline-2">
+<h2 id="orgdcd9781"><span class="section-number-2">1.</span> 需求</h2>
 <div class="outline-text-2" id="text-1">
 <ol class="org-ol">
 <li>文档，也就是数据源是一个文件，采用 <code>org-mode</code> 方式，每一个文章标题格式如下：
@@ -238,8 +238,8 @@ level | status | date | title | tags</li>
 </div>
 </div>
 
-<div id="outline-container-orgecd7c1b" class="outline-2">
-<h2 id="orgecd7c1b"><span class="section-number-2">2.</span> 处理脚本</h2>
+<div id="outline-container-org976eb5b" class="outline-2">
+<h2 id="org976eb5b"><span class="section-number-2">2.</span> 处理脚本</h2>
 <div class="outline-text-2" id="text-2">
 <ol class="org-ol">
 <li><p>
@@ -267,12 +267,12 @@ level | status | date | title | tags</li>
 </div>
 </div>
 
-<div id="outline-container-orgd451751" class="outline-2">
-<h2 id="orgd451751"><span class="section-number-2">3.</span> 问题和改进</h2>
+<div id="outline-container-orge951a4e" class="outline-2">
+<h2 id="orge951a4e"><span class="section-number-2">3.</span> 问题和改进</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-orgadbbc6b" class="outline-3">
-<h3 id="orgadbbc6b"><span class="section-number-3">3.1.</span> 转换优化</h3>
+<div id="outline-container-org30e1025" class="outline-3">
+<h3 id="org30e1025"><span class="section-number-3">3.1.</span> 转换优化</h3>
 <div class="outline-text-3" id="text-3-1">
 <ul class="org-ul">
 <li>原本方案缺点太过明显，现在依赖内容不变，不过检测方式从文件名改为生成专门的 <code>.hash</code> 文件。</li>
@@ -281,8 +281,8 @@ level | status | date | title | tags</li>
 </div>
 </div>
 
-<div id="outline-container-org3f0a3f4" class="outline-3">
-<h3 id="org3f0a3f4"><span class="section-number-3">3.2.</span> 转换优化(Deprecated)</h3>
+<div id="outline-container-orgd858d67" class="outline-3">
+<h3 id="orgd858d67"><span class="section-number-3">3.2.</span> 转换优化(Deprecated)</h3>
 <div class="outline-text-3" id="text-3-2">
 <ul class="org-ul">
 <li>文件名采用 <code>hash</code> 方式建立依赖关系，当依赖内容变动时，算出的 <code>hash</code> 也会变，就重新生成目标文件。</li>
@@ -291,8 +291,8 @@ level | status | date | title | tags</li>
 </div>
 </div>
 
-<div id="outline-container-org4c848a7" class="outline-3">
-<h3 id="org4c848a7"><span class="section-number-3">3.3.</span> 不同组表格对齐</h3>
+<div id="outline-container-org577c238" class="outline-3">
+<h3 id="org577c238"><span class="section-number-3">3.3.</span> 不同组表格对齐</h3>
 <div class="outline-text-3" id="text-3-3">
 <ul class="org-ul">
 <li>标准 <code>css/js</code> 表示的 <code>index.html</code> 界面，不同分类里面的表格宽度不一样</li>
@@ -304,7 +304,7 @@ level | status | date | title | tags</li>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>
-<p class="date">Created: 2024-05-23 Thu 09:43</p>
+<p class="date">Created: 2024-05-23 Thu 09:47</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
