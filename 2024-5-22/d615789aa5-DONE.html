@@ -4,7 +4,7 @@
 <!-- 2024-05-23 Thu 09:43 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>=windows= 平台粘贴图片到 =wsl= 的 =emacs= 的 =org= 中</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,144 +204,87 @@
  |
  <a accesskey="H" href="/"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
+<h1 class="title"><code>windows</code> 平台粘贴图片到 <code>wsl</code> 的 <code>emacs</code> 的 <code>org</code> 中</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org6bc3e92">1. python</a></li>
-<li><a href="#org9deb67e">2. wsl</a></li>
-<li><a href="#org5517ffd">3. others</a></li>
+<li><a href="#org1111232">1. 意图</a></li>
+<li><a href="#orgec391b9">2. 实现</a>
+<ul>
+<li><a href="#org4be8d1e">2.1. 说明</a></li>
+<li><a href="#org7e9ef77">2.2. 注意</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org6bc3e92" class="outline-2">
-<h2 id="org6bc3e92"><span class="section-number-2">1.</span> python</h2>
+
+<div id="outline-container-org1111232" class="outline-2">
+<h2 id="org1111232"><span class="section-number-2">1.</span> 意图</h2>
 <div class="outline-text-2" id="text-1">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/7f35b342cb-DONE.html"><code>Call function directly in cmd line</code>                                            </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
+<ol class="org-ol">
+<li>采用 <code>org-mode</code> 写文档，需要图片进行补充，因此，图片基本上都是单向复制的，也就是从 <code>windows</code> 到 <code>org</code> 。</li>
+<li>采用的工具主要是 <a href="https://learn.microsoft.com/zh-cn/powershell/module/microsoft.powershell.management/get-clipboard?view=powershell-7.4">Get-Clipboard</a>。</li>
+<li><code>windows</code> 端复制图片或截图工具截完图之后，在 <code>org</code> 文档的空闲行按 <code>Ctrl-c Ctrl-c</code> 即可将图片复制到指定位置。并在当前位置插入链接，在导出 <code>HTML</code> 时自动插入此图片。</li>
+</ol>
 </div>
 </div>
-<div id="outline-container-org9deb67e" class="outline-2">
-<h2 id="org9deb67e"><span class="section-number-2">2.</span> wsl</h2>
+
+<div id="outline-container-orgec391b9" class="outline-2">
+<h2 id="orgec391b9"><span class="section-number-2">2.</span> 实现</h2>
 <div class="outline-text-2" id="text-2">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/22c9aeb158-DONE.html"><code>wsl</code> 平台 <code>emacs</code> 和 <code>windows</code> 文本粘贴互通                                             </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2024-5-22/d615789aa5-DONE.html"><code>windows</code> 平台粘贴图片到 <code>wsl</code> 的 <code>emacs</code> 的 <code>org</code> 中                                     </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-</tbody>
-</table>
+<div class="org-src-container">
+<pre class="src src-elisp"><span style="font-weight: bold; font-style: italic;">;; </span><span style="font-weight: bold; font-style: italic;">image from windows clipboard to emacs</span>
+(<span style="font-weight: bold;">defun</span> <span style="font-weight: bold;">me/org-windows-clipboard-image</span> nil
+  (<span style="font-weight: bold;">interactive</span>)
+  (<span style="font-weight: bold;">if</span> (org-download-org-mode-p)
+      (<span style="font-weight: bold;">let*</span> ((filename <span style="font-style: italic;">"/tmp/screenshot.png"</span>)
+             (result (shell-command-to-string
+                      (format
+                       <span style="font-style: italic;">"cd / &amp;&amp; powershell.exe -command \"(gcb -format image).save(</span><span style="font-weight: bold; font-style: italic;">\</span><span style="font-style: italic;">'%s</span><span style="font-weight: bold; font-style: italic;">\</span><span style="font-style: italic;">')\" &amp;&gt; /dev/null &amp;&amp; echo -n yes"</span>
+                       filename))))
+        (<span style="font-weight: bold;">if</span> (string= <span style="font-style: italic;">"yes"</span> result)
+            (<span style="font-weight: bold;">progn</span> <span style="font-weight: bold; font-style: italic;">;;</span><span style="font-weight: bold; font-style: italic;">(setq org-download-annotate-function nil)</span>
+              <span style="font-weight: bold; font-style: italic;">;; </span><span style="font-weight: bold; font-style: italic;">Second time to copy file into a right place.</span>
+              (org-download-image filename) 
+              <span style="font-weight: bold; font-style: italic;">;; </span><span style="font-weight: bold; font-style: italic;">delete source line and #+DOWNLOADED tag line</span>
+              (<span style="font-weight: bold;">save-excursion</span> (forward-line -1) (<span style="font-weight: bold;">setq</span> beg (point))
+                              (forward-line -2) (<span style="font-weight: bold;">setq</span> end (point))
+                              (filter-buffer-substring beg end 'delete)))
+          (message <span style="font-style: italic;">"No screenshot found!"</span>)
+          ))))
+(add-hook 'org-ctrl-c-ctrl-c-final-hook #'me/org-windows-clipboard-image)
+</pre>
 </div>
 </div>
-<div id="outline-container-org5517ffd" class="outline-2">
-<h2 id="org5517ffd"><span class="section-number-2">3.</span> others</h2>
-<div class="outline-text-2" id="text-3">
-<table>
 
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/f81b1c42c9-RECD.html"><code>blog</code> 方案                                                                       </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-</tbody>
-</table>
-<p>
-目录 'github_public/2024-5-22/images/Day_Done' 创建成功。
-文件 images/Day_Done/2024-05-22_14-54-04_screenshot.png 已成功拷贝到 github_public/2024-5-22/images/Day_Done/2024-05-22_14-54-04_screenshot.png
+<div id="outline-container-org4be8d1e" class="outline-3">
+<h3 id="org4be8d1e"><span class="section-number-3">2.1.</span> 说明</h3>
+<div class="outline-text-3" id="text-2-1">
+<ol class="org-ol">
+<li><code>org-download-org-mode-p</code> 确保当前是 <code>org-mode</code> 。</li>
+<li>主要逻辑是通过 <code>gcb(Get-Clipboard)</code> 命令将图片临时保存到 <code>/tmp/screenshot.png</code> 。</li>
+<li><p>
+然后再通过 <code>org-mode</code> 自带的工具，将图片放到自配置的指定位置(<code>./images</code>)。
 </p>
-<table>
+<div class="org-src-container">
+<pre class="src src-elisp">: -*- mode:org<span style="font-weight: bold; font-style: italic;">; </span><span style="font-weight: bold; font-style: italic;">eval: (setq org-download-image-dir "./images"); -*-</span>
+</pre>
+</div></li>
+<li>删除没用的多余内容。</li>
+</ol>
+</div>
+</div>
 
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2023-9-21/ccb6748303-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-</tbody>
-</table>
-<p>
-目录 'github_public/2023-9-21' 创建成功。
-错误: 源文件 one_png.png 未找到。
-</p>
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2023-9-19/90798a89e9-STDY.html">理清 <code>bus/device_driver/device</code> 之间的关系                                             </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-</tbody>
-</table>
-<p>
-目录 'github_public/2023-9-19' 创建成功。
-错误: 源文件 match.png 未找到。
-目录 'github_public/2023-9-19' 创建成功。
-错误: 源文件 platform_driver_probe.png 未找到。
-</p>
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2023-8-30/4a42e9c6f6-STDY.html"><code>epapr</code> 的生成及其初始运行                                                               </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/f8a0aad7c5-STDY.html">学习 <code>rootfs</code> 相关内容并理解多种方式加载的区别                                                    </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
+<div id="outline-container-org7e9ef77" class="outline-3">
+<h3 id="org7e9ef77"><span class="section-number-3">2.2.</span> 注意</h3>
+<div class="outline-text-3" id="text-2-2">
+<ol class="org-ol">
+<li><code>cd /</code> 是为了防止 <code>root</code> 用户找不到 <code>gcb</code> 命令。</li>
+<li>采用 <code>org-ctrl-c-ctrl-c-final-hook</code> 而非 <code>org-ctrl-c-ctrl-c-hook</code> 是策略性地将图片粘贴排到最后，以防止 <code>ctrl-c ctrl-c</code> 命令混乱。</li>
+</ol>
+</div>
 </div>
 </div>
 </div>

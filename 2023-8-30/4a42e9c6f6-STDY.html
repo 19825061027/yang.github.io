@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-05-23 Thu 09:43 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>=epapr= 的生成及其初始运行</title>
+<meta name="author" content="Yang" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../css/readtheorg.css"/>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
+<script type="text/javascript" src="../js/readtheorg.js"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="/"> UP </a>
+ |
+ <a accesskey="H" href="/"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title"><code>epapr</code> 的生成及其初始运行</h1>
+<ol class="org-ol">
+<li>假设 vmlinux 已生成；</li>
+<li><p>
+调用脚本wrapper: vmlinux --&gt; zImage.epapr
+</p>
+<div class="org-src-container">
+<pre class="src src-makefile">     <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">define CONFIG_EPAPR_BOOT in .config</span>
+     <span style="font-weight: bold; font-style: italic;">image-$(</span><span style="font-weight: bold; font-style: italic;">CONFIG_EPAPR_BOOT</span><span style="font-weight: bold; font-style: italic;">)</span> += zImage.epapr 
+     <span style="font-weight: bold; font-style: italic;">cmd_wrap</span> := sh ./arch/powerpc/boot/wrapper -Z gz -c -o arch/powerpc/boot/zImage.epapr -p vmlinux
+
+     $(<span style="font-weight: bold; font-style: italic;">addprefix</span> $(<span style="font-weight: bold; font-style: italic;">obj</span>)/, $(<span style="font-weight: bold; font-style: italic;">sort</span> $(<span style="font-weight: bold; font-style: italic;">filter</span> zImage.%, $(<span style="font-weight: bold; font-style: italic;">image-y</span>)))): vmlinux $(<span style="font-weight: bold; font-style: italic;">wrapperbits</span>) FORCE
+              $(<span style="font-weight: bold; font-style: italic;">call</span> if_changed,wrap,$(<span style="font-weight: bold; font-style: italic;">subst</span> $(<span style="font-weight: bold; font-style: italic;">obj</span>)/zImage.,,<span style="font-weight: bold;">$</span><span style="font-weight: bold; text-decoration: underline;">@</span>))       
+</pre>
+</div></li>
+
+<li>wrapper脚本中行为：
+<ol class="org-ol">
+<li><p>
+strip all redundant information:
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">        objcopy -S vmlinux ./vmlinux.strip.gz.$<span style="font-weight: bold; font-style: italic;">$</span>
+        strip_size = sizeof ./vmlinux.strip.gz.$<span style="font-weight: bold; font-style: italic;">$</span>
+</pre>
+</div></li>
+
+<li><p>
+compress the image.
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">        gzip -n -f -9 ./vmlinux.strip.gz.$<span style="font-weight: bold; font-style: italic;">$</span>
+        mv -f ./vmlinux.strip.gz.$<span style="font-weight: bold; font-style: italic;">$</span> ./vmlinux.strip.gz
+</pre>
+</div></li>
+
+<li><p>
+Round the size to next higher MB limit
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">        <span style="font-weight: bold; font-style: italic;">link_address</span>=<span style="font-style: italic;">'0x20000000'</span>
+        <span style="font-weight: bold; font-style: italic;">round_size</span>=$(<span style="font-weight: bold;">((strip_size + 0xfffff</span>) &amp; 0xfff00000))
+        <span style="font-weight: bold; font-style: italic;">round_size</span>=0x$(<span style="font-weight: bold;">printf "%x" $round_size</span>)
+        <span style="font-weight: bold; font-style: italic;">link_addr</span>=$(<span style="font-weight: bold;">printf "%d" $link_address</span>)
+        <span style="font-weight: bold; font-style: italic;">version</span>=<span style="font-style: italic;">"5.18.0-ga4ffd4e50ea8-dirty"</span>
+</pre>
+</div></li>
+
+<li><p>
+Make gzipped vmlinux.strip as a section of a elf file.
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">        objcopy arch/powerpc/boot/empty.o ./zImage.XXXXXX.o --add-section=.kernel:vmlinux.strip=./vmlinux.strip.gz --set-section-flags=.kernel:vmlinux.strip=contents,alloc,load,readonly,data
+</pre>
+</div></li>
+
+<li><p>
+Link everything.
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">        ld -m elf64lppc -T arch/powerpc/boot/zImage.lds <span style="font-style: italic;">\</span>
+           -Ttext 0x20000000 -pie --no-dynamic-linker -z notext <span style="font-style: italic;">\</span>
+           -o arch/powerpc/boot/zImage.epapr <span style="font-style: italic;">\</span>
+           arch/powerpc/boot/pseries-head.o <span style="font-style: italic;">\</span>
+           arch/powerpc/boot/epapr.o <span style="font-style: italic;">\</span>
+           arch/powerpc/boot/epapr-wrapper.o <span style="font-style: italic;">\</span>
+           arch/powerpc/boot/empty.o <span style="font-style: italic;">\</span>
+           arch/powerpc/boot/wrapper.a
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">-pie: Produce a dynamically linked position independent executable on targets that support it.</span>
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">--no-dynamic-linker</span>
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">-z keyword: -z is passed directly on to the linker along with the keyword.</span>
+</pre>
+</div></li>
+
+<li><p>
+post-processing needed for some platforms.
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">        arch/powerpc/boot/addnote arch/powerpc/boot/zImage.epapr
+</pre>
+</div></li>
+</ol></li>
+
+<li><p>
+启动
+-Ttext 0x20000000指定了入口位置：
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">     readelf -hs zImage.epapr
+     ELF Header:
+     ...
+     Entry point address:               0x20000000
+     ...
+     Section Headers:
+     [Nr] Name              Type             Address           Offset
+     Size              EntSize          Flags  Link  Info  Align
+     [ 0]                   NULL             0000000000000000  00000000
+     0000000000000000  0000000000000000           0     0     0
+     [ 1] .text             PROGBITS         0000000020000000  00010000
+     000000000000d4b0  0000000000000000  AX       0     0     32
+     [ 2] .data             PROGBITS         000000002000e000  0001e000
+     0000000000001a90  0000000000000000  WA       0     0     8
+     [ 3] __builtin_cmdline PROGBITS         000000002000fa90  0001fa90
+     0000000000000800  0000000000000000  WA       0     0     8
+     [ 4] .dynsym           DYNSYM           0000000020010290  00020290
+     0000000000000048  0000000000000018   A       5     3     8
+     [ 5] .dynstr           STRTAB           00000000200102d8  000202d8
+     0000000000000001  0000000000000000   A       0     0     1
+     [ 6] .dynamic          DYNAMIC          00000000200102e0  000202e0
+     0000000000000130  0000000000000010  WA       5     0     8
+     [ 7] .got              PROGBITS         0000000020010500  00020500
+     0000000000000018  0000000000000008  WA       0     0     256
+     [ 8] .hash             HASH             0000000020010518  00020518
+     0000000000000018  0000000000000004   A       4     0     8
+     [ 9] .gnu.hash         GNU_HASH         0000000020010530  00020530
+     000000000000001c  0000000000000000   A       4     0     8
+     [10] .eh_frame         PROGBITS         000000002001054c  0002054c
+     000000000000236c  0000000000000000   A       0     0     4
+     [11] .rela.dyn         RELA             00000000200128b8  000228b8
+     0000000000000288  0000000000000018   A       4     0     8
+     [12] .kernel:vmlinux.s PROGBITS         0000000020013000  00023000
+     00000000006c9e03  0000000000000000   A       0     0     1
+     [13] .bss              NOBITS           00000000206dd000  006ece03
+     0000000000001698  0000000000000000  WA       0     0     8
+     [14] .debug_info       PROGBITS         0000000000000000  006ece03
+     000000000001117f  0000000000000000           0     0     1
+     [15] .debug_abbrev     PROGBITS         0000000000000000  006fdf82
+     0000000000002cf4  0000000000000000           0     0     1
+     [16] .debug_loc        PROGBITS         0000000000000000  00700c76
+     000000000001b004  0000000000000000           0     0     1
+     [17] .debug_aranges    PROGBITS         0000000000000000  0071bc7a
+     0000000000000330  0000000000000000           0     0     1
+     [18] .debug_line       PROGBITS         0000000000000000  0071bfaa
+     0000000000009af6  0000000000000000           0     0     1
+     [19] .debug_str        PROGBITS         0000000000000000  00725aa0
+     0000000000001dc0  0000000000000001  MS       0     0     1
+     [20] .comment          PROGBITS         0000000000000000  00727860
+     000000000000002c  0000000000000001  MS       0     0     1
+     [21] .debug_ranges     PROGBITS         0000000000000000  0072788c
+     00000000000022b0  0000000000000000           0     0     1
+     [22] .symtab           SYMTAB           0000000000000000  00729b40
+     0000000000001b00  0000000000000018          23   141     8
+     [23] .strtab           STRTAB           0000000000000000  0072b640
+     0000000000000e80  0000000000000000           0     0     1
+     [24] .shstrtab         STRTAB           0000000000000000  0072c4c0
+     00000000000000f2  0000000000000000           0     0     1
+     Key to Flags:
+     W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+     L (link order), O (extra OS processing required), G (group), T (TLS),
+     C (compressed), x (unknown), o (OS specific), E (exclude),
+     p (processor specific)
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">     objdump -d zImage.epapr
+     arch/powerpc/boot/zImage.epapr:     file format elf64-powerpcle
+
+     Disassembly of section .text:
+
+     0000000020000000 &lt;_start&gt;:
+     20000000:  48 00 00 08     tdi     0,r0,72
+     20000004:  2c 00 00 48     b       20000030 &lt;_start+0x30&gt;
+     20000008:  7d 60 00 a6     .long 0xa600607d
+     2000000c:  69 6b 00 01     .long 0x1006b69
+     20000010:  39 40 00 00     .long 0x4039
+     20000014:  7d 41 01 64     oris    r1,r0,16765
+     20000018:  42 9f 00 05     .long 0x5009f42
+     2000001c:  7d 48 02 a6     lhzu    r16,18557(r2)
+     20000020:  39 4a 00 14     .long 0x14004a39
+     20000024:  7d 5a 03 a6     lhzu    r16,23165(r3)
+     20000028:  7d 7b 03 a6     lhzu    r16,31613(r3)
+     2000002c:  4c 00 00 24     dozi    r0,r0,76
+     20000030:  c8 02 00 48     b       200002f8 &lt;_zimage_start_lib&gt;
+     ...
+     00000000200002f8 &lt;_zimage_start_lib&gt;:
+     200002f8:  05 00 00 48     bl      200002fc &lt;p_base&gt;
+
+     00000000200002fc &lt;p_base&gt;:
+     200002fc:  a6 02 48 7d     mflr    r10
+     20000300:  ec ff aa f8     std     r5,-20(r10)
+     ...
+     200003f8:  81 fe ff 4b     bl      20000278 &lt;platform_init+0x8&gt;
+     200003fc:  ec 0d 00 48     b       200011e8 &lt;start+0x8&gt;
+</pre>
+</div>
+
+<ol class="org-ol">
+<li>代码运行轨迹：
+pseries-head.S::0x20000000::_zimage_start -&gt;
+    crt0.S::_zimage_start_lib -&gt;
+    epapr-wrapper.c::platform_init    
+    main.c::start</li>
+</ol></li>
+</ol>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yang</p>
+<p class="date">Created: 2024-05-23 Thu 09:43</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

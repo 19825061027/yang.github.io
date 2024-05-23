@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-05-23 Thu 09:43 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>学习 =rootfs= 相关内容并理解多种方式加载的区别</title>
+<meta name="author" content="Yang" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../css/readtheorg.css"/>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
+<script type="text/javascript" src="../js/readtheorg.js"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="/"> UP </a>
+ |
+ <a accesskey="H" href="/"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">学习 <code>rootfs</code> 相关内容并理解多种方式加载的区别</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org52c2e47">1. ramfs, rootfs and initramfs</a>
+<ul>
+<li><a href="#orgb4f9931">1.1. What is ramfs?</a></li>
+<li><a href="#org1473639">1.2. ramfs and ramdisk:</a></li>
+<li><a href="#org764c210">1.3. ramfs and tmpfs:</a></li>
+<li><a href="#orgabfe492">1.4. What is rootfs?</a></li>
+<li><a href="#org3e6e6f7">1.5. What is initramfs?</a></li>
+<li><a href="#org480ab2c">1.6. Populating initramfs:</a></li>
+<li><a href="#org3c280aa">1.7. External initramfs images:</a></li>
+</ul>
+</li>
+<li><a href="#org7959ebf">2. kernel中关于内建rootfs的组织,即通过CONFIG_INITRAMFS_SOURCE方式指定</a></li>
+<li><a href="#org13c7fa2">3. 尝试CONFIG_INITRAMFS_SOURCE采用文件</a>
+<ul>
+<li><a href="#orge2a3832">3.1. 简单版本</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org52c2e47" class="outline-2">
+<h2 id="org52c2e47"><span class="section-number-2">1.</span> ramfs, rootfs and initramfs</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-orgb4f9931" class="outline-3">
+<h3 id="orgb4f9931"><span class="section-number-3">1.1.</span> What is ramfs?</h3>
+<div class="outline-text-3" id="text-1-1">
+<ol class="org-ol">
+<li>Ramfs is a very simple filesystem that exports Linux's disk caching mechanisms(the page cache and dentry cache) as a dynamically resizable RAM-based filesystem.</li>
+<li>正常情况下，Linux会将所有文件都缓存在内存中，这也就是Linux Kernel的一项缓存机制；</li>
+<li>从backing store(usually the block device the filesystem is mounted on)读出来的数据页，会缓存到内存中，以防止再次需要；但也同时会标记为clean(freeable)，以便在内存不需要，VM可以释放这块空间做其他事情；</li>
+<li>同样道理，写到标记有clean页的数据，也会立刻写回到backing store，以便VM可以随时重分配这块内存；一个相似的机制(the dentry cache)极大地加快了对目录的访问；</li>
+<li>而对于ramfs而言，是没有backing store的；但正常的写操作，仍会正常，只是没有地方作为backing store进行写回；这也就意味着，可以简单地通过将page标记为非clean实现；</li>
+<li>拿来实现ramfs的code量是很少的，因为所有的工作是在Linux caching基础上实现的；因此，menuconfig中是没有可选的移除选项用来移除ramfs的，因为这样节省下的空间几乎可以忽略不计；</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org1473639" class="outline-3">
+<h3 id="org1473639"><span class="section-number-3">1.2.</span> ramfs and ramdisk:</h3>
+<div class="outline-text-3" id="text-1-2">
+<ol class="org-ol">
+<li>The older "ram disk" mechanism created a synthetic block device out of an area of RAM and used it as backing store for a filesystem. This block device was of fixed size, so the filesystem mounted on it was of fixed size.Using a ram disk also required unnecessarily copying memory from the fake block device into the page cache (ache copying changes back out), as well as creating and destroying dentries. Plus it needed a filesystem driver (such as ext2) to format and interpret this data.</li>
+<li>Compared to ramfs, this waste memory(and memory bus bandwidth), creates unnecessary work for the CPU, and pollutes the CPU caches. (There are tricks to avoid this copying by playing with the page tables, but they're unpleasantly complicated and turn out to be about as expensive as the copying anyway.). More to the point, all the wortk ramfs is doing has to happen <span class="underline">anyway</span>, since all file access goes through the page and dentry caches. The RAM disk is simply unnecessary; ramfs is internally much simpler.</li>
+<li>Another reason ramdisks are semi-obsolete is that the introduction of loopback devices offered a more flexible and convenient way to create synthetic block devices, now from files instead of rom chunks of memory. See losetup for details.</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org764c210" class="outline-3">
+<h3 id="org764c210"><span class="section-number-3">1.3.</span> ramfs and tmpfs:</h3>
+<div class="outline-text-3" id="text-1-3">
+<ol class="org-ol">
+<li>ramfs的一个缺点就是数据只能写入，VM无法释放，因为VM认为数据应该写回backing store，所以不会主动将非clean数据进行释放，但ramfs又没有backing store；因此，只有root用户才允许对ramfs挂载进行访问；</li>
+<li>ramfs的衍生是tmpfs，用来增加大小限制，和将数据写进交换空间(swap space)的能力；普通用户也有权限访问tmpfs挂载；</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-orgabfe492" class="outline-3">
+<h3 id="orgabfe492"><span class="section-number-3">1.4.</span> What is rootfs?</h3>
+<div class="outline-text-3" id="text-1-4">
+<ol class="org-ol">
+<li>rootfs是ramfs(or tmpfs, if that's enabled)的实现；rootfs是无法卸载的，和无法杀死init process具有相同的原因；</li>
+<li>大多数系统会将rootfs进行覆盖并忽视它；并且一个空ramfs的实现占的空间是很少的；</li>
+<li>如果CONFIG_TMPFS使能了，rootfs默认使用tmpfs代替ramfs；想要强制使用ramfs，可以在kernel命令行使用rootfstype=ramfs；</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org3e6e6f7" class="outline-3">
+<h3 id="org3e6e6f7"><span class="section-number-3">1.5.</span> What is initramfs?</h3>
+<div class="outline-text-3" id="text-1-5">
+<ol class="org-ol">
+<li>自kernel2.6，kernel包含了一个gzip压缩的cpio格式的archive，用来在kernel启动的时候将其解压进rootfs；提取之后，kernel检查rootfs是否包含文件init，如果有，就将其作为PID1进程进行执行；并且，这个进程有责任执行OS启动的其他义务，包括定位和挂载正式的根设备；</li>
+<li>提取完embedded cpio archive之后，如果找不到init程序，kernel将会调用老的代码来定位并挂载一个根分区，接着执行/sbin/init或其他变种；</li>
+<li>这些在以下几个方面区别于old initrd：
+<ol class="org-ol">
+<li>old initrd总是是一个单独的文件；而initramfs是链接进kernel镜像的；(linux/usr就是用来在building期间生成archive的)；</li>
+<li>老的initrd文件是一个gzipped压缩的文件系统镜像(这个镜像往往有如ext2这种文件系统格式的，因此，还需要将ext2驱动编译进kernel)，而新的initramfs archive是一个gzipped压缩过的cpio文档(比tar包还简单)；kernel的cpio提取代码不仅小，还会标记为__init类型的文本和数据段，这种标记会在启动过程中释放这个代码和数据；</li>
+<li>由老式initrd(/initrd)启动的程序会做一些设置，并返回到内核，而initramfs的init程序则不会返回到kernel；如果/init需要转交控制权，则它可以用一个新的设备覆盖挂载根 / ，并执行另一个初始化进程，相关内容查看下面的switch_root工具；</li>
+<li>当切换到另一个根设备时，initrd将会pivot_root并卸载ramdisk；但initramfs对应的是rootfs，可以既不pivot_root rootfs，也不卸载rootfs；代替删除rootfs里的一切来释放空间(find -xdev / -exec rm '{}' ';')，而是用新的根来overmount rootfs(cd /newmount; mount --move . /; chroot .)；并将stdin/stdout/stderr附着于新的/dev/console上，并exec新的init程序；
+<ul class="org-ul">
+<li>上述删除和overmount的过程是一个非常棘手的过程，因此，klibc包提供了助手程序(utils/run_init.c)；许多其他包如busybox将其命名为switch_root；</li>
+</ul></li>
+</ol></li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org480ab2c" class="outline-3">
+<h3 id="org480ab2c"><span class="section-number-3">1.6.</span> Populating initramfs:</h3>
+<div class="outline-text-3" id="text-1-6">
+<ol class="org-ol">
+<li>自2.6以来，kernel构建进程总是创建一个gzip压缩过的cpio格式的initramfs文档；并将其链接进最终kernel镜像；默认情况下，这个文档是空的(在x86上消耗134bytes)；</li>
+<li><p>
+配置选项CONFIG_INITRAMFS_SOURCE可以用来为initramfs文档指定一个源，之后将会自动将此文档放到最终二进制镜像中；此选项可以指向一个存在了的gzip压缩过的cpio文档，也可以是一个包含想要被归档文件的目录，或者一个指明下述内容的一个文本文件：
+</p>
+<pre class="example" id="org71af829">
+   dir /dev 755 0 0
+   nod /dev/console 644 0 0 c 5 1
+   nod /dev/loop0 644 0 0 b 7 0
+   dir /bin 755 1000 1000
+   slink /bin/sh busybox 777 0 0
+   file /bin/busybox initramfs/busybox 755 0 0
+   dir /proc 755 0 0
+   dir /sys 755 0 0
+   dir /mnt 755 0 0
+   file /init initramfs/init.sh 755 0 0 
+</pre></li>
+
+<li>配置文件的一个优势就是根访问不再设置权限，也不再需要在新档中创建设备节点；但上述例子中需要在linux根目录下提供目录initramfs以及这两个指定的文件；</li>
+<li>kernel不依赖外部的cpio工具，如果指定的是一个目录，而非文件，则kernel的构建架构将会根据那个目录创建那个配置文件(usr/Makefile 调用 usr/gen_initramfs.sh)，并继续根据配置文件打包该目录(通过将其供给usr/gen_init_cpio)；kernel的构建时cpio创建代码完全自供，以及启动时解压提取代码也是自供；</li>
+<li>如果想直接提供给kernel一个打包好的gzip压缩过的cpio archive，那才需要外部cpio工具；</li>
+<li><p>
+下面命令用来提取一个cpio文档：
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">     cpio -i -d -H newc -F initramfs_data.cpio --no-absolute-filenames
+</pre>
+</div></li>
+
+<li>Note：cpio的man手册提供了一些不可取的建议；手册说"A typical way to generate the list of filenames is with the find command; you should give find the -depth option to minimize problems with permissions on directories that are unwritable or not searchable."不要通过这种方式创建initramfs.cpio.gz镜像，那将不会工作；</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org3c280aa" class="outline-3">
+<h3 id="org3c280aa"><span class="section-number-3">1.7.</span> External initramfs images:</h3>
+<div class="outline-text-3" id="text-1-7">
+<ol class="org-ol">
+<li>如果kernel使能了initrd，一个外部的cpio.gz文档同样可以传给2.6版本的kernel用来代替initrd；这种情况下，kernel将会自动检测类型并在尝试运行/init之前，将外部cpio文档提取进rootfs；</li>
+<li>也就是传统传递initrd的方式，可以传递initramfs gzipped cpio archive；kernel会自动判断是哪种archive；</li>
+</ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7959ebf" class="outline-2">
+<h2 id="org7959ebf"><span class="section-number-2">2.</span> kernel中关于内建rootfs的组织,即通过CONFIG_INITRAMFS_SOURCE方式指定</h2>
+<div class="outline-text-2" id="text-2">
+<ol class="org-ol">
+<li>可以通过CONFIG_INITRAMFS_SOURCE指定一个打包好的gzip压缩过的cpio文档、或一个文件配合一个initramfs/目录、或一个目录；</li>
+<li>第二种，由kernel内建的cpio工具(不知道是否kernel会进行gzip压缩)usr/gen_init_cpio进行压缩，只需要将CONFIG_INITRAMFS_SOURCE指定的文件作为参数传递；</li>
+<li><p>
+第三种，由usr/gen_initramfs.sh工具根据目录生成对应的cpio_list文件，如/tmp/cpiolist.XXXXXX,其中内容如下：
+</p>
+<pre class="example" id="org29f3fba">
+   #####################
+   # tmprootfs
+   # Last modified: 1693217731.9921122990
+
+   dir /bin 755 1000 1000
+   slink /bin/arch busybox 777 1000 1000
+   slink /bin/ash busybox 777 1000 1000
+   slink /bin/base32 busybox 777 1000 1000
+   slink /bin/base64 busybox 777 1000 1000
+   file /bin/busybox tmprootfs/bin/busybox 755 1000 1000
+   slink /bin/cat busybox 777 1000 1000
+   slink /bin/chattr busybox 777 1000 1000
+   slink /bin/chgrp busybox 777 1000 1000
+   slink /bin/chmod busybox 777 1000 1000
+   slink /bin/chown busybox 777 1000 1000
+   slink /bin/conspy busybox 777 1000 1000
+   slink /bin/cp busybox 777 1000 1000
+   ......
+   slink /bin/watch busybox 777 1000 1000
+   slink /bin/zcat busybox 777 1000 1000
+   dir /etc 755 1000 1000
+   file /etc/fstab tmprootfs/etc/fstab 644 1000 1000
+   dir /etc/init.d 755 1000 1000
+   file /etc/init.d/rcS tmprootfs/etc/init.d/rcS 755 1000 1000
+   file /etc/inittab tmprootfs/etc/inittab 644 1000 1000
+   file /etc/profile tmprootfs/etc/profile 644 1000 1000
+   slink /linuxrc bin/busybox 777 1000 1000
+   dir /sbin 755 1000 1000
+   slink /sbin/acpid ../bin/busybox 777 1000 1000
+   slink /sbin/adjtimex ../bin/busybox 777 1000 1000
+   slink /sbin/arp ../bin/busybox 777 1000 1000
+   slink /sbin/blkid ../bin/busybox 777 1000 1000
+   slink /sbin/blockdev ../bin/busybox 777 1000 1000
+   slink /sbin/bootchartd ../bin/busybox 777 1000 1000
+   slink /sbin/depmod ../bin/busybox 777 1000 1000
+   slink /sbin/devmem ../bin/busybox 777 1000 1000
+   slink /sbin/fbsplash ../bin/busybox 777 1000 1000
+   .......
+   slink /sbin/zcip ../bin/busybox 777 1000 1000
+   dir /tmp 755 1000 1000
+   dir /usr 755 1000 1000
+   dir /usr/bin 755 1000 1000
+   slink /usr/bin/[ ../../bin/busybox 777 1000 1000
+   slink /usr/bin/[[ ../../bin/busybox 777 1000 1000
+   slink /usr/bin/ascii ../../bin/busybox 777 1000 1000
+   slink /usr/bin/awk ../../bin/busybox 777 1000 1000
+   slink /usr/bin/basename ../../bin/busybox 777 1000 1000
+   slink /usr/bin/bc ../../bin/busybox 777 1000 1000
+   slink /usr/bin/beep ../../bin/busybox 777 1000 1000
+   slink /usr/bin/blkdiscard ../../bin/busybox 777 1000 1000
+   slink /usr/bin/bunzip2 ../../bin/busybox 777 1000 1000
+   slink /usr/bin/bzcat ../../bin/busybox 777 1000 1000
+   .......
+   slink /usr/bin/yes ../../bin/busybox 777 1000 1000
+   dir /usr/sbin 755 1000 1000
+   slink /usr/sbin/add-shell ../../bin/busybox 777 1000 1000
+   slink /usr/sbin/addgroup ../../bin/busybox 777 1000 1000
+   slink /usr/sbin/adduser ../../bin/busybox 777 1000 1000
+   slink /usr/sbin/arping ../../bin/busybox 777 1000 1000
+   slink /usr/sbin/brctl ../../bin/busybox 777 1000 1000
+   slink /usr/sbin/chat ../../bin/busybox 777 1000 1000
+   slink /usr/sbin/chpasswd ../../bin/busybox 777 1000 1000
+   slink /usr/sbin/chroot ../../bin/busybox 777 1000 1000
+   .......
+   slink /usr/sbin/udhcpd ../../bin/busybox 777 1000 1000
+   
+</pre></li>
+
+<li>Makefile逻辑顺序：
+<ol class="org-ol">
+<li><p>
+调用gen_initramfs.sh生成cpio文档
+</p>
+<div class="org-src-container">
+<pre class="src src-makefile">                 <span style="font-weight: bold; font-style: italic;">cmd_initfs</span> := sh usr/gen_initramfs.sh -o usr/initramfs_data.cpio -l usr/.initramfs_data.cpio.d -u 0 -g 0 $(<span style="font-weight: bold; font-style: italic;">ramfs-input</span>)
+         <span style="font-weight: bold;">usr/initramfs_data.cpio</span> : usr/gen_initramfs.sh usr/gen_init_cpio $(<span style="font-weight: bold; font-style: italic;">deps_initramfs</span>) FORCE               $(<span style="font-weight: bold; font-style: italic;">call</span> if_changed,initfs)
+</pre>
+</div>
+<p>
+其中，deps_initramfs如果是第二种，就会是specfile 加上initramfs/目录下的全部文件，如果是第三种，就应该是指定目录下的所有文件；ramfs-input如果是第二第三种，就是CONFIG_INITRAMFS_SOURCE指定的对象；
+</p></li>
+
+<li><p>
+根据cpio压缩文档为gzip文档
+</p>
+<div class="org-src-container">
+<pre class="src src-makefile">        <span style="font-weight: bold;">initramfs_inc_data</span>: initramfs_data.cpio
+                $(<span style="font-weight: bold; font-style: italic;">call</span> if_changed,$(<span style="font-weight: bold; font-style: italic;">compress-y</span>))
+</pre>
+</div></li>
+
+<li><p>
+根据压缩过后的文档，生成kernel链接的目标对象文件
+</p>
+<div class="org-src-container">
+<pre class="src src-makefile">        <span style="font-weight: bold; font-style: italic;">obj-$(</span><span style="font-weight: bold; font-style: italic;">CONFIG_BLK_DEV_INITRD</span><span style="font-weight: bold; font-style: italic;">)</span> := initramfs_data.o        
+        <span style="font-weight: bold;">initramfs_data.o</span>: initramfs_inc_data
+</pre>
+</div>
+<p>
+CONFIG_BLK_DEV_INITRD的说明：Initial RAM filesystem and RAM disk (initramfs/initrd) support
+</p></li>
+
+<li><p>
+而initramfs_data.o由initramfs_data.S编译而成：
+</p>
+<div class="org-src-container">
+<pre class="src src-asm">                <span style="font-weight: bold;">.section</span> .init.ramfs,<span style="font-style: italic;">"a"</span>
+        <span style="font-weight: bold;">__irf_start</span>:
+                <span style="font-weight: bold;">.incbin</span> <span style="font-style: italic;">"usr/initramfs_inc_data"</span>
+        <span style="font-weight: bold;">__irf_end</span>:
+                <span style="font-weight: bold;">.section</span> .init.ramfs.info,<span style="font-style: italic;">"a"</span>
+                <span style="font-weight: bold;">.globl</span> __initramfs_size
+        <span style="font-weight: bold;">__initramfs_size</span>:
+                <span style="font-weight: bold;">.quad</span> __irf_end - __irf_start
+</pre>
+</div>
+<p>
+上述内容主要就是将二进制文件usr/initramfs_inc_data作为initramfs_data.o的一个名为.init.ramfs的一个section，生成elf，最后合进vmlinux
+</p></li>
+
+<li>将section .init.ramfs 合进vmlinux</li>
+</ol></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org13c7fa2" class="outline-2">
+<h2 id="org13c7fa2"><span class="section-number-2">3.</span> 尝试CONFIG_INITRAMFS_SOURCE采用文件</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-orge2a3832" class="outline-3">
+<h3 id="orge2a3832"><span class="section-number-3">3.1.</span> 简单版本</h3>
+<div class="outline-text-3" id="text-3-1">
+<pre class="example" id="org2c7edfb">
+# structure
+/specfile
+/initramfs/busybox
+/initramfs/init.sh
+</pre>
+
+<pre class="example" id="orgf322e44">
+# specfile
+dir /dev 755 0 0
+nod /dev/console 644 0 0 c 5 1
+nod /dev/loop0 644 0 0 b 7 0
+dir /bin 755 1000 1000
+slink /bin/sh busybox 777 0 0
+file /bin/busybox initramfs/busybox 755 0 0
+dir /proc 755 0 0
+dir /sys 755 0 0
+dir /root 755 0 0
+dir /mnt 755 0 0
+file /init initramfs/init.sh 755 0 0 
+</pre>
+
+<div class="org-src-container">
+<pre class="src src-sh">  <span style="font-weight: bold; font-style: italic;">#</span><span style="font-weight: bold; font-style: italic;">!/bin/sh</span>
+  <span style="font-weight: bold;">export</span> <span style="font-weight: bold; font-style: italic;">PATH</span>=/sbin:/bin
+  <span style="font-weight: bold;">echo</span> hello world!
+  <span style="font-weight: bold;">exec</span> /bin/sh <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">couldn't write as exec /bin/busybox here.</span>
+</pre>
+</div>
+
+<p>
+结果：报错 /bin/sh: can't access tty; job control turned off
+百度答案：需要文件/etc/inittab
+见<span class="timestamp-wrapper"><span class="timestamp">&lt;2023-08-31 Thu&gt;</span></span>日更新
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yang</p>
+<p class="date">Created: 2024-05-23 Thu 09:43</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

@@ -4,7 +4,7 @@
 <!-- 2024-05-23 Thu 09:43 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>欢迎来到我的博客</title>
+<title>=blog= 方案</title>
 <meta name="author" content="Yang" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,13 +197,6 @@
 <script src="../js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
 <script type="text/javascript" src="../js/readtheorg.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="./css/readtheorg.css"/>
-<link rel="stylesheet" type="text/css" href="./css/mycustom.css"/>
-<script src="./js/jquery.min.js"></script>
-<script src="./js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/jquery.stickytableheaders.js"></script>
-<script type="text/javascript" src="./js/readtheorg.js"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
@@ -211,144 +204,101 @@
  |
  <a accesskey="H" href="/"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">欢迎来到我的博客</h1>
+<h1 class="title"><code>blog</code> 方案</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org6bc3e92">1. python</a></li>
-<li><a href="#org9deb67e">2. wsl</a></li>
-<li><a href="#org5517ffd">3. others</a></li>
+<li><a href="#org48f648a">1. 需求</a></li>
+<li><a href="#orgecd7c1b">2. 处理脚本</a></li>
+<li><a href="#orgd451751">3. 问题和改进</a>
+<ul>
+<li><a href="#orgadbbc6b">3.1. 转换优化</a></li>
+<li><a href="#org3f0a3f4">3.2. 转换优化(Deprecated)</a></li>
+<li><a href="#org4c848a7">3.3. 不同组表格对齐</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org6bc3e92" class="outline-2">
-<h2 id="org6bc3e92"><span class="section-number-2">1.</span> python</h2>
+
+<div id="outline-container-org48f648a" class="outline-2">
+<h2 id="org48f648a"><span class="section-number-2">1.</span> 需求</h2>
 <div class="outline-text-2" id="text-1">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-3-29/7f35b342cb-DONE.html"><code>Call function directly in cmd line</code>                                            </a></td>
-<td class="org-left">2024年03月29日</td>
-</tr>
-</tbody>
-</table>
+<ol class="org-ol">
+<li>文档，也就是数据源是一个文件，采用 <code>org-mode</code> 方式，每一个文章标题格式如下：
+<img src="images/Day_Done/2024-05-22_14-54-04_screenshot.png" alt="2024-05-22_14-54-04_screenshot.png">
+level | status | date | title | tags</li>
+<li>尽量采用 <code>emacs org-mode</code> 自带功能实现，因此，外带脚本只实现将这一个大的数据源，拆分成多个小的数据源，再使用 <code>emacs '--batch'</code> 命令，将 <code>org</code> 转成 <code>html</code> 。</li>
+<li>转换过程中的所有配置，除非万不得已，全部采用 <code>org-mode</code> 自带配置方式实现，也就是 <code>#+OPTIONS</code> 这种，以及 <code>HTML</code> 特有的，如 <code>#+HTML_HEAD</code> 。</li>
+<li><code>tags</code> 分类不同文档。展示顺序按字母排序，特殊的、存放杂类的使用 <code>others</code> 表示，永远在最后面。</li>
+<li>同一 <code>tags</code> 内部采用日期排序。</li>
+<li>由于调用 <code>emacs</code> 生成过程会跑一遍 <code>emacs</code> 配置文件，因此这里有点慢。尽可能将 <code>emacs</code> 的调用次数稳定在一次。并且按需生成。</li>
+</ol>
 </div>
 </div>
-<div id="outline-container-org9deb67e" class="outline-2">
-<h2 id="org9deb67e"><span class="section-number-2">2.</span> wsl</h2>
+
+<div id="outline-container-orgecd7c1b" class="outline-2">
+<h2 id="orgecd7c1b"><span class="section-number-2">2.</span> 处理脚本</h2>
 <div class="outline-text-2" id="text-2">
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/22c9aeb158-DONE.html"><code>wsl</code> 平台 <code>emacs</code> 和 <code>windows</code> 文本粘贴互通                                             </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2024-5-22/d615789aa5-DONE.html"><code>windows</code> 平台粘贴图片到 <code>wsl</code> 的 <code>emacs</code> 的 <code>org</code> 中                                     </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-</tbody>
-</table>
+<ol class="org-ol">
+<li><p>
+采用如下数据结构表示每篇文章
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> dataclasses <span style="font-weight: bold;">import</span> dataclass
+<span style="font-weight: bold; text-decoration: underline;">@dataclass</span>
+<span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">Diary</span>:
+    status: <span style="font-weight: bold;">str</span>
+    date: datetime
+    title: <span style="font-weight: bold;">str</span>
+    tags: <span style="font-weight: bold;">list</span>
+    content: <span style="font-weight: bold;">str</span>
+    show: <span style="font-weight: bold;">bool</span>
+</pre>
+</div></li>
+<li>解析数据源，生成 <code>Diary</code> 列表。</li>
+<li>过滤部分不便展示文章。</li>
+<li>对 <code>content</code> 进行处理，之后根据依赖内容生成文件名，将 <code>content</code> 写入文件。</li>
+<li>拷贝 <code>css/js</code> 到对应目录(全部采用本地方案，速度可能稍慢)</li>
+<li>根据 <code>Diary</code> 列表生成 <code>index.org</code> ，采用 <code>org-mode table</code> 表示每个文章。</li>
+<li><code>org</code> 转 <code>html</code></li>
+</ol>
 </div>
 </div>
-<div id="outline-container-org5517ffd" class="outline-2">
-<h2 id="org5517ffd"><span class="section-number-2">3.</span> others</h2>
+
+<div id="outline-container-orgd451751" class="outline-2">
+<h2 id="orgd451751"><span class="section-number-2">3.</span> 问题和改进</h2>
 <div class="outline-text-2" id="text-3">
-<table>
+</div>
+<div id="outline-container-orgadbbc6b" class="outline-3">
+<h3 id="orgadbbc6b"><span class="section-number-3">3.1.</span> 转换优化</h3>
+<div class="outline-text-3" id="text-3-1">
+<ul class="org-ul">
+<li>原本方案缺点太过明显，现在依赖内容不变，不过检测方式从文件名改为生成专门的 <code>.hash</code> 文件。</li>
+<li>文件名如果按先后采用数字，则容易暴露不想展示的内容，因此，文件名采用 <code>title</code> 生成的 <code>hash</code> 。</li>
+</ul>
+</div>
+</div>
 
+<div id="outline-container-org3f0a3f4" class="outline-3">
+<h3 id="org3f0a3f4"><span class="section-number-3">3.2.</span> 转换优化(Deprecated)</h3>
+<div class="outline-text-3" id="text-3-2">
+<ul class="org-ul">
+<li>文件名采用 <code>hash</code> 方式建立依赖关系，当依赖内容变动时，算出的 <code>hash</code> 也会变，就重新生成目标文件。</li>
+<li>缺点：文件名一直在变动，无法使用一个链接看到后续变更。</li>
+</ul>
+</div>
+</div>
 
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2024-5-22/f81b1c42c9-RECD.html"><code>blog</code> 方案                                                                       </a></td>
-<td class="org-left">2024年05月22日</td>
-</tr>
-</tbody>
-</table>
-<p>
-目录 'github_public/2024-5-22/images/Day_Done' 创建成功。
-文件 images/Day_Done/2024-05-22_14-54-04_screenshot.png 已成功拷贝到 github_public/2024-5-22/images/Day_Done/2024-05-22_14-54-04_screenshot.png
-</p>
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2023-9-21/ccb6748303-STDY.html">用户层对采集类型的处理,以及采集内容都可以是啥                                                         </a></td>
-<td class="org-left">2023年09月21日</td>
-</tr>
-</tbody>
-</table>
-<p>
-目录 'github_public/2023-9-21' 创建成功。
-错误: 源文件 one_png.png 未找到。
-</p>
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2023-9-19/90798a89e9-STDY.html">理清 <code>bus/device_driver/device</code> 之间的关系                                             </a></td>
-<td class="org-left">2023年09月19日</td>
-</tr>
-</tbody>
-</table>
-<p>
-目录 'github_public/2023-9-19' 创建成功。
-错误: 源文件 match.png 未找到。
-目录 'github_public/2023-9-19' 创建成功。
-错误: 源文件 platform_driver_probe.png 未找到。
-</p>
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left"><a href="./2023-8-30/4a42e9c6f6-STDY.html"><code>epapr</code> 的生成及其初始运行                                                               </a></td>
-<td class="org-left">2023年08月30日</td>
-</tr>
-
-<tr>
-<td class="org-left"><a href="./2023-8-29/f8a0aad7c5-STDY.html">学习 <code>rootfs</code> 相关内容并理解多种方式加载的区别                                                    </a></td>
-<td class="org-left">2023年08月29日</td>
-</tr>
-</tbody>
-</table>
+<div id="outline-container-org4c848a7" class="outline-3">
+<h3 id="org4c848a7"><span class="section-number-3">3.3.</span> 不同组表格对齐</h3>
+<div class="outline-text-3" id="text-3-3">
+<ul class="org-ul">
+<li>标准 <code>css/js</code> 表示的 <code>index.html</code> 界面，不同分类里面的表格宽度不一样</li>
+<li>解决：外加一个 <code>css</code> 文件，强制所有 <code>table &gt; tr &gt; td:nth-child(n)</code> 宽度固定。</li>
+</ul>
+</div>
 </div>
 </div>
 </div>

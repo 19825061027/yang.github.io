@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-05-23 Thu 09:43 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>理清 =bus/device_driver/device= 之间的关系</title>
+<meta name="author" content="Yang" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../css/readtheorg.css"/>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/jquery.stickytableheaders.js"></script>
+<script type="text/javascript" src="../js/readtheorg.js"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="/"> UP </a>
+ |
+ <a accesskey="H" href="/"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">理清 <code>bus/device_driver/device</code> 之间的关系</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgcb83d1b">1. 总线及平台总线，平台设备和平台驱动</a>
+<ul>
+<li><a href="#org8e36fee">1.1. 总线</a></li>
+<li><a href="#org6eb1ed5">1.2. 平台总线</a></li>
+<li><a href="#orgaede62e">1.3. 平台设备</a></li>
+<li><a href="#org5c332ff">1.4. 平台驱动</a></li>
+<li><a href="#orgd007f66">1.5. 设备枚举</a></li>
+<li><a href="#org2b3f33c">1.6. 设备命名和驱动绑定</a></li>
+<li><a href="#org8d0c561">1.7. 早期平台设备和驱动</a></li>
+<li><a href="#org18bc06e">1.8. kernfs kernel3.14引入的内存文件系统，其提供内核子系统内部伪文件系统所需的功能</a></li>
+</ul>
+</li>
+<li><a href="#orga441ab1">2. 代码逻辑追溯</a>
+<ul>
+<li><a href="#org9d0cc87">2.1. struct bus_type platform_bus_type::match() 作用及调用逻辑</a></li>
+<li><a href="#org0b7b000">2.2. struct platform_driver::probe() 及 struct platform_driver::driver::probe() 之间的关系</a></li>
+<li><a href="#org2786660">2.3. /sys/bus/platform/drivers_probe 的作用及代码逻辑</a></li>
+<li><a href="#org6c961f2">2.4. 挂在platform_bus_type这个总线上的驱动注册时struct platform_driver::probe的调用逻辑</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgcb83d1b" class="outline-2">
+<h2 id="orgcb83d1b"><span class="section-number-2">1.</span> 总线及平台总线，平台设备和平台驱动</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-org8e36fee" class="outline-3">
+<h3 id="org8e36fee"><span class="section-number-3">1.1.</span> 总线</h3>
+<div class="outline-text-3" id="text-1-1">
+<ul class="org-ul">
+<li>总线就是处理器到设备的通道；</li>
+<li>设备模型设计中，所有设备通过一根总线相连，即便它是一个内部的，虚拟的，"platform"总线;</li>
+<li>总线可以相互插入；</li>
+<li>一个USB连接器通常是一个PCI设备；</li>
+<li>设备模型代表总线之间真实的相互连接，以及他们所控制的设备之间的关系；</li>
+<li>一个总线由bus_type结构体表示；包含名称，默认的属性(总线的，驱动的，设备的)，总线操作，电源操作，驱动核心的私有数据；</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org6eb1ed5" class="outline-3">
+<h3 id="org6eb1ed5"><span class="section-number-3">1.2.</span> 平台总线</h3>
+</div>
+<div id="outline-container-orgaede62e" class="outline-3">
+<h3 id="orgaede62e"><span class="section-number-3">1.3.</span> 平台设备</h3>
+<div class="outline-text-3" id="text-1-3">
+<ol class="org-ol">
+<li><p>
+Platform devices are given a name, used in driver binding, and a list of resources such as addresses and IRQs.
+</p>
+<div class="org-src-container">
+<pre class="src src-c">     <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_device</span> {
+           <span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">char</span>   *<span style="font-weight: bold; font-style: italic;">name</span>;
+           <span style="font-weight: bold; text-decoration: underline;">u32</span>          <span style="font-weight: bold; font-style: italic;">id</span>;
+           <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span>        <span style="font-weight: bold; font-style: italic;">dev</span>;
+           <span style="font-weight: bold; text-decoration: underline;">u32</span>                  <span style="font-weight: bold; font-style: italic;">num_resources</span>;
+           <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">resource</span>      *<span style="font-weight: bold; font-style: italic;">resource</span>;
+     };
+</pre>
+</div></li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org5c332ff" class="outline-3">
+<h3 id="org5c332ff"><span class="section-number-3">1.4.</span> 平台驱动</h3>
+<div class="outline-text-3" id="text-1-4">
+<div class="org-src-container">
+<pre class="src src-c">     <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_driver</span> {
+           <span style="font-weight: bold; text-decoration: underline;">int</span> (*<span style="font-weight: bold;">probe</span>)(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_device</span> *);
+           <span style="font-weight: bold; text-decoration: underline;">int</span> (*<span style="font-weight: bold;">remove</span>)(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_device</span> *);
+           <span style="font-weight: bold; text-decoration: underline;">void</span> (*<span style="font-weight: bold;">shutdown</span>)(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_device</span> *);
+           <span style="font-weight: bold; text-decoration: underline;">int</span> (*<span style="font-weight: bold;">suspend</span>)(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_device</span> *, <span style="font-weight: bold; text-decoration: underline;">pm_message_t</span> <span style="font-weight: bold; font-style: italic;">state</span>);
+           <span style="font-weight: bold; text-decoration: underline;">int</span> (*<span style="font-weight: bold;">suspend_late</span>)(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_device</span> *, <span style="font-weight: bold; text-decoration: underline;">pm_message_t</span> <span style="font-weight: bold; font-style: italic;">state</span>);
+           <span style="font-weight: bold; text-decoration: underline;">int</span> (*<span style="font-weight: bold;">resume_early</span>)(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_device</span> *);
+           <span style="font-weight: bold; text-decoration: underline;">int</span> (*<span style="font-weight: bold;">resume</span>)(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_device</span> *);
+           <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device_driver</span> <span style="font-weight: bold; font-style: italic;">driver</span>;
+     };
+</pre>
+</div>
+<ul class="org-ul">
+<li>probe() 需要验证目标device硬件是否真实存在；probe()可以使用设备资源，包括clocks，和device platform_data.</li>
+<li><p>
+platform drivers注册自身的一般方法：
+</p>
+<div class="org-src-container">
+<pre class="src src-c">       <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">platform_driver_register</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_driver</span> *<span style="font-weight: bold; font-style: italic;">drv</span>);
+</pre>
+</div></li>
+<li><p>
+如果设备是非热插拔的，probe()就可以放在__init section中，只调用一次，前提是保证platform devices已经注册；
+</p>
+<div class="org-src-container">
+<pre class="src src-c">       <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">platform_driver_probe</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_driver</span> *<span style="font-weight: bold; font-style: italic;">drv</span>, <span style="font-weight: bold; text-decoration: underline;">int</span> (*<span style="font-weight: bold;">probe</span>)(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_device</span> *));
+</pre>
+</div></li>
+<li><p>
+Kernel modules可以由多个platform drivers组成，platform core提供helpers来完成成组的注册和卸载；如果一个失败了，已经注册进去的会按照相反顺序挨个卸载；
+</p>
+<div class="org-src-container">
+<pre class="src src-c">           <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">__platform_register_drivers</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_driver</span> * <span style="font-weight: bold;">const</span> *<span style="font-weight: bold; font-style: italic;">drivers</span>,
+                                           <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">count</span>, <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">module</span> *<span style="font-weight: bold; font-style: italic;">owner</span>);
+           <span style="font-weight: bold; text-decoration: underline;">void</span> <span style="font-weight: bold;">platform_unregister_drivers</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_driver</span> * <span style="font-weight: bold;">const</span> *<span style="font-weight: bold; font-style: italic;">drivers</span>,
+                                            <span style="font-weight: bold; text-decoration: underline;">unsigned</span> <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">count</span>);
+</pre>
+</div></li>
+<li><p>
+提供了方便的宏传递 THIS_MODULE:
+</p>
+<div class="org-src-container">
+<pre class="src src-c"><span style="font-weight: bold;">       #define</span> <span style="font-weight: bold;">platform_register_drivers</span>(<span style="font-weight: bold; font-style: italic;">drivers</span>, <span style="font-weight: bold; font-style: italic;">count</span>)
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgd007f66" class="outline-3">
+<h3 id="orgd007f66"><span class="section-number-3">1.5.</span> 设备枚举</h3>
+<div class="outline-text-3" id="text-1-5">
+<ol class="org-ol">
+<li><p>
+作为一个规则，平台专属设置代码(platform specific setup code, often board-specific)来注册platform devices:
+</p>
+<div class="org-src-container">
+<pre class="src src-c">     <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">platform_device_register</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_device</span> *<span style="font-weight: bold; font-style: italic;">pdev</span>);
+
+     <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">platform_add_devices</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_device</span> **<span style="font-weight: bold; font-style: italic;">pdevs</span>, <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">ndev</span>);
+</pre>
+</div></li>
+
+<li>通用规则是只注册存在的devices，但只是通用规则；</li>
+
+<li>一些cases中，固件会导出一张描述设备的表；</li>
+
+<li>如果没有这样的表，通用的方式是系统启动代码来正确设置设备，也就是构建目标板专属内核；</li>
+
+<li>许多cases中，只有内存和IRQ资源，不足以让设备的驱动工作；board setup code会通过设备的platform_data域提供更多额外的信息；</li>
+
+<li>嵌入式系统需要不同平台设备可能具有的不相同时钟，直到需要当前设备时，才进行激活；system setup code会将devices和clocks进行关联，因此clk_get(&amp;pdev-&gt;dev, clock_name)返回需要的内容；</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org2b3f33c" class="outline-3">
+<h3 id="org2b3f33c"><span class="section-number-3">1.6.</span> 设备命名和驱动绑定</h3>
+<div class="outline-text-3" id="text-1-6">
+<ol class="org-ol">
+<li>platform_device.dev.bus_id是设备的官方名字；通过以下组件建构：
+<ul class="org-ul">
+<li>platform_device.name 也用来进行驱动匹配</li>
+<li>platform_device.id    设备实例号，或者 -1 代表只有当前设备</li>
+</ul></li>
+
+<li>通过拼接，因此 name/id "serial"/0 指明 bus_id "serial.0"; "serial"/3 指明 bus_id "serial.3"，这两个设备使用的驱动名称都是 "serial"; "my_rtc" /-1 是 bus_id "my_rtc", 此设备使用的驱动的名称是 "my_rtc";</li>
+
+<li>驱动通过驱动核心代码和设备进行绑定，其中会在调用驱动probe()代码之前调用进行设备和驱动的匹配，匹配成功的才调用probe；probe()成功之后，驱动和设备才算绑定；而找到相互匹配的设备和驱动的方法有以下三种：
+<ul class="org-ul">
+<li>无论何时设备注册时，设备所属总线的驱动都会被检查是否匹配；平台设备需要在系统启动时就注册；</li>
+<li>驱动使用platform_driver_register()注册时，会检查驱动所属总线上所有未绑定的设备进行检测是否匹配；驱动经常在后面注册或通过模块加载；</li>
+<li>使用platform_driver_probe()注册驱动时，除了不会再在设备注册时进行检测(情形一)，其他和情形二一致；这种方式对应非热插拔设备；</li>
+</ul></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org8d0c561" class="outline-3">
+<h3 id="org8d0c561"><span class="section-number-3">1.7.</span> 早期平台设备和驱动</h3>
+<div class="outline-text-3" id="text-1-7">
+<ol class="org-ol">
+<li>early platform interfaces 提供给早期系统启动时驱动所需的部分平台数据；</li>
+<li>代码基于early_param()命令行解析进行构建，可以在很早的时候执行；</li>
+<li>例子："earlyprintk" 类早期串口平台；后面也会有介绍；</li>
+</ol>
+</div>
+
+<ol class="org-ol">
+<li><a id="org78707ef"></a>1. 注册早期平台设备数据<br>
+<div class="outline-text-4" id="text-1-7-1">
+<ul class="org-ul">
+<li>架构代码使用函数 early_platform_add_devices() 注册平台设备数据；</li>
+<li>early serial console，这个应该是串口的硬件配置；</li>
+<li>这个点注册的设备之后会匹配早期平台驱动；</li>
+</ul>
+</div>
+</li>
+<li><a id="org127c9fd"></a>2. 解析内核命令行<br>
+<div class="outline-text-4" id="text-1-7-2">
+<ul class="org-ul">
+<li>架构代码调用 parse_early_param() 解析内核命令行；这会执行所有匹配到的 early_param() 回调；</li>
+<li>用户指示的早期平台设备会在这个时候注册；</li>
+<li>对于早期serial console，用户可以在命令行指明端口: earlyprintk=serial.0 , "earlyprintk" 是类字符串，"serial"是平台驱动名，0 是平台设备号；如果 id = -1，那可以省略；</li>
+</ul>
+</div>
+</li>
+<li><a id="orge65649f"></a>3. 安装属于某一类的早期平台驱动<br>
+<div class="outline-text-4" id="text-1-7-3">
+<p>
+The architecture code may optionally force registration of all early
+platform drivers belonging to a certain class using the function
+early_platform_driver_register_all(). User specified devices from
+step 2 have priority over these. This step is omitted by the serial
+driver example since the early serial driver code should be disabled
+unless the user has specified port on the kernel command line.
+</p>
+</div>
+</li>
+<li><a id="org11306ad"></a>4. 早期平台驱动注册<br>
+<div class="outline-text-4" id="text-1-7-4">
+<p>
+Compiled-in platform drivers making use of early_platform_init() are
+automatically registered during step 2 or 3. The serial driver example
+should use early_platform_init("earlyprintk", &amp;platform_driver).
+</p>
+</div>
+</li>
+<li><a id="org7af12b5"></a>5. 属于某一类的早期平台驱动的probing<br>
+<div class="outline-text-4" id="text-1-7-5">
+<p>
+The architecture code calls early_platform_driver_probe() to match
+registered early platform devices associated with a certain class with
+registered early platform drivers. Matched devices will get probed().
+This step can be executed at any point during the early boot. As soon
+as possible may be good for the serial port case.
+</p>
+</div>
+</li>
+<li><a id="org47f19aa"></a>6. 早期平台驱动probe()<br>
+<div class="outline-text-4" id="text-1-7-6">
+<p>
+The driver code needs to take special care during early boot, especially
+when it comes to memory allocation and interrupt registration. The code
+in the probe() function can use is_early_platform_device() to check if
+it is called at early platform device or at the regular platform device
+time. The early serial driver performs register_console() at this point.
+</p>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-org18bc06e" class="outline-3">
+<h3 id="org18bc06e"><span class="section-number-3">1.8.</span> kernfs kernel3.14引入的内存文件系统，其提供内核子系统内部伪文件系统所需的功能</h3>
+<div class="outline-text-3" id="text-1-8">
+<ul class="org-ul">
+<li>源于拆分sysfs使用的部分内部逻辑，它通过将有关硬件设备和相关设备驱动程序的信息从内核的设备模型导出到用户空间，提供一组虚拟文件，从而实现独立且可重用的功能。其他内部子系统可以更容易，更一致地实现自己的伪文件系统；</li>
+<li>kernefs_node表示kernfs层次的构成部分(building block)，每个kernfs节点由单个kernfs_node表示。大多数字段都是kernfs专用的，不应由kernfs用户直接访问；</li>
+<li>初始化的时候创建kernfs_ndoe_cache的cache，只有在函数__kernfs_new_node中使用；</li>
+<li>有两个函数会调用：
+<ol class="org-ol">
+<li>kernfs_new_node;</li>
+<li>sysfs_init-&gt;kernfs_create_root(struct kernfs_syscall_ops *scops, unsigned int flags, void *priv); 一个新的kernfs层次，然后其保存在静态全局变量sysfs_root中，供各处使用。然后通过register_filesystem()将其注册为名为sysfs的文件系统；</li>
+</ol></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold;">sysfs_create_file</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">kobject</span> *<span style="font-weight: bold; font-style: italic;">kobj</span>, <span style="font-weight: bold;">const</span> <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">attribute</span> *<span style="font-weight: bold; font-style: italic;">attr</span>)
+  {
+        <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">kernfs_node</span> *<span style="font-weight: bold; font-style: italic;">parent</span> = kobj-&gt;sd; 
+  }  
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orga441ab1" class="outline-2">
+<h2 id="orga441ab1"><span class="section-number-2">2.</span> 代码逻辑追溯</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org9d0cc87" class="outline-3">
+<h3 id="org9d0cc87"><span class="section-number-3">2.1.</span> struct bus_type platform_bus_type::match() 作用及调用逻辑</h3>
+<div class="outline-text-3" id="text-2-1">
+<hr>
+</div>
+<ol class="org-ol">
+<li><a id="org3858292"></a>作用<br>
+<div class="outline-text-4" id="text-2-1-1">
+<ol class="org-ol">
+<li>判断struct device *dev和struct device_driver *drv是否匹配；</li>
+<li>位于 platform.c 文件中；</li>
+<li><p>
+被platform.c中的函数导出：
+</p>
+<div class="org-src-container">
+<pre class="src src-c">     <span style="font-style: italic;">/**</span>
+<span style="font-style: italic;">      * platform_find_device_by_driver - Find a platform device with a given</span>
+<span style="font-style: italic;">      * driver.</span>
+<span style="font-style: italic;">      * </span><span style="font-weight: bold; font-style: italic; text-decoration: underline;">@start</span><span style="font-style: italic;">: The device to start the search from.</span>
+<span style="font-style: italic;">      * </span><span style="font-weight: bold; font-style: italic; text-decoration: underline;">@drv</span><span style="font-style: italic;">: The device driver to look for.</span>
+<span style="font-style: italic;">      */</span>
+     <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold;">platform_find_device_by_driver</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">start</span>,
+                                                   <span style="font-weight: bold;">const</span> <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device_driver</span> *<span style="font-weight: bold; font-style: italic;">drv</span>)
+     {
+           <span style="font-weight: bold;">return</span> bus_find_device(&amp;platform_bus_type, start, drv,
+                                  platform_match);
+     }
+     <span style="font-weight: bold;">EXPORT_SYMBOL_GPL</span>(platform_find_device_by_driver);
+</pre>
+</div></li>
+<li><p>
+在框架中的主要用处：
+</p>
+<div class="org-src-container">
+<pre class="src src-c">     <span style="font-weight: bold;">static</span> <span style="font-weight: bold;">inline</span> <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">driver_match_device</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device_driver</span> *<span style="font-weight: bold; font-style: italic;">drv</span>,
+                                           <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>)
+     {
+           <span style="font-weight: bold;">return</span> drv-&gt;bus-&gt;match ? drv-&gt;bus-&gt;match(dev, drv) : 1;
+     }
+</pre>
+</div></li>
+<li>bus就是月老，设备和驱动就是mate，match 就是红线；</li>
+<li>bus_type::match()判断当前bus下任意drv和dev之间的匹配关系；</li>
+</ol>
+</div>
+</li>
+<li><a id="org72acc88"></a>调用逻辑<br>
+<div class="outline-text-4" id="text-2-1-2">
+
+<div id="orgeeaebf9" class="figure">
+<p><img src="match.png" alt="match.png">
+</p>
+</div>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-org0b7b000" class="outline-3">
+<h3 id="org0b7b000"><span class="section-number-3">2.2.</span> struct platform_driver::probe() 及 struct platform_driver::driver::probe() 之间的关系</h3>
+<div class="outline-text-3" id="text-2-2">
+<hr>
+<ol class="org-ol">
+<li>从具体的代码逻辑来看，platform_driver::driver::probe()用来调用platform_driver::probe()，并做一些其他设置，如时钟和电源域；</li>
+<li>根据框架，也可以知道，在bus.c中只看得到注册进去的是device_driver，而非platform_driver，因此，先调用platform_driver::driver::probe()</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org2786660" class="outline-3">
+<h3 id="org2786660"><span class="section-number-3">2.3.</span> /sys/bus/platform/drivers_probe 的作用及代码逻辑</h3>
+<div class="outline-text-3" id="text-2-3">
+<hr>
+</div>
+<ol class="org-ol">
+<li><a id="org0561748"></a>作用<br>
+<div class="outline-text-4" id="text-2-3-1">
+<p>
+手动写入设备名，一般都是未匹配到驱动的设备名；如果已经有绑定上驱动，则会返回 -EINVAL；
+</p>
+</div>
+</li>
+<li><a id="org7651bcf"></a>代码逻辑<br>
+<div class="outline-text-4" id="text-2-3-2">
+<ol class="org-ol">
+<li><p>
+注册bus的同时，添加此属性文件：
+</p>
+<div class="org-src-container">
+<pre class="src src-c">     <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">bus_register</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">bus_type</span> *<span style="font-weight: bold; font-style: italic;">bus</span>)
+     {
+           ...;
+           retval = add_probe_files(bus);
+           ...;
+     }
+</pre>
+</div></li>
+<li><p>
+具体细节：
+</p>
+<div class="org-src-container">
+<pre class="src src-c">     <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">ssize_t</span> <span style="font-weight: bold;">drivers_autoprobe_show</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">bus_type</span> *<span style="font-weight: bold; font-style: italic;">bus</span>, <span style="font-weight: bold; text-decoration: underline;">char</span> *<span style="font-weight: bold; font-style: italic;">buf</span>)
+     {
+           <span style="font-weight: bold;">return</span> sysfs_emit(buf, <span style="font-style: italic;">"%d\n"</span>, bus-&gt;p-&gt;drivers_autoprobe);
+     }
+
+     <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">ssize_t</span> <span style="font-weight: bold;">drivers_autoprobe_store</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">bus_type</span> *<span style="font-weight: bold; font-style: italic;">bus</span>,
+                                            <span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">char</span> *<span style="font-weight: bold; font-style: italic;">buf</span>, <span style="font-weight: bold; text-decoration: underline;">size_t</span> <span style="font-weight: bold; font-style: italic;">count</span>)
+     {
+           <span style="font-weight: bold;">if</span> (buf[0] == <span style="font-style: italic;">'0'</span>)
+                 bus-&gt;p-&gt;drivers_autoprobe = 0;
+           <span style="font-weight: bold;">else</span>
+                 bus-&gt;p-&gt;drivers_autoprobe = 1;
+           <span style="font-weight: bold;">return</span> count;
+     }
+
+     <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">ssize_t</span> <span style="font-weight: bold;">drivers_probe_store</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">bus_type</span> *<span style="font-weight: bold; font-style: italic;">bus</span>,
+                                        <span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">char</span> *<span style="font-weight: bold; font-style: italic;">buf</span>, <span style="font-weight: bold; text-decoration: underline;">size_t</span> <span style="font-weight: bold; font-style: italic;">count</span>)
+     {
+           <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>;
+           dev = bus_find_device_by_name(bus, <span style="font-weight: bold; text-decoration: underline;">NULL</span>, buf); <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#26681;&#25454;buf&#20013;&#20256;&#36827;&#26469;&#30340;&#35774;&#22791;&#21517;&#65292;&#25214;&#21040;&#24403;&#21069;platform_bus_type&#19979;&#30340;&#23545;&#24212;&#35774;&#22791;</span>
+           <span style="font-weight: bold;">if</span> (bus_rescan_devices_helper(dev, <span style="font-weight: bold; text-decoration: underline;">NULL</span>) == 0)
+                 err = count;
+           <span style="font-weight: bold;">return</span> err;
+     }
+
+     <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">BUS_ATTR_WO</span>(<span style="font-weight: bold; font-style: italic;">drivers_probe</span>);
+     <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">BUS_ATTR_RW</span>(<span style="font-weight: bold; font-style: italic;">drivers_autoprobe</span>);
+
+     <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">add_probe_files</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">bus_type</span> *<span style="font-weight: bold; font-style: italic;">bus</span>){
+           bus_create_file(bus, &amp;bus_attr_drivers_probe);
+           bus_create_file(bus, &amp;bus_attr_drivers_autoprobe);
+     }
+</pre>
+</div></li>
+<li><p>
+最重要的函数bus_rescan_devices_helper
+</p>
+<div class="org-src-container">
+<pre class="src src-c">     <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold; font-style: italic;">__must_check</span> bus_rescan_devices_helper(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>,
+                                                       <span style="font-weight: bold; text-decoration: underline;">void</span> *<span style="font-weight: bold; font-style: italic;">data</span>)
+     {
+           <span style="font-weight: bold;">return</span> device_attach(dev);
+     }
+
+     <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">device_attach</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>)
+     {
+           <span style="font-weight: bold;">return</span> __device_attach(dev, <span style="font-weight: bold; text-decoration: underline;">false</span>);
+     }
+
+     <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">__device_attach</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>, <span style="font-weight: bold; text-decoration: underline;">bool</span> <span style="font-weight: bold; font-style: italic;">allow_async</span>)
+     {
+           <span style="font-weight: bold; font-style: italic;">// </span><span style="font-weight: bold; font-style: italic;">&#36941;&#21382;&#25152;&#26377;driver&#65292;&#38024;&#23545;&#27599;&#20010;driver&#37117;&#35843;&#29992;__device_attach_driver</span>
+           ret = bus_for_each_drv(dev-&gt;bus, <span style="font-weight: bold; text-decoration: underline;">NULL</span>, &amp;data,
+                                  __device_attach_driver);
+     }
+
+</pre>
+</div></li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-org6c961f2" class="outline-3">
+<h3 id="org6c961f2"><span class="section-number-3">2.4.</span> 挂在platform_bus_type这个总线上的驱动注册时struct platform_driver::probe的调用逻辑</h3>
+<div class="outline-text-3" id="text-2-4">
+<hr>
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-style: italic;">/**</span>
+<span style="font-style: italic;">   * </span><span style="font-weight: bold; font-style: italic; text-decoration: underline;">@probe</span><span style="font-style: italic;">: Called to query the existence of a specific device,</span>
+<span style="font-style: italic;">   * whether this driver can work with it, and bind the driver</span>
+<span style="font-style: italic;">   * to a specific device.</span>
+<span style="font-style: italic;">   */</span>
+  <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device_driver</span> {
+        ...;
+        <span style="font-weight: bold; text-decoration: underline;">int</span> (*<span style="font-weight: bold;">probe</span>) (<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>);
+        ...;
+  };
+
+  <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_driver</span> {
+        <span style="font-weight: bold; text-decoration: underline;">int</span> (*<span style="font-weight: bold;">probe</span>)(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_device</span> *);
+        ...;
+        <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device_driver</span> <span style="font-weight: bold; font-style: italic;">driver</span>;
+        ...;
+  };
+
+  <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">__platform_driver_register</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_driver</span> *<span style="font-weight: bold; font-style: italic;">drv</span>,
+                                 <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">module</span> *<span style="font-weight: bold; font-style: italic;">owner</span>)
+  {
+        ...;
+        drv-&gt;driver.probe = platform_drv_probe;
+        ...;
+
+        <span style="font-weight: bold;">return</span> driver_register(&amp;drv-&gt;driver);
+  }
+
+  <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">platform_drv_probe</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">_dev</span>)
+  {
+        <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_driver</span> *<span style="font-weight: bold; font-style: italic;">drv</span> = to_platform_driver(_dev-&gt;driver);
+        <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">platform_device</span> *<span style="font-weight: bold; font-style: italic;">dev</span> = to_platform_device(_dev);
+
+        ret = of_clk_set_defaults(_dev-&gt;of_node, <span style="font-weight: bold; text-decoration: underline;">false</span>);
+
+        ret = dev_pm_domain_attach(_dev, <span style="font-weight: bold; text-decoration: underline;">true</span>);
+
+        <span style="font-weight: bold;">if</span> (drv-&gt;probe) {
+              ret = drv-&gt;probe(dev);
+        }
+  }
+</pre>
+</div>
+<ol class="org-ol">
+<li>在纯正的面向对象设计中，device_driver 作为 platform_driver 的父类，应该由框架调用 device_driver::probe()，而此 probe() 被 platform_driver::probe() 覆盖，因此，最终就是框架调用 platform_driver::probe();</li>
+<li>此为 C 语言仿面向对象思想设计的内容；</li>
+<li>而 probe() 的作用是确定当前driver是否可以在传进来的device上工作，也就是是否可以驱动device，如果可以，便进行绑定；</li>
+<li>上述过程是先由bus负责找到可能是一对的platform_driver和platform_device之后，再调用platform_driver的probe；</li>
+</ol>
+<div class="org-src-container">
+<pre class="src src-c">  <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">kset</span> <span style="font-weight: bold; font-style: italic;">bus_kset</span> = {
+        .name = <span style="font-style: italic;">"bus"</span>,
+        .filter = bus_uevent_filter,
+  };
+
+  <span style="font-weight: bold;">static</span> <span style="font-weight: bold; text-decoration: underline;">int</span> <span style="font-weight: bold;">bus_uevent_filter</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">kset</span> *<span style="font-weight: bold; font-style: italic;">kset</span>, <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">kobject</span> *<span style="font-weight: bold; font-style: italic;">kobj</span>)
+  {
+        <span style="font-weight: bold;">return</span> get_ktype(kobj) == &amp;bus_ktype? 1 : 0;
+  }
+
+  <span style="font-style: italic;">/**</span>
+<span style="font-style: italic;">   * struct bus_type - The bus type of the device</span>
+<span style="font-style: italic;">   *</span>
+<span style="font-style: italic;">   * </span><span style="font-weight: bold; font-style: italic; text-decoration: underline;">@name</span><span style="font-style: italic;">:     The name of the bus.</span>
+<span style="font-style: italic;">   * </span><span style="font-weight: bold; font-style: italic; text-decoration: underline;">@match</span><span style="font-style: italic;">:    Called, perhaps multiple times, whenever a new device or driver</span>
+<span style="font-style: italic;">   *            is added for this bus. It should return a positive value if the</span>
+<span style="font-style: italic;">   *            given device can be handled by the given driver and zero</span>
+<span style="font-style: italic;">   *            otherwise. It may also return error code if determining that</span>
+<span style="font-style: italic;">   *            the driver supports the device is not possible. In case of</span>
+<span style="font-style: italic;">   *            -EPROBE_DEFER it will queue the device for deferred probing.</span>
+<span style="font-style: italic;">   * </span><span style="font-weight: bold; font-style: italic; text-decoration: underline;">@uevent</span><span style="font-style: italic;">:   Called when a device is added, removed, or a few other things</span>
+<span style="font-style: italic;">   *            that generate uevents to add the environment variables.</span>
+<span style="font-style: italic;">   * </span><span style="font-weight: bold; font-style: italic; text-decoration: underline;">@probe</span><span style="font-style: italic;">:    Called when a new device or driver add to this bus, and callback</span>
+<span style="font-style: italic;">   *            the specific driver's probe to initial the matched device.</span>
+<span style="font-style: italic;">   * </span><span style="font-weight: bold; font-style: italic; text-decoration: underline;">@remove</span><span style="font-style: italic;">:   Called when a device removed from this bus.</span>
+<span style="font-style: italic;">   * </span><span style="font-weight: bold; font-style: italic; text-decoration: underline;">@p</span><span style="font-style: italic;">:        The private data of the driver core, only the driver core can</span>
+<span style="font-style: italic;">   *            touch this.</span>
+<span style="font-style: italic;">   */</span>
+  <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">bus_type</span> {
+        <span style="font-weight: bold;">const</span> <span style="font-weight: bold; text-decoration: underline;">char</span>              *<span style="font-weight: bold; font-style: italic;">name</span>;
+        ...;
+        <span style="font-weight: bold; text-decoration: underline;">int</span> (*<span style="font-weight: bold;">match</span>)(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>, <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device_driver</span> *<span style="font-weight: bold; font-style: italic;">drv</span>);
+        <span style="font-weight: bold; text-decoration: underline;">int</span> (*<span style="font-weight: bold;">uevent</span>)(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>, <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">kobj_uevent_env</span> *<span style="font-weight: bold; font-style: italic;">env</span>);
+        <span style="font-weight: bold; text-decoration: underline;">int</span> (*<span style="font-weight: bold;">probe</span>)(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>);
+        <span style="font-weight: bold; text-decoration: underline;">int</span> (*<span style="font-weight: bold;">remove</span>)(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">device</span> *<span style="font-weight: bold; font-style: italic;">dev</span>);
+        <span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">subsys_private</span> *<span style="font-weight: bold; font-style: italic;">p</span>;
+        ...;
+  };
+
+</pre>
+</div>
+
+<div id="orge76cd9e" class="figure">
+<p><img src="platform_driver_probe.png" alt="platform_driver_probe.png">
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yang</p>
+<p class="date">Created: 2024-05-23 Thu 09:43</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
