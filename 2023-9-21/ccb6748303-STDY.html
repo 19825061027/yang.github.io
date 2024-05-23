@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2024-05-23 Thu 09:54 -->
+<!-- 2024-05-23 Thu 10:03 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>用户层对采集类型的处理,以及采集内容都可以是啥</title>
@@ -209,17 +209,17 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org71ff168">1. 从用户层请求发起的请求中perf_event_attr::sample_type指明要采样的值</a></li>
-<li><a href="#orgab4042b">2. perf_event_open 对attr::sample_type的处理</a></li>
-<li><a href="#orgadfa1e1">3. P8中对branch stack的整理</a></li>
-<li><a href="#orgf2f7ef0">4. 从底层拿到值后,传给ring-buffer</a></li>
-<li><a href="#org0c9e17a">5. 流程图(含有部分问题未修改,仍以源代码为主)</a></li>
+<li><a href="#org3c2843d">1. 从用户层请求发起的请求中perf_event_attr::sample_type指明要采样的值</a></li>
+<li><a href="#org73eeeb9">2. perf_event_open 对attr::sample_type的处理</a></li>
+<li><a href="#orgaf75e20">3. P8中对branch stack的整理</a></li>
+<li><a href="#orgb6cfbc3">4. 从底层拿到值后,传给ring-buffer</a></li>
+<li><a href="#org9e96f23">5. 流程图(含有部分问题未修改,仍以源代码为主)</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org71ff168" class="outline-2">
-<h2 id="org71ff168"><span class="section-number-2">1.</span> 从用户层请求发起的请求中perf_event_attr::sample_type指明要采样的值</h2>
+<div id="outline-container-org3c2843d" class="outline-2">
+<h2 id="org3c2843d"><span class="section-number-2">1.</span> 从用户层请求发起的请求中perf_event_attr::sample_type指明要采样的值</h2>
 <div class="outline-text-2" id="text-1">
 <div class="org-src-container">
 <pre class="src src-c">  <span style="font-weight: bold; font-style: italic;">/*</span>
@@ -296,8 +296,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgab4042b" class="outline-2">
-<h2 id="orgab4042b"><span class="section-number-2">2.</span> perf_event_open 对attr::sample_type的处理</h2>
+<div id="outline-container-org73eeeb9" class="outline-2">
+<h2 id="org73eeeb9"><span class="section-number-2">2.</span> perf_event_open 对attr::sample_type的处理</h2>
 <div class="outline-text-2" id="text-2">
 <ol class="org-ol">
 <li>在static int perf_copy_attr(struct perf_event_attr __user *uattr, struct perf_event_attr *attr)中会对attr::sample_type进行部分功能和权限过滤;</li>
@@ -305,8 +305,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgadfa1e1" class="outline-2">
-<h2 id="orgadfa1e1"><span class="section-number-2">3.</span> P8中对branch stack的整理</h2>
+<div id="outline-container-orgaf75e20" class="outline-2">
+<h2 id="orgaf75e20"><span class="section-number-2">3.</span> P8中对branch stack的整理</h2>
 <div class="outline-text-2" id="text-3">
 <div class="org-src-container">
 <pre class="src src-c">     <span style="font-style: italic;">/**</span>
@@ -359,8 +359,8 @@ powerpc CPU PMU中对br_stack唯一的处理:
 </ol>
 </div>
 </div>
-<div id="outline-container-orgf2f7ef0" class="outline-2">
-<h2 id="orgf2f7ef0"><span class="section-number-2">4.</span> 从底层拿到值后,传给ring-buffer</h2>
+<div id="outline-container-orgb6cfbc3" class="outline-2">
+<h2 id="orgb6cfbc3"><span class="section-number-2">4.</span> 从底层拿到值后,传给ring-buffer</h2>
 <div class="outline-text-2" id="text-4">
 <div class="org-src-container">
 <pre class="src src-c">  <span style="font-weight: bold; text-decoration: underline;">void</span> <span style="font-weight: bold;">perf_output_sample</span>(<span style="font-weight: bold;">struct</span> <span style="font-weight: bold; text-decoration: underline;">perf_output_handle</span> *<span style="font-weight: bold; font-style: italic;">handle</span>,
@@ -385,8 +385,8 @@ powerpc CPU PMU中对br_stack唯一的处理:
 </div>
 </div>
 </div>
-<div id="outline-container-org0c9e17a" class="outline-2">
-<h2 id="org0c9e17a"><span class="section-number-2">5.</span> 流程图(含有部分问题未修改,仍以源代码为主)</h2>
+<div id="outline-container-org9e96f23" class="outline-2">
+<h2 id="org9e96f23"><span class="section-number-2">5.</span> 流程图(含有部分问题未修改,仍以源代码为主)</h2>
 <div class="outline-text-2" id="text-5">
 <ol class="org-ol">
 <li>无论是一组事件还是单个事件,导出user的只有一个fd;</li>
@@ -436,7 +436,7 @@ powerpc CPU PMU中对br_stack唯一的处理:
 流程图有部分问题
 </p>
 
-<div id="org38e33e8" class="figure">
+<div id="orgf0ca5fa" class="figure">
 <p><img src="one_png.png" alt="one_png.png">
 </p>
 </div>
@@ -445,7 +445,7 @@ powerpc CPU PMU中对br_stack唯一的处理:
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yang</p>
-<p class="date">Created: 2024-05-23 Thu 09:54</p>
+<p class="date">Created: 2024-05-23 Thu 10:03</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
